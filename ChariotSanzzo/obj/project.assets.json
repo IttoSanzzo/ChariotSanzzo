@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/Itto/Lab/ChariotSanzzo/ChariotS/ChariotS.csproj",
-      "projectName": "ChariotS",
-      "projectPath": "/home/Itto/Lab/ChariotSanzzo/ChariotS/ChariotS.csproj",
+      "projectUniqueName": "/home/Itto/Lab/ChariotSanzzo/ChariotSanzzo/ChariotSanzzo.csproj",
+      "projectName": "ChariotSanzzo",
+      "projectPath": "/home/Itto/Lab/ChariotSanzzo/ChariotSanzzo/ChariotSanzzo.csproj",
       "packagesPath": "/home/Itto/.nuget/packages/",
-      "outputPath": "/home/Itto/Lab/ChariotSanzzo/ChariotS/obj/",
+      "outputPath": "/home/Itto/Lab/ChariotSanzzo/ChariotSanzzo/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/home/Itto/.nuget/NuGet/NuGet.Config"

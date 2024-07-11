@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "VLRy3jLF/QuadLRaPFQgv1t/JXo6x06g7qD5fU+HqZ8xjO1EPn1kc/+mVROaRZXe+I2d2bF6NsPAoExbRSW2VQ==",
+  "dgSpecHash": "ZB4ne8gUxY+UNRnzjHQz2g1RNHVzaLFSbhzFY0DJEas7QiGWiqwtc+44GJl5bv6nIOMdam+wNbR9VSwUq1nVew==",
   "success": true,
-  "projectFilePath": "/home/Itto/Lab/ChariotSanzzo/ChariotS/ChariotS.csproj",
+  "projectFilePath": "/home/Itto/Lab/ChariotSanzzo/ChariotSanzzo/ChariotSanzzo.csproj",
   "expectedPackageFiles": [
     "/home/Itto/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.6/microsoft.aspnetcore.app.ref.8.0.6.nupkg.sha512"
   ],
