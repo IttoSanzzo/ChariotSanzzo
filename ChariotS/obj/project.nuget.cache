@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "VLRy3jLF/QuadLRaPFQgv1t/JXo6x06g7qD5fU+HqZ8xjO1EPn1kc/+mVROaRZXe+I2d2bF6NsPAoExbRSW2VQ==",
+  "success": true,
+  "projectFilePath": "/home/Itto/Lab/ChariotSanzzo/ChariotS/ChariotS.csproj",
+  "expectedPackageFiles": [
+    "/home/Itto/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.6/microsoft.aspnetcore.app.ref.8.0.6.nupkg.sha512"
+  ],
+  "logs": []
+}

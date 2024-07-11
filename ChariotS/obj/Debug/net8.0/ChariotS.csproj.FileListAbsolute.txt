@@ -1,0 +1,15 @@
+/home/Itto/Lab/ChariotSanzzo/ChariotS/bin/Debug/net8.0/ChariotS
+/home/Itto/Lab/ChariotSanzzo/ChariotS/bin/Debug/net8.0/ChariotS.deps.json
+/home/Itto/Lab/ChariotSanzzo/ChariotS/bin/Debug/net8.0/ChariotS.runtimeconfig.json
+/home/Itto/Lab/ChariotSanzzo/ChariotS/bin/Debug/net8.0/ChariotS.dll
+/home/Itto/Lab/ChariotSanzzo/ChariotS/bin/Debug/net8.0/ChariotS.pdb
+/home/Itto/Lab/ChariotSanzzo/ChariotS/obj/Debug/net8.0/ChariotS.GeneratedMSBuildEditorConfig.editorconfig
+/home/Itto/Lab/ChariotSanzzo/ChariotS/obj/Debug/net8.0/ChariotS.AssemblyInfoInputs.cache
+/home/Itto/Lab/ChariotSanzzo/ChariotS/obj/Debug/net8.0/ChariotS.AssemblyInfo.cs
+/home/Itto/Lab/ChariotSanzzo/ChariotS/obj/Debug/net8.0/ChariotS.csproj.CoreCompileInputs.cache
+/home/Itto/Lab/ChariotSanzzo/ChariotS/obj/Debug/net8.0/ChariotS.sourcelink.json
+/home/Itto/Lab/ChariotSanzzo/ChariotS/obj/Debug/net8.0/ChariotS.dll
+/home/Itto/Lab/ChariotSanzzo/ChariotS/obj/Debug/net8.0/refint/ChariotS.dll
+/home/Itto/Lab/ChariotSanzzo/ChariotS/obj/Debug/net8.0/ChariotS.pdb
+/home/Itto/Lab/ChariotSanzzo/ChariotS/obj/Debug/net8.0/ChariotS.genruntimeconfig.cache
+/home/Itto/Lab/ChariotSanzzo/ChariotS/obj/Debug/net8.0/ref/ChariotS.dll
