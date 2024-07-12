@@ -1,15 +1,28 @@
-﻿using DSharpPlus;
+﻿using ChariotSanzzo.config;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
+using Microsoft.Extensions.Configuration;
 
-namespace ChariotSanzzo;
-
-class Program {
-	// private static DiscordClient Client {get; set;}
-	// private static CommandsNextExtension Commands {get; set;}
-	public static void	Main(string[] args) {
-		// var	builder = new UserSecretsConfigBuilder();
-		// var	botToken = builder.GetValue("BotToken");
-		Console.WriteLine("Ohayou...");
-		Console.WriteLine();
+namespace ChariotSanzzo {
+	internal class Program {
+		private static DiscordClient? Client {get; set;}
+		private static CommandsNextExtension? Commands {get; set;}
+		static async Task Main(string[] args) {
+			var config = new ConfigReader();
+			Console.WriteLine($"Ohayou... {config._name} is waking up!");
+			var discordConfig = new DiscordConfiguration() {
+				Intents = DiscordIntents.All,
+				Token = config._token,
+				TokenType = TokenType.Bot,
+				AutoReconnect = true
+			};
+			Client = new DiscordClient(discordConfig);
+			Client.Ready += Client_Ready;
+			await Client.ConnectAsync();
+			await Task.Delay(-1);
+		}
+		private static Task Client_Ready(DiscordClient sender, DSharpPlus.EventArgs.ReadyEventArgs args) {
+			return (Task.CompletedTask);
+		}
 	}
 }
