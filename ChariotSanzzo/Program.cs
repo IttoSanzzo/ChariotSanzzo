@@ -1,4 +1,5 @@
-﻿using ChariotSanzzo.config;
+﻿using ChariotSanzzo.commands;
+using ChariotSanzzo.config;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using Microsoft.Extensions.Configuration;
@@ -18,6 +19,16 @@ namespace ChariotSanzzo {
 			};
 			Client = new DiscordClient(discordConfig);
 			Client.Ready += Client_Ready;
+			var commandsConfig = new CommandsNextConfiguration() {
+				StringPrefixes = new string[] {config.GetPrefix()},
+				EnableMentionPrefix = true,
+				EnableDms = true,
+				EnableDefaultHelp = false
+			};
+			Commands = Client.UseCommandsNext(commandsConfig);
+			Commands.RegisterCommands<TestCommand>();
+			Commands.RegisterCommands<TeaCommand>();
+			Commands.RegisterCommands<AlbinaNotionLink>();
 			await Client.ConnectAsync();
 			await Task.Delay(-1);
 		}

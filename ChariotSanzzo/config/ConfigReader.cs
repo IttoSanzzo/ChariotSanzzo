@@ -6,11 +6,6 @@ namespace ChariotSanzzo.config {
 		public string?	_prefix {get; set;}
 		public string?	_token {get; set;}
 		public ConfigReader() {
-			/*
-			using (StreamReader sr = new StreamReader("config.json")) {
-				string json = await sr.ReadToEndAsync();
-			}
-			*/
 			var	builder = new ConfigurationBuilder()
 			.SetBasePath($"{Directory.GetCurrentDirectory()}/config/")
 			.AddJsonFile("appconfig.json", optional: true, reloadOnChange: true)
@@ -20,11 +15,10 @@ namespace ChariotSanzzo.config {
 			this._prefix = config.GetValue<string>("BotData:Prefix");
 			this._token = config.GetValue<string>("BotData:BotToken");
 		}
+		public string GetPrefix() {
+			if (string.IsNullOrWhiteSpace(this._prefix))
+				return ("");
+			return (this._prefix);
+		}
 	}
-	/*
-	internal sealed class ConfigStruct {
-		public string	_token {get; set;}
-		public string	_prefix {get; set;}
-	}
-	*/
 }
