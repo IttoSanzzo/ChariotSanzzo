@@ -16,7 +16,6 @@ namespace ChariotSanzzo.commands {
 				await ctx.Channel.SendMessageAsync($"```How about a tea now, {ctx.Member.DisplayName}?\nhttps://i.pinimg.com/originals/33/2b/67/332b67a92964df5e0676e7ccde1f4750.jpg```");
 			else
 				await ctx.Channel.SendMessageAsync("How about a tea now?");
-			DiscordEmbedç
 		}
 	}
 }
