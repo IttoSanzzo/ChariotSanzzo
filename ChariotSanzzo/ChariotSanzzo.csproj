@@ -18,4 +18,8 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="8.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\STPlib\STPlib.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -3,6 +3,8 @@ using ChariotSanzzo.config;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 
+using STPlib;
+
 namespace ChariotSanzzo {
 	internal class Program {
 		private static DiscordClient? Client {get; set;}

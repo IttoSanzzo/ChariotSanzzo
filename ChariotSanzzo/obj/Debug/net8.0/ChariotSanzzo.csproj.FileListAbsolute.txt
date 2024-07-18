@@ -68,3 +68,5 @@
 /home/Itto/Lab/ChariotSanzzo/ChariotSanzzo/obj/Debug/net8.0/ChariotSanzzo.pdb
 /home/Itto/Lab/ChariotSanzzo/ChariotSanzzo/obj/Debug/net8.0/ChariotSanzzo.genruntimeconfig.cache
 /home/Itto/Lab/ChariotSanzzo/ChariotSanzzo/obj/Debug/net8.0/ref/ChariotSanzzo.dll
+/home/Itto/Lab/ChariotSanzzo/ChariotSanzzo/bin/Debug/net8.0/STPlib.dll
+/home/Itto/Lab/ChariotSanzzo/ChariotSanzzo/bin/Debug/net8.0/STPlib.pdb

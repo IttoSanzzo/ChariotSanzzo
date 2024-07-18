@@ -1,0 +1,12 @@
+/home/Itto/Lab/ChariotSanzzo/STPlib/obj/Debug/net8.0/STPlib.GeneratedMSBuildEditorConfig.editorconfig
+/home/Itto/Lab/ChariotSanzzo/STPlib/obj/Debug/net8.0/STPlib.AssemblyInfoInputs.cache
+/home/Itto/Lab/ChariotSanzzo/STPlib/obj/Debug/net8.0/STPlib.AssemblyInfo.cs
+/home/Itto/Lab/ChariotSanzzo/STPlib/obj/Debug/net8.0/STPlib.csproj.CoreCompileInputs.cache
+/home/Itto/Lab/ChariotSanzzo/STPlib/obj/Debug/net8.0/STPlib.sourcelink.json
+/home/Itto/Lab/ChariotSanzzo/STPlib/bin/Debug/net8.0/STPlib.deps.json
+/home/Itto/Lab/ChariotSanzzo/STPlib/bin/Debug/net8.0/STPlib.dll
+/home/Itto/Lab/ChariotSanzzo/STPlib/bin/Debug/net8.0/STPlib.pdb
+/home/Itto/Lab/ChariotSanzzo/STPlib/obj/Debug/net8.0/STPlib.dll
+/home/Itto/Lab/ChariotSanzzo/STPlib/obj/Debug/net8.0/refint/STPlib.dll
+/home/Itto/Lab/ChariotSanzzo/STPlib/obj/Debug/net8.0/STPlib.pdb
+/home/Itto/Lab/ChariotSanzzo/STPlib/obj/Debug/net8.0/ref/STPlib.dll

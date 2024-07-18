@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "Jzpqn7wR+DR7BrGUbD949RQDYpIicvPJlRiD3dkqySCDfJQ3tiCjZ6V4ZTcIPZJiDK04Q+6o6WnV5BaH/Ej0vw==",
+  "success": true,
+  "projectFilePath": "/home/Itto/Lab/ChariotSanzzo/STPlib/STPlib.csproj",
+  "expectedPackageFiles": [
+    "/home/Itto/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.6/microsoft.aspnetcore.app.ref.8.0.6.nupkg.sha512"
+  ],
+  "logs": []
+}
