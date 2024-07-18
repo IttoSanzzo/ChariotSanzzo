@@ -2,7 +2,6 @@
 using ChariotSanzzo.config;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
-using Microsoft.Extensions.Configuration;
 
 namespace ChariotSanzzo {
 	internal class Program {
@@ -26,9 +25,7 @@ namespace ChariotSanzzo {
 				EnableDefaultHelp = false
 			};
 			Commands = Client.UseCommandsNext(commandsConfig);
-			Commands.RegisterCommands<TestCommand>();
-			Commands.RegisterCommands<TeaCommand>();
-			Commands.RegisterCommands<AlbinaNotionLink>();
+			Commands.CommandsInitRun();
 			await Client.ConnectAsync();
 			await Task.Delay(-1);
 		}
