@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("STPlib")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7bc852032d2d82f9d9ef68b122568f23772b80c3")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f5f830be2c78fbfb7f7a1737f89f1e36dbfbe4a4")]
 [assembly: System.Reflection.AssemblyProductAttribute("STPlib")]
 [assembly: System.Reflection.AssemblyTitleAttribute("STPlib")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

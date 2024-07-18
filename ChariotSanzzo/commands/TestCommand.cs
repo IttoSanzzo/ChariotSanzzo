@@ -47,10 +47,10 @@ namespace ChariotSanzzo.commands {
 			var	embed = new DiscordEmbedBuilder()
 				.WithColor(DiscordColor.Yellow)
 				.WithTitle("Result..:")
-				.WithDescription($"The winner was... {(((res == 1) ? "Heads": "Tails"))}!")
+				.WithFooter($"The winner was... {(((res == 1) ? "Heads": "Tails"))}!")
 				.WithImageUrl($"{((res == 1)
-					? "https://m.media-amazon.com/images/I/71goga5omHL._AC_SX679_.jpg" 
-					: "https://m.media-amazon.com/images/I/71NHDGRgDrL._AC_SX679_.jpg" )}");
+					? "https://i.postimg.cc/5ywj9bWv/CSHeads.png" 
+					: "https://i.postimg.cc/FFqYjCHw/CSTails.png")}");
 			await ctx.Channel.SendMessageAsync(embed: embed);
 		}
 	}
