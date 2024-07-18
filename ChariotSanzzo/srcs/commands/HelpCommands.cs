@@ -2,7 +2,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 
-namespace ChariotSanzzo.commands {
+namespace ChariotSanzzo.Commands {
 	public class HelpCommands : BaseCommandModule {
 		[Command("help")]
 		public async Task HelpCore(CommandContext ctx) {

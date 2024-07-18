@@ -1,17 +1,23 @@
-﻿using ChariotSanzzo.commands;
+﻿using ChariotSanzzo.Commands;
+using ChariotSanzzo.Events;
 using ChariotSanzzo.config;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
+using DSharpPlus.Interactivity;
+using DSharpPlus.Interactivity.Extensions;
 
 using STPlib;
 
 namespace ChariotSanzzo {
 	internal class Program {
-		private static DiscordClient? Client {get; set;}
-		private static CommandsNextExtension? Commands {get; set;}
+		public static DiscordClient? Client {get; set;}
+		public static CommandsNextExtension? Commands {get; set;}
 		static async Task Main(string[] args) {
+			// 1. Importing Json configs and starting
 			var config = new ConfigReader();
 			Console.WriteLine($"Ohayou... {config._name} is waking up!");
+
+			// 2. Setting Discord Client
 			var discordConfig = new DiscordConfiguration() {
 				Intents = DiscordIntents.All,
 				Token = config._token,
@@ -19,7 +25,12 @@ namespace ChariotSanzzo {
 				AutoReconnect = true
 			};
 			Client = new DiscordClient(discordConfig);
-			Client.Ready += Client_Ready;
+			Client.UseInteractivity(new InteractivityConfiguration() {
+				Timeout = TimeSpan.FromMinutes(2)
+			});
+			Client.EventsInitRun();
+
+			// 3. Setting Commands
 			var commandsConfig = new CommandsNextConfiguration() {
 				StringPrefixes = new string[] {config.GetPrefix()},
 				EnableMentionPrefix = true,
@@ -28,11 +39,11 @@ namespace ChariotSanzzo {
 			};
 			Commands = Client.UseCommandsNext(commandsConfig);
 			Commands.CommandsInitRun();
+			Commands.EventsInitRun();
+
+			// 4. Finishing, Connecting and Looping
 			await Client.ConnectAsync();
 			await Task.Delay(-1);
-		}
-		private static Task Client_Ready(DiscordClient sender, DSharpPlus.EventArgs.ReadyEventArgs args) {
-			return (Task.CompletedTask);
 		}
 	}
 }

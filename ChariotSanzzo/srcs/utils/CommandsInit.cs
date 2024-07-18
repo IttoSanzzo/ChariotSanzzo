@@ -1,12 +1,12 @@
 using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
 
-namespace ChariotSanzzo.commands {
+namespace ChariotSanzzo.Commands {
 	public static class CommandsInit  {
 		public static void CommandsInitRun(this CommandsNextExtension commands) {
-			commands.RegisterCommands<TestCommand>();
+			commands.RegisterCommands<TestCommands>();
 			commands.RegisterCommands<HelpCommands>();
-			commands.RegisterCommands<AlbinaNotionLink>();
+			commands.RegisterCommands<LinkCommands>();
+			commands.RegisterCommands<DiceCommands>();
 		}
 	}
 }

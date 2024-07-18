@@ -2,8 +2,8 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 
-namespace ChariotSanzzo.commands {
-	public class AlbinaNotionLink : BaseCommandModule {
+namespace ChariotSanzzo.Commands {
+	public class LinkCommands : BaseCommandModule {
 		[Command("AlbinaLink")]
 		public async Task AlbinaNotionLinkTask(CommandContext ctx) {
 			DiscordEmbedBuilder embed = new DiscordEmbedBuilder {
