@@ -73,6 +73,23 @@
           }
         }
       },
+      "DSharpPlus.SlashCommands/4.4.9": {
+        "type": "package",
+        "dependencies": {
+          "DSharpPlus": "4.4.9",
+          "Microsoft.Extensions.DependencyInjection": "5.0.1"
+        },
+        "compile": {
+          "lib/netstandard2.0/DSharpPlus.SlashCommands.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/DSharpPlus.SlashCommands.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "Microsoft.Extensions.Configuration/8.0.0": {
         "type": "package",
         "dependencies": {
@@ -1638,6 +1655,20 @@
         "dsharpplus.png",
         "lib/netstandard2.0/DSharpPlus.Interactivity.dll",
         "lib/netstandard2.0/DSharpPlus.Interactivity.xml"
+      ]
+    },
+    "DSharpPlus.SlashCommands/4.4.9": {
+      "sha512": "rjs6AF8+J87Jufzw5TYfVa/6aXCs9hcZJ+aUfLsy+nGYYSEzKHaqz6pr/UzqatvN78GjM3N1ZPIunxLhE+qSrw==",
+      "type": "package",
+      "path": "dsharpplus.slashcommands/4.4.9",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "dsharpplus.png",
+        "dsharpplus.slashcommands.4.4.9.nupkg.sha512",
+        "dsharpplus.slashcommands.nuspec",
+        "lib/netstandard2.0/DSharpPlus.SlashCommands.dll",
+        "lib/netstandard2.0/DSharpPlus.SlashCommands.xml"
       ]
     },
     "Microsoft.Extensions.Configuration/8.0.0": {
@@ -4970,6 +5001,7 @@
       "DSharpPlus >= 4.4.9",
       "DSharpPlus.CommandsNext >= 4.4.9",
       "DSharpPlus.Interactivity >= 4.4.9",
+      "DSharpPlus.SlashCommands >= 4.4.9",
       "Microsoft.Extensions.Configuration >= 8.0.0",
       "Microsoft.Extensions.Configuration.Binder >= 8.0.2",
       "Microsoft.Extensions.Configuration.Json >= 8.0.0",
@@ -5027,6 +5059,10 @@
             "version": "[4.4.9, )"
           },
           "DSharpPlus.Interactivity": {
+            "target": "Package",
+            "version": "[4.4.9, )"
+          },
+          "DSharpPlus.SlashCommands": {
             "target": "Package",
             "version": "[4.4.9, )"
           },

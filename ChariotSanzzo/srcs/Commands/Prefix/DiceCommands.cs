@@ -1,9 +1,8 @@
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Interactivity.Extensions;
 
-namespace ChariotSanzzo.Commands {
+namespace ChariotSanzzo.Commands.Prefix {
 	public class DiceCommands : BaseCommandModule {
 		[Command("toss")]
 		public async Task TossCoin(CommandContext ctx) {

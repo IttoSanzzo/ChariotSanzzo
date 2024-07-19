@@ -2,9 +2,8 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Interactivity.Extensions;
-using STPlib;
 
-namespace ChariotSanzzo.Commands {
+namespace ChariotSanzzo.Commands.Prefix {
 	public class TestCommands : BaseCommandModule {
 		[Command("test")]
 		[Aliases("hello", "HelloWorld")]

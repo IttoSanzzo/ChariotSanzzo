@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "IsD4h1O4BJY467PxUymy9J+rIlam38KRvr0tuKdz+YvKOS2LvpHdcMz5Af/auq+wHtc8c3QpMe6wh7YS/an4RA==",
+  "dgSpecHash": "+gMtGE1VDCgrVIqjOgexn7dcem00F52TJHRZ5MJHz66Aw3ZHZVjDuPhMZDjvUzNQvJmBoUdUYL8XE9bWqlBUEQ==",
   "success": true,
   "projectFilePath": "/home/Itto/Lab/ChariotSanzzo/ChariotSanzzo/ChariotSanzzo.csproj",
   "expectedPackageFiles": [
@@ -8,6 +8,7 @@
     "/home/Itto/.nuget/packages/dsharpplus/4.4.9/dsharpplus.4.4.9.nupkg.sha512",
     "/home/Itto/.nuget/packages/dsharpplus.commandsnext/4.4.9/dsharpplus.commandsnext.4.4.9.nupkg.sha512",
     "/home/Itto/.nuget/packages/dsharpplus.interactivity/4.4.9/dsharpplus.interactivity.4.4.9.nupkg.sha512",
+    "/home/Itto/.nuget/packages/dsharpplus.slashcommands/4.4.9/dsharpplus.slashcommands.4.4.9.nupkg.sha512",
     "/home/Itto/.nuget/packages/microsoft.extensions.configuration/8.0.0/microsoft.extensions.configuration.8.0.0.nupkg.sha512",
     "/home/Itto/.nuget/packages/microsoft.extensions.configuration.abstractions/8.0.0/microsoft.extensions.configuration.abstractions.8.0.0.nupkg.sha512",
     "/home/Itto/.nuget/packages/microsoft.extensions.configuration.binder/8.0.2/microsoft.extensions.configuration.binder.8.0.2.nupkg.sha512",

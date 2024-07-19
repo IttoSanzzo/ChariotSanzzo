@@ -10,7 +10,13 @@ namespace ChariotSanzzo.Events {
 		public static async Task CmdErrTask(CommandsNextExtension sender, CommandErrorEventArgs ctx) {
 			string?				timeLeft = null;
 			DiscordEmbedBuilder	embed;
-
+			if (ctx.Command == null) {
+				embed = new DiscordEmbedBuilder()
+								.WithColor(DiscordColor.Red)
+								.WithDescription("Unknown Command.");
+				await ctx.Context.Message.RespondAsync(embed: embed);
+				return ;
+			}
 			if (ctx.Exception is ChecksFailedException exception)
 				foreach (var check in exception.FailedChecks) {
 					var coolDown = (CooldownAttribute)check;

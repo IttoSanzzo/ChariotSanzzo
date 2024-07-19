@@ -2,7 +2,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 
-namespace ChariotSanzzo.Commands {
+namespace ChariotSanzzo.Commands.Prefix {
 	public class LinkCommands : BaseCommandModule {
 		[Command("AlbinaLink")]
 		public async Task AlbinaNotionLinkTask(CommandContext ctx) {

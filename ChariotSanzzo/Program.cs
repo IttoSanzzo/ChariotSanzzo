@@ -5,8 +5,7 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
-
-using STPlib;
+using DSharpPlus.SlashCommands;
 
 namespace ChariotSanzzo {
 	internal class Program {
@@ -38,6 +37,8 @@ namespace ChariotSanzzo {
 				EnableDefaultHelp = false
 			};
 			Commands = Client.UseCommandsNext(commandsConfig);
+			var	slashCommandsConfig = Client.UseSlashCommands();
+			slashCommandsConfig.CommandsInitRun();
 			Commands.CommandsInitRun();
 			Commands.EventsInitRun();
 
