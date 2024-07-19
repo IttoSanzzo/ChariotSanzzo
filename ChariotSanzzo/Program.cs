@@ -1,6 +1,6 @@
 ﻿using ChariotSanzzo.Commands;
 using ChariotSanzzo.Events;
-using ChariotSanzzo.config;
+using ChariotSanzzo.Config;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Interactivity;
@@ -11,6 +11,7 @@ namespace ChariotSanzzo {
 	internal class Program {
 		public static DiscordClient? Client {get; set;}
 		public static CommandsNextExtension? Commands {get; set;}
+		public static DBConfig DbConfigSet {get; set;} = new DBConfig();
 		static async Task Main(string[] args) {
 			// 1. Importing Json configs and starting
 			var config = new ConfigReader();

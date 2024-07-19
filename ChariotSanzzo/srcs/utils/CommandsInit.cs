@@ -15,6 +15,7 @@ namespace ChariotSanzzo.Commands {
 		public static void CommandsInitRun(this SlashCommandsExtension commands) {
 			// SlashCommands
 			commands.RegisterCommands<Slash.TestCommands>();
+			commands.RegisterCommands<Slash.DatabaseCommands>();
 		}
 	}
 }
