@@ -9,7 +9,7 @@ namespace ChariotSanzzo.Commands.Prefix {
 		[Aliases("hello", "HelloWorld")]
 		[Description("Tests if Chariot is online and running correctly.")]
 		public async Task Test(CommandContext ctx) {
-			await ctx.Message.RespondAsync("Hello World!");
+			await ctx.Message.RespondAsync("<:Chariot:1263663980497604659>Hello World!");
 		}
 		
 		[Command("tea")]

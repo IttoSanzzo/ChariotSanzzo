@@ -15,7 +15,9 @@ namespace ChariotSanzzo {
 		static async Task Main(string[] args) {
 			// 1. Importing Json configs and starting
 			var config = new ConfigReader();
+			Console.ForegroundColor = ConsoleColor.Blue;
 			Console.WriteLine($"Ohayou... {config._name} is waking up!");
+			Console.ResetColor();
 
 			// 2. Setting Discord Client
 			var discordConfig = new DiscordConfiguration() {

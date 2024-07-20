@@ -45,7 +45,6 @@ namespace ChariotSanzzo.Config {
 				this._database == null)
 				return ;
 			this._conn = $"Host={this._hostname};Username={this._username};Password={this._password};Database={this._database}";
-			Console.WriteLine(this._conn);
 		}
 	}
 }

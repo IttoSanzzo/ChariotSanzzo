@@ -16,6 +16,7 @@ namespace ChariotSanzzo.Commands {
 			// SlashCommands
 			commands.RegisterCommands<Slash.TestCommands>();
 			commands.RegisterCommands<Slash.DatabaseCommands>();
+			commands.RegisterCommands<Slash.DiceCommands>();
 		}
 	}
 }
