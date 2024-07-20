@@ -37,14 +37,27 @@ namespace ChariotSanzzo.Components.DiceRoller {
 				}
 		}
 		public void FmString() {
-			string	ret = $"` {this._rTotalV} `<-- [";
-			for (int i = 0; i < this._dSet._dCount; i++) {
-				ret += $"{this._rValues[i]}";
-				if (i < this._dSet._dCount - 1)
-					ret += ", ";
+			string	ret = "";
+			if (this._dSet._dAdvan >= 0) {
+				for (int i = 0; i < this._dSet._dCount; i++) {
+					ret += $"{this._rValues[i]}";
+					if (i < this._dSet._dCount - 1)
+						ret += ", ";
+				}
+			} else {
+				for (int i = 0; i < this._dSet._dCount; i++) {
+					ret += $"{this._rValues[i]}";
+					if (i < this._dSet._dCount - 1)
+						ret += ", ";
+				}
 			}
-			ret += $"] {this._dSet._dString}";
-			this._rString = ret;
+			string totalString = $"` {this._rTotalV}";
+			for (int i = 0; i < (DigitsCount(this._dSet._dCount * this._dSet._dSides) - DigitsCount(this._rTotalV)); i++)
+				totalString += " ";
+			ret = totalString + " `<-- [" + ret + $"]{((this._dSet._dTimes <= 3) ? $" {this._dSet._dString}" : "")}";this._rString = ret;
+		}
+		public int DigitsCount(int nbr) {
+			return ((int)Math.Floor(Math.Log10(Math.Abs(nbr)) + 1));
 		}
 	}
 }

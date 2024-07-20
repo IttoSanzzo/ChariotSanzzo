@@ -10,8 +10,8 @@ namespace ChariotSanzzo.Commands.Prefix {
 			var	coin = new Random();
 			var res = coin.Next(1, 3);
 			var	embed = new DiscordEmbedBuilder()
-				.WithColor(DiscordColor.Yellow)
-				.WithTitle("Result..:")
+				.WithColor(DiscordColor.VeryDarkGray)
+				.WithTitle($"Result..: {(((res == 1) ? "<:CSHeads:1264065806246088806>": "<:CSTails:1264065821454372884>"))}")
 				.WithFooter($"The winner was... {(((res == 1) ? "Heads": "Tails"))}!")
 				.WithImageUrl($"{((res == 1)
 					? "https://i.postimg.cc/5ywj9bWv/CSHeads.png" 

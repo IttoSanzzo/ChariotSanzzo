@@ -51,7 +51,7 @@ namespace ChariotSanzzo.Components.DiceRoller {
 	
 		// 3. Running
 		public bool RunDice() {
-			if (this._dTimes == 0 || this._dCount == 0 || this._dSides == 0
+			if (this._dTimes <= 0 || this._dCount <= 0 || this._dSides <= 0
 				|| (this._dTimes * this._dCount) > 30000)
 				return (false);
 			this._dResul = new DiceRes[this._dTimes];
@@ -72,6 +72,8 @@ namespace ChariotSanzzo.Components.DiceRoller {
 				}
 			else if ((this._dTimes * this._dCount) > 30000)
 				context = "That dice set is WAAAY too big.";
+			else if (this._dTimes <= 0 || this._dCount <= 0 || this._dSides <= 0)
+				context = "Invalid value detected.";
 			else
 				context = "So... what happened?";
 			if (context.Length > 4000)
@@ -79,6 +81,8 @@ namespace ChariotSanzzo.Components.DiceRoller {
 			var embed = new DiscordEmbedBuilder() {
 				Color = DiscordColor.DarkBlue,
 				Description = context};
+			if (this._dTimes > 3)
+				embed.WithTitle($"Dice Set..: {this._dString}");
 			return (embed.Build());
 		}
 		public string GetFinalString() {
@@ -87,6 +91,8 @@ namespace ChariotSanzzo.Components.DiceRoller {
 			if (this._dResul != null)
 				for (int i = 0; i < this._dTimes; i++) {
 					context += this._dResul[i]._rString;
+					if (this._dTimes > 3)
+						context += $"Dice Set..: {this._dString}";
 					if (i < this._dTimes - 1)
 						context += "\n";
 				}
@@ -98,6 +104,8 @@ namespace ChariotSanzzo.Components.DiceRoller {
 				context = "That Dice Set was too big for text messages.";
 			return (context);
 		}
+
+		// 5. Utils
 		public DiscordEmbed GetSetConfigEmbed() {
 			var embed = new DiscordEmbedBuilder() {
 				Color = DiscordColor.Gold,
