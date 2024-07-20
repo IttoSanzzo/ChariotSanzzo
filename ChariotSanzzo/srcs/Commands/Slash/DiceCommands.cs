@@ -38,7 +38,7 @@ namespace ChariotSanzzo.Commands.Slash {
 			if (dAdvan != 0)
 				finalString += $"a{dAdvan}";
 			if (dEquat != "")
-				finalString += $"e{dEquat}";
+				finalString += $" ({dEquat})";
 			DiceSet	dSet = new DiceSet() {
 					_dString = finalString,
 					_dEquat = dEquat,
