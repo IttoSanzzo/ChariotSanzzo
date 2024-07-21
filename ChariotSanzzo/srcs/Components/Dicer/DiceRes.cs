@@ -1,5 +1,4 @@
 using System.Data;
-using DSharpPlus.Entities;
 
 namespace ChariotSanzzo.Components.DiceRoller {
 	public class DiceRes {
@@ -18,11 +17,9 @@ namespace ChariotSanzzo.Components.DiceRoller {
 				this._rValues[i] = DiceRes._rRandom.Next(1, this._dSet._dSides + 1);
 				this._rTotalV += this._rValues[i];
 			}
-			// TODO _rTotalV Manipulation
-			// this._rTotalV = this._rTotalV + this._dSet._dEquat;
-			this.BubbleSort();
+			Array.Sort(this._rValues);
+			Array.Reverse(this._rValues);
 			this.FmString();
-			// Console.WriteLine(this._rString);
 		}
 
 		// 2. Functions
@@ -65,17 +62,6 @@ namespace ChariotSanzzo.Components.DiceRoller {
 		}
 
 		// 3. Utils
-		public void BubbleSort() {
-			int	temp;
-
-			for (int i = 0; i < this._dSet._dCount; i++)
-				if (i < this._dSet._dCount - 1 && this._rValues[i] < this._rValues[i + 1]) {
-					temp = this._rValues[i];
-					this._rValues[i] = this._rValues[i + 1];
-					this._rValues[i + 1] = temp;
-					i = -1;
-				}
-		}
 		public int DigitsCount(int nbr) {
 			return ((int)Math.Floor(Math.Log10(Math.Abs(nbr)) + 1));
 		}

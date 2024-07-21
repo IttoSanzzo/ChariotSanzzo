@@ -1,7 +1,6 @@
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using ChariotSanzzo.Components.DiceRoller;
-using Microsoft.VisualBasic;
 
 namespace ChariotSanzzo.Commands.Slash {
 	[SlashCommandGroup("Rolling", "Commands for RNG.")]
@@ -21,34 +20,22 @@ namespace ChariotSanzzo.Commands.Slash {
 			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed: embed));
 		}
 
-		[SlashCommand("dice", "Rolls a overly powerfull dice feature.")]
-		public async Task Dice(InteractionContext ctx,
+		[SlashCommand("mdice", "Rolls a overly powerfull dice feature manually.")]
+		public async Task MDice(InteractionContext ctx,
 								[Option("Times", "How many times the set will be played. (1)")] double dTimes = 1,
 								[Option("Count", "How many dices will be played each time. (1)")] double dCount = 1,
 								[Option("Sides", "How much sides the dice have. (20)")] double dSides = 20,
 								[Option("Advantage", "Advantage or disadvantage dice removals. (0)")] double dAdvan = 0,
 								[Option("Equation", "Automatic calculation in each play. (null)")] string dEquat = "") {
 			await ctx.DeferAsync();
-			string	finalString = "";
-			if (dTimes > 1)
-				finalString += $"{dTimes}#";
-			if (dCount > 1)
-				finalString += $"{dCount}";
-			finalString += $"d{dSides}";
-			if (dAdvan != 0)
-				finalString += $"a{dAdvan}";
-			if (dEquat != "")
-				finalString += $" ({dEquat})";
-			DiceSet	dSet = new DiceSet() {
-					_dString = finalString,
-					_dEquat = dEquat,
-					_dTimes = (int)dTimes,
-					_dCount = (int)dCount,
-					_dSides = (int)dSides,
-					_dAdvan = (int)dAdvan
-			};
-			dSet.RunDice();
-			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(dSet.GetFinalEmbed()));
+			DiceSet	dSet = new DiceSet((int)dTimes, (int)dCount, (int)dSides, (int)dAdvan, dEquat);
+			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(dSet.GetEmbed()));
+		}
+		[SlashCommand("dice", "Rolls a overly powerfull dice feature.")]
+		public async Task Dice(InteractionContext ctx, [Option("DiceSet", "Just roll your dices.")] string dLine) {
+			await ctx.DeferAsync();
+			DiceSet	dSet = new DiceSet(dLine);
+			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(dSet.GetEmbed()));
 		}
 	}
 }

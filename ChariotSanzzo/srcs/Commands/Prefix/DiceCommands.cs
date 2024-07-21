@@ -32,60 +32,27 @@ namespace ChariotSanzzo.Commands.Prefix {
 		[Command("dice")]
 		public async Task Dice(CommandContext ctx, string line) {
 			DiceSet	dSet = new DiceSet(line);
-			dSet.RunDice();
-			await ctx.Message.RespondAsync(dSet.GetFinalEmbed());
+			await ctx.Message.RespondAsync(dSet.GetEmbed());
 		}
 		[Command("dice")]
 		public async Task Dice(CommandContext ctx, int dCount, int dSides) {
-			DiceSet	dSet = new DiceSet() {
-					_dString = $"{dCount}d{dSides}",
-					_dEquat = "",
-					_dTimes = 1,
-					_dCount = dCount,
-					_dSides = dSides,
-					_dAdvan = 0
-			};
-			dSet.RunDice();
-			await ctx.Message.RespondAsync(dSet.GetFinalEmbed());
+			DiceSet	dSet = new DiceSet(1, dCount, dSides, 0, "");
+			await ctx.Message.RespondAsync(dSet.GetEmbed());
 		}
 		[Command("dice")]
 		public async Task Dice(CommandContext ctx, int dTimes, int dCount, int dSides) {
-			DiceSet	dSet = new DiceSet() {
-					_dString = $"{dTimes}#{dCount}d{dSides}",
-					_dEquat = "",
-					_dTimes = dTimes,
-					_dCount = dCount,
-					_dSides = dSides,
-					_dAdvan = 0
-			};
-			dSet.RunDice();
-			await ctx.Message.RespondAsync(dSet.GetFinalEmbed());
+			DiceSet	dSet = new DiceSet(dTimes, dCount, dSides, 0, "");
+			await ctx.Message.RespondAsync(dSet.GetEmbed());
 		}
 		[Command("dice")]
 		public async Task Dice(CommandContext ctx, int dTimes, int dCount, int dSides, int dAdvan) {
-			DiceSet	dSet = new DiceSet() {
-					_dString = $"{dTimes}#{dCount}d{dSides}a{dAdvan}",
-					_dEquat = "",
-					_dTimes = dTimes,
-					_dCount = dCount,
-					_dSides = dSides,
-					_dAdvan = dAdvan
-			};
-			dSet.RunDice();
-			await ctx.Message.RespondAsync(dSet.GetFinalEmbed());
+			DiceSet	dSet = new DiceSet(dTimes, dCount, dSides, dAdvan, "");
+			await ctx.Message.RespondAsync(dSet.GetEmbed());
 		}
 		[Command("dice")]
 		public async Task Dice(CommandContext ctx, int dTimes, int dCount, int dSides, int dAdvan, string dEquat) {
-			DiceSet	dSet = new DiceSet() {
-					_dString = $"{dTimes}#{dCount}d{dSides}a{dAdvan}e{dEquat}",
-					_dEquat = dEquat,
-					_dTimes = dTimes,
-					_dCount = dCount,
-					_dSides = dSides,
-					_dAdvan = dAdvan
-			};
-			dSet.RunDice();
-			await ctx.Message.RespondAsync(dSet.GetFinalEmbed());
+			DiceSet	dSet = new DiceSet(dTimes, dCount, dSides, dAdvan, dEquat);
+			await ctx.Message.RespondAsync(dSet.GetEmbed());
 		}
 	}
 }

@@ -2,6 +2,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Interactivity.Extensions;
+using System.Diagnostics;
 
 namespace ChariotSanzzo.Commands.Prefix {
 	public class TestCommands : BaseCommandModule {
@@ -54,6 +55,37 @@ namespace ChariotSanzzo.Commands.Prefix {
 		[Cooldown(2, 10, CooldownBucketType.Global)]
 		public async Task Coll(CommandContext ctx) {
 			await ctx.Channel.SendMessageAsync("Colldown test!");
+		}
+	
+		[Command("stopthechariot")]
+		[Aliases("stop")]
+		public async Task Stop(CommandContext ctx) {
+			if (ctx.User.Username == "ittosanzzo" || ctx.User.Username == "nasasanzzo")
+				await ctx.Message.RespondAsync("Stopping the Chariot!");
+				if (Program.Client != null) {
+					await Program.Client.DisconnectAsync();
+					Environment.Exit(0);
+				}
+		}
+		[Command("restartthechariot")]
+		[Aliases("restart")]
+		public async Task Restart(CommandContext ctx) {
+			if (ctx.User.Username == "ittosanzzo" || ctx.User.Username == "nasasanzzo")
+				await ctx.Message.RespondAsync("Restarting the Chariot!");
+				if (Program.Client != null) {
+					await Program.Client.DisconnectAsync();
+					{
+						Process proc = new System.Diagnostics.Process();
+						proc.StartInfo.FileName = "dotnet";
+						proc.StartInfo.UseShellExecute = true;
+						proc.StartInfo.CreateNoWindow = false;
+						proc.StartInfo.RedirectStandardOutput = false;
+						proc.StartInfo.Arguments = "run";
+						proc.Start();
+						proc.WaitForExit();
+					}
+					Environment.Exit(0);
+				}
 		}
 	}
 }

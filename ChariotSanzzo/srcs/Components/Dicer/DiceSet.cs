@@ -1,59 +1,87 @@
 using DSharpPlus.Entities;
+using STPlib;
 
 namespace ChariotSanzzo.Components.DiceRoller {
 	public class DiceSet {
 		// 0. Member Variables
-		public string		_dString {get; set;} = "";
-		public string		_dEquat {get; set;} = "";
-		public int			_dTimes {get; set;} = 0;
-		public int			_dCount {get; set;} = 0;
-		public int			_dSides {get; set;} = 0;
-		public int			_dAdvan {get; set;} = 0;
-		public DiceRes[]?	_dResul {get; set;} = null;
+		public string			_dString {get; set;} = "";
+		public string			_dEquat {get; set;} = "";
+		public int				_dTimes {get; set;} = 0;
+		public int				_dCount {get; set;} = 0;
+		public int				_dSides {get; set;} = 0;
+		public int				_dAdvan {get; set;} = 0;
+		public bool				_bManual {get; set;} = false;
+		private DiscordEmbed?	_embed {get; set;} = null;
+		private DiceStr?		_cStr {get; set;} = null;
+		private DiceRes[]?		_dResul {get; set;} = null;
 
 		// 1. Constructors
-		public DiceSet() {}
+		public DiceSet(int dTimes, int dCount, int dSides, int dAdvan, string dEquat) {
+			this._bManual = true;
+			this._dTimes = dTimes;
+			this._dCount = dCount;
+			this._dSides = dSides;
+			this._dAdvan = dAdvan;
+			this._dEquat = dEquat;
+			this.FormStringFromParams();
+			this.CheckDice();
+			this.RunDice();
+			this.GenFinalEmbed();
+		}
 		public DiceSet(string dLine) {
-			this._dString = FmDiceString(dLine);
-			this._dEquat = FmDiceEquation();
-			this._dTimes = FmDiceTimes();
-			this._dCount = FmDiceCount();
-			this._dSides = FmDiceSides();
-			this._dAdvan = FmDiceAdvantage();
+			this._dString = dLine;
+			this.CheckDice();
+			this.RunDice();
+			this.GenFinalEmbed();
 		}
 
 		// 2. Form Dice Functions
-		string FmDiceString(string line) {
-			string	ret;
-			ret = "";
-			return (ret);
+		/*
+		bool	FmDiceString() {
+			// for (int i = 0; i < this._cStr.Length; i++) {
+				// if (this._cStr[i] == ' ')
+					// this._cStr.
+			// }
+			// this._dString = this._cStr;
+			return (true);
 		}
-		string FmDiceEquation() {
+		string	FmDiceEquation() {
 			this._dEquat = "";
 			return (this._dEquat);
 		}
-		int FmDiceTimes() {
+		int		FmDiceTimes() {
 			this._dTimes = 0;
 			return (this._dTimes);
 		}
-		int FmDiceCount() {
+		int		FmDiceCount() {
 			this._dCount = 0;
 			return (this._dCount);
 		}
-		int FmDiceSides() {
+		int		FmDiceSides() {
 			this._dSides = 0;
 			return (this._dSides);
 		}
-		int FmDiceAdvantage() {
+		int		FmDiceAdvantage() {
 			this._dAdvan = 0;
 			return (this._dAdvan);
 		}
-	
-		// 3. Running
-		public bool RunDice() {
-			if (this._dTimes <= 0 || this._dCount <= 0 || this._dSides <= 0
-				|| (this._dTimes * this._dCount) > 30000)
+		*/
+
+		// 3. Checking & Running
+		public bool CheckDice() {
+			if (this._cStr == null)
+				this._cStr = new DiceStr(this);
+			return (this._cStr._sCheck);
+		}
+		private bool RunDice() {
+			if ((this._dTimes <= 0 || this._dTimes > 200)
+				|| (this._dCount <= 0 || this._dCount > 1000)
+				|| (this._dSides <= 0 || this._dSides > 1000)
+				|| (this._dTimes * this._dCount) > 10000) {
+				if (this._cStr != null)
+					this._cStr._sCheck = false;
 				return (false);
+			}
 			this._dResul = new DiceRes[this._dTimes];
 			for (int i = 0; i < this._dTimes; i++)
 				this._dResul[i] = new DiceRes(this);
@@ -61,28 +89,41 @@ namespace ChariotSanzzo.Components.DiceRoller {
 		}
 
 		// 4. Returning
-		public DiscordEmbed GetFinalEmbed() {
+		private void GenFinalEmbed() {
+			var embed = new DiscordEmbedBuilder();
+			if (this._cStr != null && this._cStr._sCheck == false) {
+				embed.WithColor(DiscordColor.Red);
+				embed.WithDescription($"{((this._dTimes > 200 || this._dCount > 1000 || this._dSides > 1000|| (this._dTimes * this._dCount) > 10000) ?
+										"That dice set is WAAAY too big." : 
+										((this._dTimes <= 0 || this._dCount <= 0 || this._dSides <= 0) ? 
+											"Invalid value detected (forbidden null-or-negative value)." :
+											"Dice Set was invalid."))}");
+				this._embed = embed.Build();
+				return ;
+			}
 			string	context = "";
-
 			if (this._dResul != null)
 				for (int i = 0; i < this._dTimes; i++) {
 					context += this._dResul[i]._rString;
 					if (i < this._dTimes - 1)
 						context += "\n";
 				}
-			else if ((this._dTimes * this._dCount) > 30000)
-				context = "That dice set is WAAAY too big.";
-			else if (this._dTimes <= 0 || this._dCount <= 0 || this._dSides <= 0)
-				context = "Invalid value detected.";
 			else
-				context = "So... what happened?";
+				context = "So... what happened? No results found.";
 			if (context.Length > 4000)
 				context = "That Dice Set was too big for embeds.";
-			var embed = new DiscordEmbedBuilder() {
-				Color = DiscordColor.DarkBlue,
-				Description = context};
+			embed.WithColor(DiscordColor.DarkBlue);
+			embed.WithDescription(context);
 			if (this._dTimes > 3)
 				embed.WithTitle($"Dice Set..: {this._dString}");
+			this._embed = embed.Build();
+		}
+		public DiscordEmbed GetEmbed() {
+			if (this._embed != null)
+				return (this._embed);
+			var	embed = new DiscordEmbedBuilder() {
+						Color = DiscordColor.Red,
+						Description = "No embed to retrieve."};
 			return (embed.Build());
 		}
 		public string GetFinalString() {
@@ -117,6 +158,19 @@ namespace ChariotSanzzo.Components.DiceRoller {
 								$"Sides........: {this._dSides}\n" +
 								$"Removes..: {this._dAdvan}\n"};
 			return (embed.Build());
+		}
+		private string FormStringFromParams() {
+			this._dString = "";
+			if (this._dTimes > 1)
+				this._dString += $"{this._dTimes}#";
+			if (this._dCount > 1)
+				this._dString += $"{this._dCount}";
+			this._dString += $"d{this._dSides}";
+			if (this._dAdvan != 0)
+				this._dString += $"a{this._dAdvan}";
+			if (this._dEquat != "")
+				this._dString += $" ({this._dEquat})";
+			return (this._dString);
 		}
 	}
 }
