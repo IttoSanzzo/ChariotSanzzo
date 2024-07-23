@@ -24,6 +24,8 @@ namespace ChariotSanzzo.Components.DiceRoller {
 		public DiceStr(DiceSet dSet) {
 			this._dSet = dSet;
 			this._lStr = this._dSet._dString;
+			if (this._dSet._bManual == true)
+				return ;
 			if (this.CheckDString() == false)
 				return ;
 			this.GetValues();
@@ -31,37 +33,21 @@ namespace ChariotSanzzo.Components.DiceRoller {
 
 		// 2. Checks
 		private bool CheckDString() {
-			this._sCheck = true;
-			Console.Write("Check Try -> ");
-			/* Defaults for Manual Incriptions */
-			if (this._dSet._bManual == true) {
-				Console.WriteLine("Manual Mode");
-				return (this._sCheck);
-			}
 			/* Checks for Empty or Length Limite */
-			else if (this._lStr == "" || this._lStr.Length > 40) {
-				Console.Write("Empty or Big");
+			if (this._lStr == "" || this._lStr.Length > 40)
 				this._sCheck = false;
-			}
+			/* Removes Spaces from the Input */
 			this._lStr = this._lStr.RemoveChr(' ');
-			Console.Write($"=>{this._lStr}<=");
 			/* Checks for Invalid Characters */
-			if (this._lStr.StrLimitChrSetOrDigit("dD#+-*/aA") == false) {
-				Console.Write("Other Char");
+			if (this._lStr.StrLimitChrSetOrDigit("dD#+-*/aA") == false)
 				this._sCheck = false;
-			}
 			/* Checks and Count Tokens */
-			else if (this.CountTokens() == false) {
-				Console.Write("Token Count Error");
+			else if (this.CountTokens() == false)
 				this._sCheck = false;
-			}
 			/* Checks Token Order */
-			else if (this.CheckTokenOrder() == false) {
-				Console.Write("Token Order Error");
+			else if (this.CheckTokenOrder() == false)
 				this._sCheck = false;
-			}
 			/* End Return */
-			if (this._sCheck) Console.WriteLine("All Good"); else Console.WriteLine(" <- Error");
 			return (this._sCheck);
 		}
 		private bool CountTokens() {
@@ -132,7 +118,6 @@ namespace ChariotSanzzo.Components.DiceRoller {
 					if (char.IsDigit(this._lStr[i]) == false)
 						break ;
 				this._dSet._dAdvan = this._lStr.Substring(0, i).StoI() * advanType;
-				Console.WriteLine($"AdvanType -> {advanType == 1}");
 				if (this._token[(short)TokenI.Math][0] == 1)
 					this._lStr = this._lStr.Remove(0, i);	
 			}
@@ -140,12 +125,6 @@ namespace ChariotSanzzo.Components.DiceRoller {
 				this._dSet._dEquat = new string(this._lStr);
 			else
 				this._dSet._dEquat = "";
-			Console.Write($"|_dTime = {this._dSet._dTimes}|\n" +
-							$"|_dCount = {this._dSet._dCount}|\n" +
-							$"|_dCount = {this._dSet._dCount}|\n" +
-							$"|_dMath = " + this._dSet._dEquat + "|\n" +
-							$"|_dSides = {this._dSet._dSides}|\n");
-			Console.WriteLine($"|=>{this._lStr}<=|");
 			return ;
 		}
 	}

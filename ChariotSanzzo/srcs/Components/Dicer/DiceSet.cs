@@ -166,8 +166,10 @@ namespace ChariotSanzzo.Components.DiceRoller {
 			if (this._dCount > 1)
 				this._dString += $"{this._dCount}";
 			this._dString += $"d{this._dSides}";
-			if (this._dAdvan != 0)
-				this._dString += $"a{this._dAdvan}";
+			if (this._dAdvan > 0)
+				this._dString += $"A{this._dAdvan}";
+			else if (this._dAdvan < 0)
+				this._dString += $"a{this._dAdvan * -1}";
 			if (this._dEquat != "")
 				this._dString += $" ({this._dEquat})";
 			return (this._dString);
