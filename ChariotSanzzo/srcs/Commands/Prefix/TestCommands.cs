@@ -3,6 +3,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Interactivity.Extensions;
 using System.Diagnostics;
+using ChariotSanzzo.Database;
 
 namespace ChariotSanzzo.Commands.Prefix {
 	public class TestCommands : BaseCommandModule {
@@ -86,6 +87,14 @@ namespace ChariotSanzzo.Commands.Prefix {
 					}
 					Environment.Exit(0);
 				}
+		}
+
+		[Command("testfan")]
+		public async Task TestFan(CommandContext ctx) {
+			DBEngine engine = new DBEngine();
+			DBFanfare dicef = await engine.GetDiceFanfareAsync(20);
+			await ctx.Channel.SendMessageAsync("Testing");
+			Console.WriteLine($"[\n{dicef._message}\n{dicef._glink}\n]");
 		}
 	}
 }

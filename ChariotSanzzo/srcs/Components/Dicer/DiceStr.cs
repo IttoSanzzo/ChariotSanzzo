@@ -121,8 +121,11 @@ namespace ChariotSanzzo.Components.DiceRoller {
 				if (this._token[(short)TokenI.Math][0] == 1)
 					this._lStr = this._lStr.Remove(0, i);	
 			}
-			if (this._token[(short)TokenI.Math][0] == 1)
+			if (this._token[(short)TokenI.Math][0] == 1) {
 				this._dSet._dEquat = new string(this._lStr);
+				if (this._dSet._dEquat.StrLimitChrSetOrDigit("+=*/") == false)
+					this._sCheck = false;
+			}
 			else
 				this._dSet._dEquat = "";
 			return ;

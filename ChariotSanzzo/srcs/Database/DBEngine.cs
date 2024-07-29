@@ -4,13 +4,16 @@ using Npgsql;
 
 namespace ChariotSanzzo.Database {
 	public class DBEngine {
+		// 0. Member Variables
 		private string	_conn {get; set;} = Program.DbConfigSet._conn;
+
+		// 1. Main Functions
 		public async Task<bool> StoreUserAsync(DBUser user) {
 			var	DBEngine = new DBEngine();
 			var	retrieve = await DBEngine.GetUserAsync(user._userName, user._serverId);
 			if (retrieve.Item1 == true)
 				return (true);
-			var	userNo = await GetTotalUsersAsync() + 1;
+			var	userNo = await GetRowsCountAsync("data.userinfo") + 1;
 			if (userNo == -1)
 				throw new Exception();
 			try {
@@ -29,14 +32,15 @@ namespace ChariotSanzzo.Database {
 			}
 		}
 		
+		// 2. Get Functions
 		public async Task<(bool, DBUser?)> GetUserAsync(string userName, ulong serverId) {
 			DBUser	user;
 			try {
 				using (var conn = new NpgsqlConnection(this._conn)) {
-					await conn.OpenAsync();
+					await conn.OpenAsync(); 
 					string	query = "SELECT u.userno, u.username, u.servername, u.serverid " + 
 					"FROM data.userinfo u " +
-					$"WHERE username = '{userName}' and serverid = {serverId}";
+					$"WHERE username = '{userName}' AND serverid = {serverId}";
 					using (var cmd = new NpgsqlCommand(query, conn)) {
 						var	reader = await cmd.ExecuteReaderAsync();
 						await reader.ReadAsync();
@@ -54,13 +58,39 @@ namespace ChariotSanzzo.Database {
 				return (false, null);
 			}
 		}
-		
-		public async Task<long> GetTotalUsersAsync() {
+		public async Task<DBFanfare> GetDiceFanfareAsync(int dice) {
+			DBFanfare	dicef = new DBFanfare();
+			if (dice != 1 && dice != 20)
+				return (dicef);
+			try {
+				using (var conn = new NpgsqlConnection(this._conn)) {
+					await conn.OpenAsync();
+					string query = "SELECT d.message, d.glink " +
+									"FROM botmiscs.dfanfare d " +
+									$"WHERE type = {dice} " +
+									"ORDER BY random() LIMIT 1";
+					using (var cmd = new NpgsqlCommand(query, conn)) {
+						var reader = await cmd.ExecuteReaderAsync();
+						await reader.ReadAsync();
+						dicef._message = reader.GetString(0);
+						dicef._glink = reader.GetString(1);
+					}
+				}
+				return (dicef);
+			}
+			catch (Exception ex) {
+				Console.WriteLine($"[->GetDiceFanfareError\n{ex.ToString()}\n]");
+				return (dicef);
+			}
+		}
+
+		// 3. Utils
+		public async Task<long> GetRowsCountAsync(string table) {
 			Object?	userCount;
 			try {
 				using (var conn = new NpgsqlConnection(this._conn)) {
 					await conn.OpenAsync();
-					string query = "SELECT COUNT (*) FROM data.userinfo";
+					string query = $"SELECT COUNT (*) FROM {table}";
 					using (var cmd = new NpgsqlCommand(query, conn)) {
 						userCount = await cmd.ExecuteScalarAsync();
 					}
@@ -71,6 +101,5 @@ namespace ChariotSanzzo.Database {
 				return (-1);
 			}
 		}
-	
 	}
 }
