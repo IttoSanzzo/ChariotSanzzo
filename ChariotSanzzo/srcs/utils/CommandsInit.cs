@@ -4,7 +4,7 @@ using ChariotSanzzo.Commands.Slash;
 using DSharpPlus.SlashCommands;
 
 namespace ChariotSanzzo.Commands {
-	public static class CommandsInit  {
+	public static class CommandsInit {
 		public static void CommandsInitRun(this CommandsNextExtension commands) {
 			// PrefixCommands
 			commands.RegisterCommands<Prefix.TestCommands>();
@@ -17,6 +17,7 @@ namespace ChariotSanzzo.Commands {
 			commands.RegisterCommands<Slash.TestCommands>();
 			commands.RegisterCommands<Slash.DatabaseCommands>();
 			commands.RegisterCommands<Slash.DiceCommands>();
+			commands.RegisterCommands<Slash.MusicCommands>();
 		}
 	}
 }

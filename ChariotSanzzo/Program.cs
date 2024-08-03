@@ -45,8 +45,12 @@ namespace ChariotSanzzo {
 			Commands.CommandsInitRun();
 			Commands.EventsInitRun();
 
+			// 4. Lavalink Setup
+			Client.LavalinkRunInit();
+
 			// 4. Finishing, Connecting and Looping
 			await Client.ConnectAsync();
+			Client.LavalinkConnectAsync();
 			await Task.Delay(-1);
 		}
 	}

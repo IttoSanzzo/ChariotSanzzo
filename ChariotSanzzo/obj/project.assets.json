@@ -73,6 +73,22 @@
           }
         }
       },
+      "DSharpPlus.Lavalink/4.4.9": {
+        "type": "package",
+        "dependencies": {
+          "DSharpPlus": "4.4.9"
+        },
+        "compile": {
+          "lib/netstandard2.0/DSharpPlus.Lavalink.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/DSharpPlus.Lavalink.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "DSharpPlus.SlashCommands/4.4.9": {
         "type": "package",
         "dependencies": {
@@ -1680,6 +1696,20 @@
         "dsharpplus.png",
         "lib/netstandard2.0/DSharpPlus.Interactivity.dll",
         "lib/netstandard2.0/DSharpPlus.Interactivity.xml"
+      ]
+    },
+    "DSharpPlus.Lavalink/4.4.9": {
+      "sha512": "nJHgVTwnsxu9XNtjMdINAVoWNoH5nBd388Rsni77THeMcYOyDPVcY+5M/re7tmD5QbRD8wz3o1eMpqAYmQ7mEQ==",
+      "type": "package",
+      "path": "dsharpplus.lavalink/4.4.9",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "dsharpplus.lavalink.4.4.9.nupkg.sha512",
+        "dsharpplus.lavalink.nuspec",
+        "dsharpplus.png",
+        "lib/netstandard2.0/DSharpPlus.Lavalink.dll",
+        "lib/netstandard2.0/DSharpPlus.Lavalink.xml"
       ]
     },
     "DSharpPlus.SlashCommands/4.4.9": {
@@ -5114,6 +5144,7 @@
       "DSharpPlus >= 4.4.9",
       "DSharpPlus.CommandsNext >= 4.4.9",
       "DSharpPlus.Interactivity >= 4.4.9",
+      "DSharpPlus.Lavalink >= 4.4.9",
       "DSharpPlus.SlashCommands >= 4.4.9",
       "Microsoft.Extensions.Configuration >= 8.0.0",
       "Microsoft.Extensions.Configuration.Binder >= 8.0.2",
@@ -5173,6 +5204,10 @@
             "version": "[4.4.9, )"
           },
           "DSharpPlus.Interactivity": {
+            "target": "Package",
+            "version": "[4.4.9, )"
+          },
+          "DSharpPlus.Lavalink": {
             "target": "Package",
             "version": "[4.4.9, )"
           },
