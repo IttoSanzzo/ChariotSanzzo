@@ -4,6 +4,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Interactivity.Extensions;
 using System.Diagnostics;
 using ChariotSanzzo.Database;
+using DSharpPlus.Lavalink;
 
 namespace ChariotSanzzo.Commands.Prefix {
 	public class TestCommands : BaseCommandModule {
@@ -64,6 +65,9 @@ namespace ChariotSanzzo.Commands.Prefix {
 			if (ctx.User.Username == "ittosanzzo" || ctx.User.Username == "nasasanzzo")
 				await ctx.Message.RespondAsync("Stopping the Chariot!");
 				if (Program.Client != null) {
+					var	lavalink = Program.Client.GetLavalink();
+					var	node = lavalink.ConnectedNodes.Values.First();
+					await node.StopAsync();
 					await Program.Client.DisconnectAsync();
 					Environment.Exit(0);
 				}
@@ -74,6 +78,9 @@ namespace ChariotSanzzo.Commands.Prefix {
 			if (ctx.User.Username == "ittosanzzo" || ctx.User.Username == "nasasanzzo")
 				await ctx.Message.RespondAsync("Restarting the Chariot!");
 				if (Program.Client != null) {
+					var	lavalink = Program.Client.GetLavalink();
+					var	node = lavalink.ConnectedNodes.Values.First();
+					await node.StopAsync();
 					await Program.Client.DisconnectAsync();
 					{
 						Process proc = new System.Diagnostics.Process();

@@ -60,7 +60,7 @@ namespace ChariotSanzzo.Commands.Slash {
 			}
 			if (musicTracks.Length > 1) {
 				embed.WithColor(DiscordColor.Aquamarine);
-				embed.WithDescription("A Playlist was added!");
+				embed.WithDescription($"A Playlist was added! {musicTracks.Length} new tracks!");
 			}
 
 			// 4. Cores
@@ -170,7 +170,19 @@ namespace ChariotSanzzo.Commands.Slash {
 		}
 	
 	// 3. Queue
-	[SlashCommand("loop", "Changes the loop setting! (Defaults to Loop Track)")]
+		[SlashCommand("queue", "Shows the local queue.")]
+		public async Task GetQueue(InteractionContext ctx) {
+			await ctx.DeferAsync();
+		// 0. Initialization
+			var testObj = await this.PreChecksPass(ctx, 0);
+			if (testObj.Item1 == false)
+				return ;
+			t_tools	tools = testObj.Item2;
+
+		// 1. Prepare Embed
+			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(tools.queue.GetQueueEmbed()));
+		}
+		[SlashCommand("loop", "Changes the loop setting! (Defaults to Loop Track)")]
 		public async Task Loop(InteractionContext ctx, [Choice("none", 0)][Choice("track", 1)][Choice("queue", 2)][Option("Type", "What should be looped.")] long type = 1) {
 			await ctx.DeferAsync();
 		// 0. Initialization
@@ -198,7 +210,7 @@ namespace ChariotSanzzo.Commands.Slash {
 			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed: embed));
 		}
 		[SlashCommand("skip", "Skips the currently playing track!")]
-		public async Task Skip(InteractionContext ctx) {
+		public async Task Skip(InteractionContext ctx, [Option("count", "How many tracks should bem skipped. (Defatults to 1)")] long count = 1) {
 			await ctx.DeferAsync();
 		// 0. Initialization
 			var testObj = await this.PreChecksPass(ctx, 0);
@@ -210,8 +222,16 @@ namespace ChariotSanzzo.Commands.Slash {
 			var	embed = new DiscordEmbedBuilder() {
 				Color = DiscordColor.Aquamarine
 			};
+			if (count > 1000 || count < 1) {
+				embed.WithColor(DiscordColor.Red);
+				embed.WithDescription("Invalid skip count value.");
+				await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed: embed));
+				return ;
+			}
 
 		// 1. Core
+			for (int i = 0; i < count - 1; i++)
+				tools.queue.GoNextIndex();
 			var	toPlayNow = tools.queue.UseNextTrack();
 			if (toPlayNow != null) {
 				await tools.queue._conn.PlayAsync(toPlayNow);
@@ -267,6 +287,59 @@ namespace ChariotSanzzo.Commands.Slash {
 			}
 			else
 				embed.WithDescription("Coundn't replay (Probably no tracks left).");
+			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed: embed));
+		}
+		[SlashCommand("index", "Plays the track at the given index position!")]
+		public async Task Index(InteractionContext ctx, [Option("index", "The track's position in the queue.")] long index) {
+			await ctx.DeferAsync();
+		// 0. Initialization
+			var testObj = await this.PreChecksPass(ctx, 0);
+			if (testObj.Item1 == false)
+				return ;
+			t_tools	tools = testObj.Item2;
+			index -= 1;
+
+		// 1. Prepare Embed
+			var	embed = new DiscordEmbedBuilder() {
+				Color = DiscordColor.Aquamarine
+			};
+			if (index < 0 || index > tools.queue._tracks.Length - 1) {
+				embed.WithColor(DiscordColor.Red);
+				embed.WithDescription("Selected track does no exist!");
+				await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed: embed));
+				return ;
+			}
+		// 1. Core
+			var	toPlayNow = tools.queue.UseIndexTrack((int)index);
+			if (toPlayNow != null) {
+				await tools.queue._conn.PlayAsync(toPlayNow);
+				await ctx.DeleteResponseAsync();
+				return ;
+				// embed.WithDescription("Track replayed.");
+			}
+			else
+				embed.WithDescription("Coundn't replay (Probably no tracks left).");
+			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed: embed));
+		}
+		[SlashCommand("shuffle", "Shuffles the queue.")]
+		public async Task Shuffle(InteractionContext ctx) {
+			await ctx.DeferAsync();
+		// 0. Initialization
+			var testObj = await this.PreChecksPass(ctx, 0);
+			if (testObj.Item1 == false)
+				return ;
+			t_tools	tools = testObj.Item2;
+
+		// 1. Core
+			var	embed = new DiscordEmbedBuilder();
+			if (tools.queue.ShuffleTracks()) {
+				embed.WithColor(DiscordColor.Aquamarine);
+				embed.WithDescription("Shuffed Succesfully!");
+			}
+			else {
+				embed.WithColor(DiscordColor.Red);
+				embed.WithDescription("Failed Shuffling!");
+			}
 			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed: embed));
 		}
 
