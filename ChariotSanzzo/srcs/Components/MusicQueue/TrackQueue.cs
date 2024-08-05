@@ -49,6 +49,8 @@ namespace ChariotSanzzo.Components.MusicQueue {
 		public void	SetLoop(int type) {
 			if (type >= 0 && type <= 2)
 				this._loop = type;
+			else
+				this._loop = 0;
 		}
 		public bool	GoNextIndex() {
 			if (this._currentIndex >= this._length - 1) {
@@ -149,13 +151,27 @@ namespace ChariotSanzzo.Components.MusicQueue {
 		// 0. Embed Construction
 			var	embed = new DiscordEmbedBuilder();
 			string description = "";
-			if (track.Uri.ToString().Contains("youtube.com") == true) {
-				embed.WithColor(DiscordColor.Red);
-				description += "<:YoutubeIcon:1269684532777320448> ";
-				embed.WithImageUrl($"https://img.youtube.com/vi/{track.Uri.ToString().Substring(32)}/maxresdefault.jpg");
+			Console.WriteLine($"[{track.Uri.Host}]");
+			switch (track.Uri.Host) {
+				case ("www.youtube.com"):
+					embed.WithColor(DiscordColor.Red);
+					description += "<:YoutubeIcon:1269684532777320448> ";
+					embed.WithImageUrl($"https://img.youtube.com/vi/{track.Identifier}/maxresdefault.jpg");
+				break;
+				case ("soundcloud.com"):
+					embed.WithColor(DiscordColor.Orange);
+					description += "<:SoundCloudIcon:1269685534737825822> ";
+					embed.WithImageUrl(track.Uri.ToString());
+				break;
+				case ("open.spotify.com"):
+					embed.WithColor(DiscordColor.DarkGreen);
+					description += "<:SpotifyIcon:1269685522528211004> ";
+					embed.WithImageUrl(track.Uri.ToString());
+				break;
+				default:
+					embed.WithColor(DiscordColor.Purple);
+				break;
 			}
-			else
-				embed.WithColor(DiscordColor.Purple);
 			description += $"_**Now Playing:**_ [{track.Title}]({track.Uri})\n" +
 										$"_**Author:**_ {track.Author}\n" +
 										$"_**Length:**_ {track.Length}\t_**Index:**_ ` {this._currentIndex + 1} `\n";
@@ -166,11 +182,18 @@ namespace ChariotSanzzo.Components.MusicQueue {
 			message.AddEmbed(embed: embed);
 			if (this._advanConfig == true) {
 				message.AddComponents(
+					((this._loop == 0)
+						? (new DiscordButtonComponent(DSharpPlus.ButtonStyle.Secondary, "MusicLoopButton", null, false, new DiscordComponentEmoji(1269878155443699764)))
+						: (((this._loop == 1)
+							? (new DiscordButtonComponent(DSharpPlus.ButtonStyle.Success, "MusicLoopButton", null, false, new DiscordComponentEmoji(1269881536552108135)))
+							: (new DiscordButtonComponent(DSharpPlus.ButtonStyle.Danger, "MusicLoopButton", null, false, new DiscordComponentEmoji(1269878136804347965)))
+						))),
 					new DiscordButtonComponent(DSharpPlus.ButtonStyle.Primary, "MusicPreviousTrackButton", null, false, new DiscordComponentEmoji(1269698996830605342)),
 					((this._pauseState == false)
-					? (new DiscordButtonComponent(DSharpPlus.ButtonStyle.Success, "MusicPlayPauseButton", null, false, new DiscordComponentEmoji(1269697085834395738)))
-					: (new DiscordButtonComponent(DSharpPlus.ButtonStyle.Secondary, "MusicPlayPauseButton", null, false, new DiscordComponentEmoji(1269697085834395738)))),
-					new DiscordButtonComponent(DSharpPlus.ButtonStyle.Primary, "MusicNextTrackButton", null, false, new DiscordComponentEmoji(1269698987259330702)));
+						? (new DiscordButtonComponent(DSharpPlus.ButtonStyle.Success, "MusicPlayPauseButton", null, false, new DiscordComponentEmoji(1269697085834395738)))
+						: (new DiscordButtonComponent(DSharpPlus.ButtonStyle.Secondary, "MusicPlayPauseButton", null, false, new DiscordComponentEmoji(1269697085834395738)))),
+					new DiscordButtonComponent(DSharpPlus.ButtonStyle.Primary, "MusicNextTrackButton", null, false, new DiscordComponentEmoji(1269698987259330702)),
+					new DiscordButtonComponent(DSharpPlus.ButtonStyle.Secondary, "MusicShuffleButton", null, false, new DiscordComponentEmoji(1263663980497604659)));
 			}
 			return (message);
 		}
@@ -182,14 +205,13 @@ namespace ChariotSanzzo.Components.MusicQueue {
 		}
 
 		// 5. Shuffle
-		public bool	ShuffleTracks() {
+		public async Task<bool>	ShuffleTracks() {
 			if (this._tracks.Length == 0)
 				return (false);
-			var	temp = this._tracks[this._currentIndex].Uri;
 			TrackQueue.Shuffle(this._tracks);
-			for (int i = 0; i < this._tracks.Length; i++)
-				if (this._tracks[i].Uri == temp)
-					this._currentIndex = i;
+			var toPlayNow = await this.UseIndexTrackAsync(0);
+			if (toPlayNow != null)
+				await this._conn.PlayAsync(toPlayNow);
 			return (true);
 		}
 		private static void	Shuffle(LavalinkTrack[] tracks) {

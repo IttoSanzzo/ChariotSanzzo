@@ -136,7 +136,7 @@ namespace ChariotSanzzo.Commands.Slash {
 				embed.WithColor(DiscordColor.Red);
 				embed.WithDescription("Already Paused.");
 				await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed: embed));
-				await Task.Delay(1000 * 20);
+				await Task.Delay(1000 * 10);
 				await ctx.DeleteResponseAsync();
 				return ;
 			}
@@ -159,7 +159,7 @@ namespace ChariotSanzzo.Commands.Slash {
 						await tools.queue._pauseMss.DeleteAsync();
 					tools.queue.SetPauseMessage(null);
 					await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed: embed));
-					await Task.Delay(1000 * 60);
+					await Task.Delay(1000 * 10);
 					await ctx.DeleteResponseAsync();
 				break;
 			}
@@ -186,7 +186,7 @@ namespace ChariotSanzzo.Commands.Slash {
 				embed.WithDescription($"_**Volume:**_ Set to {volume}.");
 			}
 			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed: embed));
-			await Task.Delay(1000 * 60);
+			await Task.Delay(1000 * 20);
 			await ctx.DeleteResponseAsync();
 		}
 	
@@ -231,7 +231,7 @@ namespace ChariotSanzzo.Commands.Slash {
 			}
 			tools.queue.SetLoop((int)type);
 			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed: embed));
-			await Task.Delay(1000 * 60);
+			await Task.Delay(1000 * 10);
 			await ctx.DeleteResponseAsync();
 		}
 		[SlashCommand("skip", "Skips the currently playing track!")]
@@ -265,7 +265,7 @@ namespace ChariotSanzzo.Commands.Slash {
 			else
 				embed.WithDescription("Coundn't Skip (Probably no tracks left).");
 			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed: embed));
-			await Task.Delay(1000 * 60);
+			await Task.Delay(1000 * 10);
 			await ctx.DeleteResponseAsync();
 		}
 		[SlashCommand("previous", "Goes back to the previous track!")]
@@ -291,7 +291,7 @@ namespace ChariotSanzzo.Commands.Slash {
 			else
 				embed.WithDescription("Coundn't go back (Probably no tracks left).");
 			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed: embed));
-			await Task.Delay(1000 * 60);
+			await Task.Delay(1000 * 10);
 			await ctx.DeleteResponseAsync();
 		}
 		[SlashCommand("replay", "Replays the current track!")]
@@ -317,7 +317,7 @@ namespace ChariotSanzzo.Commands.Slash {
 			else
 				embed.WithDescription("Coundn't replay (Probably no tracks left).");
 			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed: embed));
-			await Task.Delay(1000 * 60);
+			await Task.Delay(1000 * 10);
 			await ctx.DeleteResponseAsync();
 		}
 		[SlashCommand("index", "Plays the track at the given index position!")]
@@ -351,7 +351,7 @@ namespace ChariotSanzzo.Commands.Slash {
 			else
 				embed.WithDescription("Coundn't replay (Probably no tracks left).");
 			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed: embed));
-			await Task.Delay(1000 * 60);
+			await Task.Delay(1000 * 10);
 			await ctx.DeleteResponseAsync();
 		}
 		[SlashCommand("shuffle", "Shuffles the queue.")]
@@ -365,7 +365,7 @@ namespace ChariotSanzzo.Commands.Slash {
 
 		// 1. Core
 			var	embed = new DiscordEmbedBuilder();
-			if (tools.queue.ShuffleTracks()) {
+			if (await tools.queue.ShuffleTracks()) {
 				embed.WithColor(DiscordColor.Aquamarine);
 				embed.WithDescription("Shuffed Succesfully!");
 			}
@@ -374,7 +374,7 @@ namespace ChariotSanzzo.Commands.Slash {
 				embed.WithDescription("Failed Shuffling!");
 			}
 			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed: embed));
-			await Task.Delay(1000 * 60);
+			await Task.Delay(1000 * 10);
 			await ctx.DeleteResponseAsync();
 		}
 

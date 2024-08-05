@@ -79,7 +79,7 @@ namespace ChariotSanzzo.Events {
 					else
 						embed.WithDescription("Coundn't Skip (Probably no tracks left).");
 					trashMss = await ctx.Channel.SendMessageAsync(embed: embed);
-					await Task.Delay(1000 * 20);
+					await Task.Delay(1000 * 10);
 					await trashMss.DeleteAsync();
 				break;
 				case ("MusicPreviousTrackButton"): // PreviousTrackButton
@@ -100,8 +100,27 @@ namespace ChariotSanzzo.Events {
 					trashMss = await ctx.Channel.SendMessageAsync(embed: embed);
 					if (toPlayNow != null)
 						await queue._conn.PlayAsync(toPlayNow);
-					await Task.Delay(1000 * 20);
+					await Task.Delay(1000 * 10);
 					await trashMss.DeleteAsync();
+				break;
+				case ("MusicLoopButton"): // MusicLoopButton
+					await ctx.Interaction.DeferAsync();
+					await ctx.Interaction.DeleteOriginalResponseAsync();
+				// 0. Initialization
+					queue = MusicCommands.QColle.GetQueueUnsafe((long)ctx.Guild.Id);
+					if (queue == null)
+						return ;
+					queue.SetLoop(queue._loop + 1);
+					await ctx.Message.ModifyAsync(queue.GenNowPlayingAsync(queue, queue._tracks[queue._currentIndex]));
+				break;
+				case ("MusicShuffleButton"):
+					await ctx.Interaction.DeferAsync();
+					await ctx.Interaction.DeleteOriginalResponseAsync();
+				// 0. Initialization
+					queue = MusicCommands.QColle.GetQueueUnsafe((long)ctx.Guild.Id);
+					if (queue == null)
+						return ;
+					await queue.ShuffleTracks();
 				break;
 				default:
 					return ;

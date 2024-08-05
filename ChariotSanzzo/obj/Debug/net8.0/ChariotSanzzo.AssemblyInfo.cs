@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ChariotSanzzo")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+af463bf2af81e43dc8e898da9cb59177a728e665")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4b9077b0ebb668f02c4cf497f757eb0d1876a4ab")]
 [assembly: System.Reflection.AssemblyProductAttribute("ChariotSanzzo")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ChariotSanzzo")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
