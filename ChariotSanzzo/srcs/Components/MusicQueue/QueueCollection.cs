@@ -47,6 +47,13 @@ namespace ChariotSanzzo.Components.MusicQueue {
 			Console.WriteLine($"GetExit {this._length}\n\n");
 			return (this._queues[this._length - 1]);
 		}
+		public TrackQueue?	GetQueueUnsafe(long serverId) {
+			Console.WriteLine("GetEntered");
+			for (int i = 0; i < this._length; i++)
+				if (this._queues[i]._serverId == serverId)
+					return (this._queues[i]);
+			return (null);
+		}
 
 	// 3. Utils
 		public bool QueueExist(long serverId) {

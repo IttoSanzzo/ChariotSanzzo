@@ -6,7 +6,8 @@ namespace ChariotSanzzo.Events {
 	public static class	EventsInit{
 		public static void EventsInitRun(this DiscordClient client) {
 			client.Ready += Client_Ready;
-			client.MessageCreated += STPDiceRoller.DiceRoller;
+			client.MessageCreated += Events.STPDiceRoller.DiceRoller;
+			client.ComponentInteractionCreated += Events.Music.MusicInterectionButton;
 		}
 		public static void EventsInitRun(this CommandsNextExtension command) {
 			command.CommandErrored += STPCommandErrored.CmdErrTask;

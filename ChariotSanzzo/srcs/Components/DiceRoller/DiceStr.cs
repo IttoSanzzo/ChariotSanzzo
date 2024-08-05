@@ -60,7 +60,7 @@ namespace ChariotSanzzo.Components.DiceRoller {
 			this._token[(short)TokenI.Aa] = this._lStr.StrCountChrFirstIndex("Aa");
 			if (this._token[(short)TokenI.Aa][0] > 1)
 				return (false);
-			this._token[(short)TokenI.Math] = this._lStr.StrCountChrFirstIndex("+-*/");
+			this._token[(short)TokenI.Math] = this._lStr.StrCountChrFirstIndex("-+*/");
 			if (this._token[(short)TokenI.Math][0] > 1)
 				this._token[(short)TokenI.Math][0] = 1;
 			return (true);
@@ -123,7 +123,7 @@ namespace ChariotSanzzo.Components.DiceRoller {
 			}
 			if (this._token[(short)TokenI.Math][0] == 1) {
 				this._dSet._dEquat = new string(this._lStr);
-				if (this._dSet._dEquat.StrLimitChrSetOrDigit("+=*/") == false)
+				if (this._dSet._dEquat.StrLimitChrSetOrDigit("+-*/") == false)
 					this._sCheck = false;
 			}
 			else

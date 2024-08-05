@@ -9,10 +9,15 @@ namespace ChariotSanzzo.Components.MusicQueue {
 		public LavalinkGuildConnection	_conn			{get; private set;}
 		public DiscordChannel?			_chat			{get; private set;} = null;
 		public long						_serverId		{get; private set;}
+		public bool						_pauseState		{get; private set;} = false;
 		public int						_length			{get; private set;} = 0;
 		public int						_loop			{get; private set;} = 0;
 		public int						_currentIndex	{get; private set;} = -1;
 		public LavalinkTrack[]			_tracks			{get; private set;} = new LavalinkTrack[0];
+		private bool					_cleanConfig	{get; set;} = true;
+		private bool					_advanConfig	{get; set;} = true;
+		public DiscordMessage?			_pauseMss		{get; private set;} = null;
+		public DiscordMessage?			_lastPlayerMss	{get; private set;} = null;
 
 	// 1. Constructors
 		~TrackQueue() {
@@ -60,31 +65,45 @@ namespace ChariotSanzzo.Components.MusicQueue {
 				this._currentIndex = 0;
 			return (true);
 		}
+		public void SetPauseMessage(DiscordMessage? pauseMss) {
+			this._pauseMss = pauseMss;
+		}
+		public void SetLastPlayerMessage(DiscordMessage? lastPlayerMss) {
+			this._lastPlayerMss = lastPlayerMss;
+		}
+		public bool SetPauseState(bool state) {
+			this._pauseState = state;
+			return (state);
+		}
 	// 3. Gets
-		public LavalinkTrack?	UseNextTrack() {
+		public async Task<LavalinkTrack?>	UseNextTrackAsync() {
 			Console.WriteLine($"BeforeUse lenght {this._length}");
 			if (this.GoNextIndex() == false)
 				return (null);
 			Console.WriteLine($"LaterUse Index {this._currentIndex}");
-			this.NowPlaying(this, this._tracks[this._currentIndex]);
+			await this.NowPlayingAsync(this, this._tracks[this._currentIndex]);
+			this._pauseState = false;
 			return (this._tracks[this._currentIndex]);
 		}
-		public LavalinkTrack?	UsePreviousTrack() {
+		public async Task<LavalinkTrack?>	UsePreviousTrackAsync() {
 			this._currentIndex -= 1;
 			if (this._currentIndex < 0)
 				this._currentIndex = this._length - 1;
-			this.NowPlaying(this, this._tracks[this._currentIndex]);
+			await this.NowPlayingAsync(this, this._tracks[this._currentIndex]);
+			this._pauseState = false;
 			return (this._tracks[this._currentIndex]);
 		}
-		public LavalinkTrack?	UseCurrentTrack() {
-			this.NowPlaying(this, this._tracks[this._currentIndex]);
+		public async Task<LavalinkTrack?>	UseCurrentTrackAsync() {
+			await this.NowPlayingAsync(this, this._tracks[this._currentIndex]);
+			this._pauseState = false;
 			return (this._tracks[this._currentIndex]);
 		}
-		public LavalinkTrack?	UseIndexTrack(int index) {
+		public async Task<LavalinkTrack?>	UseIndexTrackAsync(int index) {
 			if (index < 0 || index > this._tracks.Length - 1)
 				return (null);
 			this._currentIndex = index;
-			this.NowPlaying(this, this._tracks[this._currentIndex]);
+			await this.NowPlayingAsync(this, this._tracks[this._currentIndex]);
+			this._pauseState = false;
 			return (this._tracks[this._currentIndex]);
 		}
 		public DiscordEmbed		GetQueueEmbed() {
@@ -115,22 +134,51 @@ namespace ChariotSanzzo.Components.MusicQueue {
 			Console.WriteLine($"{this._length} lenght: Track does not already exist!");
 			return (false);
 		}
-
-		public Task NowPlaying(TrackQueue queue, LavalinkTrack track) {
+		public async Task NowPlayingAsync(TrackQueue queue, LavalinkTrack track) {
 			if (queue._loop == 1)
-				return (Task.CompletedTask);
-			var	embed = new DiscordEmbedBuilder() {
-				Color = DiscordColor.Purple,
-				Description = $"_**Now Playing:**_ {track.Title}\n" +
-										$"_**Author:**_ {track.Author}\n" +
-										$"_**Length:**_ {track.Length}\t_**Index:**_ ` {this._currentIndex + 1} `\n" +
-										$"_**URL:**_ {track.Uri}"
-			};
-			if (track.Uri.ToString().Contains("youtube.com") == true)
+				return ;
+			if (this._cleanConfig == true && this._lastPlayerMss != null)
+				await this._lastPlayerMss.DeleteAsync();
+			if (queue._chat != null){
+				var message = GenNowPlayingAsync(queue, this._tracks[this._currentIndex]);
+				if (message != null)
+					this._lastPlayerMss = await queue._chat.SendMessageAsync(message);
+			}
+		}
+		public DiscordMessageBuilder?	GenNowPlayingAsync(TrackQueue queue, LavalinkTrack track) {
+		// 0. Embed Construction
+			var	embed = new DiscordEmbedBuilder();
+			string description = "";
+			if (track.Uri.ToString().Contains("youtube.com") == true) {
+				embed.WithColor(DiscordColor.Red);
+				description += "<:YoutubeIcon:1269684532777320448> ";
 				embed.WithImageUrl($"https://img.youtube.com/vi/{track.Uri.ToString().Substring(32)}/maxresdefault.jpg");
-			if (queue._chat != null)
-				queue._chat.SendMessageAsync(embed: embed);
-			return (Task.CompletedTask);
+			}
+			else
+				embed.WithColor(DiscordColor.Purple);
+			description += $"_**Now Playing:**_ [{track.Title}]({track.Uri})\n" +
+										$"_**Author:**_ {track.Author}\n" +
+										$"_**Length:**_ {track.Length}\t_**Index:**_ ` {this._currentIndex + 1} `\n";
+			embed.WithDescription(description);
+		
+		// 2. Message Construction
+			var message = new DiscordMessageBuilder();
+			message.AddEmbed(embed: embed);
+			if (this._advanConfig == true) {
+				message.AddComponents(
+					new DiscordButtonComponent(DSharpPlus.ButtonStyle.Primary, "MusicPreviousTrackButton", null, false, new DiscordComponentEmoji(1269698996830605342)),
+					((this._pauseState == false)
+					? (new DiscordButtonComponent(DSharpPlus.ButtonStyle.Success, "MusicPlayPauseButton", null, false, new DiscordComponentEmoji(1269697085834395738)))
+					: (new DiscordButtonComponent(DSharpPlus.ButtonStyle.Secondary, "MusicPlayPauseButton", null, false, new DiscordComponentEmoji(1269697085834395738)))),
+					new DiscordButtonComponent(DSharpPlus.ButtonStyle.Primary, "MusicNextTrackButton", null, false, new DiscordComponentEmoji(1269698987259330702)));
+			}
+			return (message);
+		}
+		public int SwitchPause() {
+			this._pauseState = !this._pauseState;
+			if (this._pauseState == true)
+				return (1);
+			return (0);
 		}
 
 		// 5. Shuffle

@@ -22,7 +22,7 @@ namespace ChariotSanzzo.Commands.Slash {
 
 	// 1. Main
 		[SlashCommand("play", "Enters the voice channel and starts to play a song!")]
-		public async Task Play(InteractionContext ctx, [Option("SearchQuery", "Name or link of the desired music.")] string query) {
+		public async Task Play(InteractionContext ctx, [Option("SearchQuery", "Name or link of the desired music.")] string query, [Choice("Youtube", 0)][Choice("Soundcloud", 1)][Choice("Plain", 2)][Option("PLataform", "Which plataform should be used as search engine. (Defaults to Youtube)")] long plataform = 0) {
 			await ctx.DeferAsync();
 			// 0. Initialization
 			var testObj = await this.PreChecksPass(ctx, 0);
@@ -35,7 +35,17 @@ namespace ChariotSanzzo.Commands.Slash {
 			if (query.Contains("https://") == true)
 				searchQuery = await tools.node.Rest.GetTracksAsync(query, LavalinkSearchType.Plain);
 			else
-				searchQuery = await tools.node.Rest.GetTracksAsync(query, LavalinkSearchType.Youtube);
+				switch ((int)plataform) {
+					case (0):
+						searchQuery = await tools.node.Rest.GetTracksAsync(query, LavalinkSearchType.Youtube);
+					break;
+					case (1):
+						searchQuery = await tools.node.Rest.GetTracksAsync(query, LavalinkSearchType.SoundCloud);
+					break;
+					default:
+						searchQuery = await tools.node.Rest.GetTracksAsync(query, LavalinkSearchType.Plain);
+					break;
+				}
 			if (searchQuery.LoadResultType == LavalinkLoadResultType.NoMatches || searchQuery.LoadResultType == LavalinkLoadResultType.LoadFailed) {
 				await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Failed to find proper music using the given query."));
 				return ;
@@ -65,7 +75,7 @@ namespace ChariotSanzzo.Commands.Slash {
 
 			// 4. Cores
 			if (tools.conn.CurrentState.CurrentTrack == null) {
-				var	toPlayNow = tools.queue.UseNextTrack();
+				var	toPlayNow = await tools.queue.UseNextTrackAsync();
 				await tools.queue._conn.PlayAsync(toPlayNow);
 			}
 			else if (musicTracks.Length == 1) {
@@ -102,11 +112,13 @@ namespace ChariotSanzzo.Commands.Slash {
 
 			// 3. Respond
 			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed: embed));
+			await Task.Delay(1000 * 60);
+			await ctx.DeleteResponseAsync();
 		}
 
 	// 2. Miscs
-		[SlashCommand("pause", "Pauses the music.")]
-		public async Task Pause(InteractionContext ctx) {
+		[SlashCommand("pause", "Switches the track's pause state.")]
+		public async Task Pause(InteractionContext ctx, [Choice("Switch", 2)][Choice("Pause", 1)][Choice("Resume", 0)][Option("Action", "What should happen. (Defaults to Switch)")] long type = 2) {
 			await ctx.DeferAsync();
 			// 0. Initialization
 			var testObj = await this.PreChecksPass(ctx, 2);
@@ -114,36 +126,43 @@ namespace ChariotSanzzo.Commands.Slash {
 				return ;
 			t_tools	tools = testObj.Item2;
 
-			// 1. Core
-			await tools.queue._conn.PauseAsync();
-
-			// 2. Embed Return
+			// 1. Embed Preparation
 			var	embed = new DiscordEmbedBuilder() {
-				Color = DiscordColor.Purple,
-				Title = "_**Music Paused!**_",
+				Color = DiscordColor.DarkGray,
 				Description = $"_**Current Track:**_ {tools.conn.CurrentState.CurrentTrack.Title}"
 			};
-			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed: embed));
-		}
-		[SlashCommand("resume", "Resumes the paused music.")]
-		public async Task Resume(InteractionContext ctx) {
-			await ctx.DeferAsync();
-			// 0. Initialization
-			var testObj = await this.PreChecksPass(ctx, 3);
-			if (testObj.Item1 == false)
+			// 2. Checks
+			if (tools.queue._pauseState == true && type == 1) {
+				embed.WithColor(DiscordColor.Red);
+				embed.WithDescription("Already Paused.");
+				await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed: embed));
+				await Task.Delay(1000 * 20);
+				await ctx.DeleteResponseAsync();
 				return ;
-			t_tools	tools = testObj.Item2;
-
-			// 1. Core
-			await tools.queue._conn.ResumeAsync();
-
-			// 2. Embed Return
-			var	embed = new DiscordEmbedBuilder() {
-				Color = DiscordColor.Purple,
-				Title = "_**Music Resumed!**_",
-				Description = $"_**Current Track:**_ {tools.conn.CurrentState.CurrentTrack.Title}"
-			};
-			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed: embed));
+			}
+			if (type == 2)
+				type = tools.queue.SwitchPause();
+			// 3. Core
+			var	resumeButton = new DiscordButtonComponent(DSharpPlus.ButtonStyle.Success, "MusicPlayPauseButton", "Resume Track", false, new DiscordComponentEmoji(1269696547046555688));
+			switch ((int)type) {
+				case (1): // Pause
+					await tools.queue._conn.PauseAsync();
+					embed.WithTitle("_**Music Paused!**_");
+					tools.queue.SetPauseState(true);
+					tools.queue.SetPauseMessage(await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed: embed).AddComponents(resumeButton)));
+				break;
+				case (0): // Resume
+					await tools.queue._conn.ResumeAsync();
+					embed.WithTitle("_**Music Resumed!**_");
+					tools.queue.SetPauseState(false);
+					if (tools.queue._pauseMss != null)
+						await tools.queue._pauseMss.DeleteAsync();
+					tools.queue.SetPauseMessage(null);
+					await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed: embed));
+					await Task.Delay(1000 * 60);
+					await ctx.DeleteResponseAsync();
+				break;
+			}
 		}
 		[SlashCommand("volume", "Tweakes the volume of the music.")]
 		public async Task Volume(InteractionContext ctx, [Option("Value", "Changes the playback volume to the especified. (Default = 100)")] double volume = 100) {
@@ -167,6 +186,8 @@ namespace ChariotSanzzo.Commands.Slash {
 				embed.WithDescription($"_**Volume:**_ Set to {volume}.");
 			}
 			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed: embed));
+			await Task.Delay(1000 * 60);
+			await ctx.DeleteResponseAsync();
 		}
 	
 	// 3. Queue
@@ -181,6 +202,8 @@ namespace ChariotSanzzo.Commands.Slash {
 
 		// 1. Prepare Embed
 			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(tools.queue.GetQueueEmbed()));
+			await Task.Delay(1000 * 60 * 5);
+			await ctx.DeleteResponseAsync();
 		}
 		[SlashCommand("loop", "Changes the loop setting! (Defaults to Loop Track)")]
 		public async Task Loop(InteractionContext ctx, [Choice("none", 0)][Choice("track", 1)][Choice("queue", 2)][Option("Type", "What should be looped.")] long type = 1) {
@@ -208,6 +231,8 @@ namespace ChariotSanzzo.Commands.Slash {
 			}
 			tools.queue.SetLoop((int)type);
 			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed: embed));
+			await Task.Delay(1000 * 60);
+			await ctx.DeleteResponseAsync();
 		}
 		[SlashCommand("skip", "Skips the currently playing track!")]
 		public async Task Skip(InteractionContext ctx, [Option("count", "How many tracks should bem skipped. (Defatults to 1)")] long count = 1) {
@@ -232,7 +257,7 @@ namespace ChariotSanzzo.Commands.Slash {
 		// 1. Core
 			for (int i = 0; i < count - 1; i++)
 				tools.queue.GoNextIndex();
-			var	toPlayNow = tools.queue.UseNextTrack();
+			var	toPlayNow = await tools.queue.UseNextTrackAsync();
 			if (toPlayNow != null) {
 				await tools.queue._conn.PlayAsync(toPlayNow);
 				embed.WithDescription("Track Skipped.");
@@ -240,6 +265,8 @@ namespace ChariotSanzzo.Commands.Slash {
 			else
 				embed.WithDescription("Coundn't Skip (Probably no tracks left).");
 			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed: embed));
+			await Task.Delay(1000 * 60);
+			await ctx.DeleteResponseAsync();
 		}
 		[SlashCommand("previous", "Goes back to the previous track!")]
 		public async Task Previous(InteractionContext ctx) {
@@ -256,7 +283,7 @@ namespace ChariotSanzzo.Commands.Slash {
 			};
 
 		// 1. Core
-			var	toPlayNow = tools.queue.UsePreviousTrack();
+			var	toPlayNow = await tools.queue.UsePreviousTrackAsync();
 			if (toPlayNow != null) {
 				await tools.queue._conn.PlayAsync(toPlayNow);
 				embed.WithDescription("Track set back.");
@@ -264,6 +291,8 @@ namespace ChariotSanzzo.Commands.Slash {
 			else
 				embed.WithDescription("Coundn't go back (Probably no tracks left).");
 			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed: embed));
+			await Task.Delay(1000 * 60);
+			await ctx.DeleteResponseAsync();
 		}
 		[SlashCommand("replay", "Replays the current track!")]
 		public async Task Replay(InteractionContext ctx) {
@@ -280,7 +309,7 @@ namespace ChariotSanzzo.Commands.Slash {
 			};
 
 		// 1. Core
-			var	toPlayNow = tools.queue.UseCurrentTrack();
+			var	toPlayNow = await tools.queue.UseCurrentTrackAsync();
 			if (toPlayNow != null) {
 				await tools.queue._conn.PlayAsync(toPlayNow);
 				embed.WithDescription("Track replayed.");
@@ -288,6 +317,8 @@ namespace ChariotSanzzo.Commands.Slash {
 			else
 				embed.WithDescription("Coundn't replay (Probably no tracks left).");
 			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed: embed));
+			await Task.Delay(1000 * 60);
+			await ctx.DeleteResponseAsync();
 		}
 		[SlashCommand("index", "Plays the track at the given index position!")]
 		public async Task Index(InteractionContext ctx, [Option("index", "The track's position in the queue.")] long index) {
@@ -310,7 +341,7 @@ namespace ChariotSanzzo.Commands.Slash {
 				return ;
 			}
 		// 1. Core
-			var	toPlayNow = tools.queue.UseIndexTrack((int)index);
+			var	toPlayNow = await tools.queue.UseIndexTrackAsync((int)index);
 			if (toPlayNow != null) {
 				await tools.queue._conn.PlayAsync(toPlayNow);
 				await ctx.DeleteResponseAsync();
@@ -320,6 +351,8 @@ namespace ChariotSanzzo.Commands.Slash {
 			else
 				embed.WithDescription("Coundn't replay (Probably no tracks left).");
 			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed: embed));
+			await Task.Delay(1000 * 60);
+			await ctx.DeleteResponseAsync();
 		}
 		[SlashCommand("shuffle", "Shuffles the queue.")]
 		public async Task Shuffle(InteractionContext ctx) {
@@ -341,6 +374,8 @@ namespace ChariotSanzzo.Commands.Slash {
 				embed.WithDescription("Failed Shuffling!");
 			}
 			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed: embed));
+			await Task.Delay(1000 * 60);
+			await ctx.DeleteResponseAsync();
 		}
 
 	// 4. Checks
