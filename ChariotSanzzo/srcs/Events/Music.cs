@@ -49,12 +49,12 @@ namespace ChariotSanzzo.Events {
 						case (false):
 							await queue._conn.PauseAsync();
 							queue.SetPauseState(true);
-							await ctx.Message.ModifyAsync(queue.GenNowPlayingAsync(queue, queue._tracks[queue._currentIndex]));
+							await ctx.Message.ModifyAsync(await queue.GenNowPlayingAsync(queue, queue._tracks[queue._currentIndex]));
 						break;
 						case (true):
 							await queue._conn.ResumeAsync();
 							queue.SetPauseState(false);
-							await ctx.Message.ModifyAsync(queue.GenNowPlayingAsync(queue, queue._tracks[queue._currentIndex]));
+							await ctx.Message.ModifyAsync(await queue.GenNowPlayingAsync(queue, queue._tracks[queue._currentIndex]));
 							if (queue._pauseMss != null)
 								await queue._pauseMss.DeleteAsync();
 							queue.SetPauseMessage(null);
@@ -111,7 +111,7 @@ namespace ChariotSanzzo.Events {
 					if (queue == null)
 						return ;
 					queue.SetLoop(queue._loop + 1);
-					await ctx.Message.ModifyAsync(queue.GenNowPlayingAsync(queue, queue._tracks[queue._currentIndex]));
+					await ctx.Message.ModifyAsync(await queue.GenNowPlayingAsync(queue, queue._tracks[queue._currentIndex]));
 				break;
 				case ("MusicShuffleButton"):
 					await ctx.Interaction.DeferAsync();

@@ -6,13 +6,19 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
+using ChariotSanzzo.Components.SpotifyApi;
 
 namespace ChariotSanzzo {
 	internal class Program {
 		public static DiscordClient? Client {get; set;}
 		public static CommandsNextExtension? Commands {get; set;}
 		public static DBConfig DbConfigSet {get; set;} = new DBConfig();
+		public static SpotifyConn	SpotifyConn {get; set;} = new SpotifyConn();
 		static async Task Main(string[] args) {
+			// 0. TESTING GROUNDS
+			SpotifyConn.RunInit();
+			// Console.WriteLine(await SpotifyConn.GetArtWorkAsync(new Uri("https://open.spotify.com/intl-pt/track/3UpHW2joNoKO2HfEv8Mchp")));
+
 			// 1. Importing Json configs and starting
 			var config = new ConfigReader();
 			Console.ForegroundColor = ConsoleColor.Blue;

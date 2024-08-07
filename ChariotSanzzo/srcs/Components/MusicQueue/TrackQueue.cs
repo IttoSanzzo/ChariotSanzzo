@@ -108,7 +108,7 @@ namespace ChariotSanzzo.Components.MusicQueue {
 			this._pauseState = false;
 			return (this._tracks[this._currentIndex]);
 		}
-		public DiscordEmbed		GetQueueEmbed() {
+		public DiscordEmbed					GetQueueEmbed() {
 			var	embed = new DiscordEmbedBuilder();
 			if (this._tracks.Length == 0) {
 				embed.WithColor(DiscordColor.Gray);
@@ -127,6 +127,22 @@ namespace ChariotSanzzo.Components.MusicQueue {
 			embed.WithDescription(description);
 			return (embed.Build());
 		}
+		public async Task<string>			GetTrackArtWorkAsync(int index) {
+			string?	artWorkLink = null;
+			switch (this._tracks[index].Uri.Host) {
+				case ("www.youtube.com"):
+					artWorkLink = $"https://img.youtube.com/vi/{this._tracks[index].Identifier}/maxresdefault.jpg";
+				break;
+				case ("soundcloud.com"):
+				break;
+				case ("open.spotify.com"):
+					artWorkLink = await Program.SpotifyConn.GetArtWorkAsync(this._tracks[index].Uri);
+				break;
+			}
+			if (artWorkLink == null)
+				return ("https://i.redd.it/dtljzwihuh861.jpg");
+			return (artWorkLink);
+		}
 
 	// 4. Utils
 		public bool TrackExist(LavalinkTrack track) {
@@ -142,36 +158,33 @@ namespace ChariotSanzzo.Components.MusicQueue {
 			if (this._cleanConfig == true && this._lastPlayerMss != null)
 				await this._lastPlayerMss.DeleteAsync();
 			if (queue._chat != null){
-				var message = GenNowPlayingAsync(queue, this._tracks[this._currentIndex]);
+				var message = await GenNowPlayingAsync(queue, this._tracks[this._currentIndex]);
 				if (message != null)
 					this._lastPlayerMss = await queue._chat.SendMessageAsync(message);
 			}
 		}
-		public DiscordMessageBuilder?	GenNowPlayingAsync(TrackQueue queue, LavalinkTrack track) {
+		public async Task<DiscordMessageBuilder?>	GenNowPlayingAsync(TrackQueue queue, LavalinkTrack track) {
 		// 0. Embed Construction
 			var	embed = new DiscordEmbedBuilder();
 			string description = "";
-			Console.WriteLine($"[{track.Uri.Host}]");
 			switch (track.Uri.Host) {
 				case ("www.youtube.com"):
 					embed.WithColor(DiscordColor.Red);
 					description += "<:YoutubeIcon:1269684532777320448> ";
-					embed.WithImageUrl($"https://img.youtube.com/vi/{track.Identifier}/maxresdefault.jpg");
 				break;
 				case ("soundcloud.com"):
 					embed.WithColor(DiscordColor.Orange);
 					description += "<:SoundCloudIcon:1269685534737825822> ";
-					embed.WithImageUrl(track.Uri.ToString());
 				break;
 				case ("open.spotify.com"):
 					embed.WithColor(DiscordColor.DarkGreen);
 					description += "<:SpotifyIcon:1269685522528211004> ";
-					embed.WithImageUrl(track.Uri.ToString());
 				break;
 				default:
 					embed.WithColor(DiscordColor.Purple);
 				break;
 			}
+			embed.WithImageUrl(await this.GetTrackArtWorkAsync(this._currentIndex));
 			description += $"_**Now Playing:**_ [{track.Title}]({track.Uri})\n" +
 										$"_**Author:**_ {track.Author}\n" +
 										$"_**Length:**_ {track.Length}\t_**Index:**_ ` {this._currentIndex + 1} `\n";
