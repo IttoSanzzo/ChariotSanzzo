@@ -13,18 +13,16 @@ namespace ChariotSanzzo.Components.MusicQueue {
 		}
 
 	// 2. Utils
-		private void			CreateQueue(long serverId, LavalinkGuildConnection conn, DiscordChannel? chat) {
-			Console.WriteLine($"CreateEntered {this._length}");
+		public void			CreateQueue(long serverId, LavalinkGuildConnection conn, DiscordChannel? chat) {
 			if (QueueExist(serverId) == true)
 				return ;
 			TrackQueue[] temp = new TrackQueue[this._length + 1];
 			int	i = -1;
 			while (++i < this._length)
 				temp[i] = this._queues[i];
-			temp[i] = new TrackQueue(serverId, conn, chat);
+			temp[i] = new TrackQueue(serverId, conn, chat, this);
 			this._queues = temp;
 			this._length += 1;
-			Console.WriteLine($"CreateExit {this._length}");
 		}
 		public void			DropQueue(long serverId) {
 			if (QueueExist(serverId) == false)
@@ -36,19 +34,15 @@ namespace ChariotSanzzo.Components.MusicQueue {
 					temp[i] = this._queues[i];
 			this._queues = temp;
 			this._length -= 1;
-			Console.WriteLine($"DropExit {this._length}");
 		}
 		public TrackQueue	GetQueue(long serverId, LavalinkGuildConnection conn, DiscordChannel? chat) {
-			Console.WriteLine("GetEntered");
 			for (int i = 0; i < this._length; i++)
 				if (this._queues[i]._serverId == serverId)
 					return (this._queues[i]);
 			this.CreateQueue(serverId, conn, chat);
-			Console.WriteLine($"GetExit {this._length}\n\n");
 			return (this._queues[this._length - 1]);
 		}
 		public TrackQueue?	GetQueueUnsafe(long serverId) {
-			Console.WriteLine("GetEntered");
 			for (int i = 0; i < this._length; i++)
 				if (this._queues[i]._serverId == serverId)
 					return (this._queues[i]);
@@ -60,7 +54,6 @@ namespace ChariotSanzzo.Components.MusicQueue {
 			for (int i = 0; i < this._length; i++)
 				if (this._queues[i]._serverId == serverId)
 					return (true);
-			Console.WriteLine($"{this._length} lenght: Queue does not already exist!");
 			return (false);
 		}
 	}

@@ -1,5 +1,7 @@
 using System.Diagnostics;
 using System.Drawing;
+using System.Net;
+using System.Runtime.CompilerServices;
 using ChariotSanzzo.Commands.Slash;
 using ChariotSanzzo.Components.MusicQueue;
 using DSharpPlus;
@@ -8,6 +10,7 @@ using DSharpPlus.EventArgs;
 using DSharpPlus.Lavalink;
 using DSharpPlus.Lavalink.EventArgs;
 using DSharpPlus.SlashCommands;
+using Newtonsoft.Json.Linq;
 
 namespace ChariotSanzzo.Events {
 	public static class Music {
@@ -15,7 +18,9 @@ namespace ChariotSanzzo.Events {
 		public static async Task PlayNext(LavalinkGuildConnection conn, TrackFinishEventArgs ctx) {
 			if (ctx.Reason != TrackEndReason.Finished)
 				return ;
-			var	queue = MusicCommands.QColle.GetQueue((long)ctx.Player.Guild.Id, conn, null);
+			var	queue = MusicCommands.QColle.GetQueueUnsafe((long)ctx.Player.Guild.Id);
+			if (queue == null)
+				return ;
 			var	toPlayNow = await queue.UseNextTrackAsync();
 			if (toPlayNow == null) {
 				if (queue._chat != null) {
@@ -30,7 +35,18 @@ namespace ChariotSanzzo.Events {
 			await queue._conn.PlayAsync(toPlayNow);
 			return ;
 		}
-		
+		public static Task Disconnected(DiscordClient sender, VoiceStateUpdateEventArgs ctx) {
+			if (ctx.User.Id == 1070103829934260344 && ctx.After.Member.VoiceState == null)
+				MusicCommands.QColle.DropQueue((long)ctx.Before.Channel.Guild.Id);
+			return (Task.CompletedTask);
+		}
+		public static Task NewConn(LavalinkGuildConnection conn, GuildConnectionCreatedEventArgs ctx) {
+			Console.WriteLine("[CONNECTED!]");
+			conn.StopAsync();
+			MusicCommands.QColle.DropQueue((long)conn.Guild.Id);
+			return (Task.CompletedTask);
+		}
+
 		// 1. Button Events
 		public static async Task MusicInterectionButton(DiscordClient sender, ComponentInteractionCreateEventArgs ctx) {
 			TrackQueue?		queue = null;
@@ -49,12 +65,12 @@ namespace ChariotSanzzo.Events {
 						case (false):
 							await queue._conn.PauseAsync();
 							queue.SetPauseState(true);
-							await ctx.Message.ModifyAsync(await queue.GenNowPlayingAsync(queue, queue._tracks[queue._currentIndex]));
+							await ctx.Message.ModifyAsync(await queue.GenNowPlayingAsync());
 						break;
 						case (true):
 							await queue._conn.ResumeAsync();
 							queue.SetPauseState(false);
-							await ctx.Message.ModifyAsync(await queue.GenNowPlayingAsync(queue, queue._tracks[queue._currentIndex]));
+							await ctx.Message.ModifyAsync(await queue.GenNowPlayingAsync());
 							if (queue._pauseMss != null)
 								await queue._pauseMss.DeleteAsync();
 							queue.SetPauseMessage(null);
@@ -111,7 +127,7 @@ namespace ChariotSanzzo.Events {
 					if (queue == null)
 						return ;
 					queue.SetLoop(queue._loop + 1);
-					await ctx.Message.ModifyAsync(await queue.GenNowPlayingAsync(queue, queue._tracks[queue._currentIndex]));
+					await ctx.Message.ModifyAsync(await queue.GenNowPlayingAsync());
 				break;
 				case ("MusicShuffleButton"):
 					await ctx.Interaction.DeferAsync();
@@ -126,24 +142,5 @@ namespace ChariotSanzzo.Events {
 					return ;
 			}
 		}
-
-		/*
-		public static async Task NowPlaying(LavalinkGuildConnection conn, TrackStartEventArgs ctx) {
-			var	queue = MusicCommands.QColle.GetQueue((long)ctx.Player.Guild.Id, conn, null);
-			if (queue._loop == 1)
-				return ;
-			var	embed = new DiscordEmbedBuilder() {
-				Color = DiscordColor.Purple,
-				Description = $"_**Now Playing:**_ {ctx.Track.Title}\n" +
-										$"_**Length:**_ {ctx.Track.Length}\n" +
-										$"_**Author:**_ {ctx.Track.Author}\n" +
-										$"_**URL:**_ {ctx.Track.Uri}"
-			};
-			if (ctx.Track.Uri.ToString().Contains("youtube.com") == true)
-				embed.WithImageUrl($"https://img.youtube.com/vi/{ctx.Track.Uri.ToString().Substring(32)}/maxresdefault.jpg");
-			if (queue._chat != null)
-				await queue._chat.SendMessageAsync(embed: embed);
-		}
-		*/
 	}
 }

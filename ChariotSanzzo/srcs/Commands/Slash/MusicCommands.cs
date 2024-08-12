@@ -1,9 +1,12 @@
 using ChariotSanzzo.Components.MusicQueue;
+using ChariotSanzzo.Database;
 using ChariotSanzzo.Events;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.Lavalink;
 using DSharpPlus.SlashCommands;
+using STPlib;
 
 namespace ChariotSanzzo.Commands.Slash {
 	// -1. Struct
@@ -17,32 +20,42 @@ namespace ChariotSanzzo.Commands.Slash {
 
 	[SlashCommandGroup("Music", "General Music Slash Commands.")]
 	public class MusicCommands : ApplicationCommandModule {
-	// 0. Member Variables
-		public static QueueCollection	QColle {get; set;} = new QueueCollection();
+	// -1. Member Variables
+		public static QueueCollection			QColle		{get; set;} = new QueueCollection();
+		private static LavalinkExtension		_llInstance	{get; set;} = Program.Client.GetLavalink();
+		private static LavalinkNodeConnection	_node		{get; set;} = _llInstance.ConnectedNodes.Values.First();
+
+	// 0. Constructor
+	static MusicCommands() {
+		MusicCommands._node.GuildConnectionCreated += Music.NewConn;
+		// MusicCommands._node.GuildConnectionRemoved += Music.Disconnected;
+		if (Program.Client != null)
+			Program.Client.VoiceStateUpdated += Music.Disconnected;
+	}
 
 	// 1. Main
 		[SlashCommand("play", "Enters the voice channel and starts to play a song!")]
 		public async Task Play(InteractionContext ctx, [Option("SearchQuery", "Name or link of the desired music.")] string query, [Choice("Youtube", 0)][Choice("Soundcloud", 1)][Choice("Plain", 2)][Option("PLataform", "Which plataform should be used as search engine. (Defaults to Youtube)")] long plataform = 0) {
 			await ctx.DeferAsync();
 			// 0. Initialization
-			var testObj = await this.PreChecksPass(ctx, 0);
+			var testObj = await MusicCommands.PreChecksPass(ctx, 0);
 			if (testObj.Item1 == false)
 				return ;
 			t_tools	tools = testObj.Item2;
 
 			// 1. Core
 			LavalinkLoadResult	searchQuery;
-			if (query.Contains("https://") == true)
+			if (query.Contains("https://") == true || query.Contains("http://") == true)
 				searchQuery = await tools.node.Rest.GetTracksAsync(query, LavalinkSearchType.Plain);
 			else
 				switch ((int)plataform) {
-					case (0):
+					case (0): // Youtube
 						searchQuery = await tools.node.Rest.GetTracksAsync(query, LavalinkSearchType.Youtube);
 					break;
-					case (1):
+					case (1): // Soundcloud
 						searchQuery = await tools.node.Rest.GetTracksAsync(query, LavalinkSearchType.SoundCloud);
 					break;
-					default:
+					default: // Plain
 						searchQuery = await tools.node.Rest.GetTracksAsync(query, LavalinkSearchType.Plain);
 					break;
 				}
@@ -52,57 +65,73 @@ namespace ChariotSanzzo.Commands.Slash {
 			}
 
 			// 2. Embed Initialization
-			var	embed = new DiscordEmbedBuilder() {
-				Color = DiscordColor.Purple,
-				Title = $"At {ctx.Member.VoiceState.Channel.Name}"
-			};
+			var embed = new DiscordEmbedBuilder();
+			embed.WithColor(DiscordColor.Purple);
 
 			// 3. Playing Track
 			LavalinkTrack[]	musicTracks;
-			if (query.Contains("youtube.com/playlist?") == true) {
+		// Search Playlists
+			if (query.Contains("youtube.com/playlist?") == true
+				|| query.Contains("spotify.com/playlist") == true
+				|| (query.Contains("soundcloud.com/") == true && query.Contains("/sets") == true)) {
 				musicTracks = searchQuery.Tracks.ToArray();
 				for (int i = 0; i < musicTracks.Length; i++)
-					tools.queue.AddTrackToQueue(musicTracks[i]);
+					tools.queue.AddTrackToQueue(new ChariotTrack(musicTracks[i], ctx.User));
 			}
+		// Search Single Tracks
 			else {
+				/*
+				Console.WriteLine($"LONERS: {query}");
+				Uri? uri = null;
+				if (query.Contains("https://") == true || query.Contains("http://") == true)
+					uri = new Uri(query);
+				if (uri != null && uri.AbsoluteUri.Contains("youtube.com/watch?v=") && uri.Query.Contains("&index=") == true) {
+					Console.WriteLine($"LONERS 1: {uri.AbsoluteUri}");
+					// int index = uri.Query.Substring(uri.Query.IndexOf("&index=") + 7).StoI();
+					// musicTracks = new LavalinkTrack[1] {searchQuery.Tracks.ElementAt(index - 1)};
+				}
+				else
+				*/
 				musicTracks = new LavalinkTrack[1] {searchQuery.Tracks.First()};
-				tools.queue.AddTrackToQueue(musicTracks[0]);
+				tools.queue.AddTrackToQueue(new ChariotTrack(musicTracks[0], ctx.User));
 			}
+
+			// 4. Core
 			if (musicTracks.Length > 1) {
 				embed.WithColor(DiscordColor.Aquamarine);
 				embed.WithDescription($"A Playlist was added! {musicTracks.Length} new tracks!");
 			}
-
-			// 4. Cores
 			if (tools.conn.CurrentState.CurrentTrack == null) {
-				var	toPlayNow = await tools.queue.UseNextTrackAsync();
-				await tools.queue._conn.PlayAsync(toPlayNow);
+				await tools.queue._conn.PlayAsync(await tools.queue.UseNextTrackAsync());
+				if (!(musicTracks.Length > 1))
+					await ctx.DeleteResponseAsync();
 			}
 			else if (musicTracks.Length == 1) {
-				embed.WithDescription($"_**Added to queue:**_ {musicTracks[0].Title}\n" +
-										$"_**Length:**_ {musicTracks[0].Length}\n" +
-										$"_**Author:**_ {musicTracks[0].Author}\n" +
-										$"_**URL:**_ {musicTracks[0].Uri}");
-				if (musicTracks[0].Uri.ToString().Contains("youtube.com") == true)
-					embed.WithImageUrl($"https://img.youtube.com/vi/{musicTracks[0].Uri.ToString().Substring(32)}/maxresdefault.jpg");
+				embed.WithDescription($"_**Added to Queue:**_ [{musicTracks[0].Title}]({musicTracks[0].Uri})\n" +
+										$"**Author:** {musicTracks[0].Author}\n" +
+										$"**Length:** {musicTracks[0].Length}" +
+										$"\t\t**Index:** ` {tools.queue._tracks.Length} `" );
+				embed.WithThumbnail(await ChariotTrack.GetArtworkAsync(musicTracks[0].Uri));
 			}
-			// 3. Embed Return
+			
 			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed: embed));
+			await Task.Delay(1000 * 60);
+			await ctx.DeleteResponseAsync();
 		}
 		[SlashCommand("stop", "Stops the music and exits from the Voice Channel.")]
 		public async Task Stop(InteractionContext ctx) {
 			await ctx.DeferAsync();
 			// 0. Initialization
-			var testObj = await this.PreChecksPass(ctx, 1);
+			var testObj = await MusicCommands.PreChecksPass(ctx, 1);
 			if (testObj.Item1 == false)
 				return ;
 			t_tools	tools = testObj.Item2;
 
 			// 1. Embed Creation
 			var	embed = new DiscordEmbedBuilder() {
-				Color = DiscordColor.Purple,
+				Color = DiscordColor.Black,
 				Title = "_**Music Stopped!**_",
-				Description = $"_**Stopped Track:**_ {tools.conn.CurrentState.CurrentTrack.Title}"
+				Description = $"_**Stopped Track:**_ [{tools.conn.CurrentState.CurrentTrack.Title}]({tools.conn.CurrentState.CurrentTrack.Uri})"
 			};
 
 			// 2. Core
@@ -121,7 +150,7 @@ namespace ChariotSanzzo.Commands.Slash {
 		public async Task Pause(InteractionContext ctx, [Choice("Switch", 2)][Choice("Pause", 1)][Choice("Resume", 0)][Option("Action", "What should happen. (Defaults to Switch)")] long type = 2) {
 			await ctx.DeferAsync();
 			// 0. Initialization
-			var testObj = await this.PreChecksPass(ctx, 2);
+			var testObj = await MusicCommands.PreChecksPass(ctx, 2);
 			if (testObj.Item1 == false)
 				return ;
 			t_tools	tools = testObj.Item2;
@@ -129,7 +158,7 @@ namespace ChariotSanzzo.Commands.Slash {
 			// 1. Embed Preparation
 			var	embed = new DiscordEmbedBuilder() {
 				Color = DiscordColor.DarkGray,
-				Description = $"_**Current Track:**_ {tools.conn.CurrentState.CurrentTrack.Title}"
+				Description = $"_**Current Track:**_ [{tools.conn.CurrentState.CurrentTrack.Title}]({tools.conn.CurrentState.CurrentTrack.Uri})"
 			};
 			// 2. Checks
 			if (tools.queue._pauseState == true && type == 1) {
@@ -168,7 +197,7 @@ namespace ChariotSanzzo.Commands.Slash {
 		public async Task Volume(InteractionContext ctx, [Option("Value", "Changes the playback volume to the especified. (Default = 100)")] double volume = 100) {
 			await ctx.DeferAsync();
 			// 0. Initialization
-			var testObj = await this.PreChecksPass(ctx, 3);
+			var testObj = await MusicCommands.PreChecksPass(ctx, 3);
 			if (testObj.Item1 == false)
 				return ;
 			t_tools	tools = testObj.Item2;
@@ -195,13 +224,13 @@ namespace ChariotSanzzo.Commands.Slash {
 		public async Task GetQueue(InteractionContext ctx) {
 			await ctx.DeferAsync();
 		// 0. Initialization
-			var testObj = await this.PreChecksPass(ctx, 0);
+			var testObj = await MusicCommands.PreChecksPass(ctx, 0);
 			if (testObj.Item1 == false)
 				return ;
 			t_tools	tools = testObj.Item2;
 
 		// 1. Prepare Embed
-			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(tools.queue.GetQueueEmbed()));
+			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbeds(tools.queue.GetQueueEmbed()));
 			await Task.Delay(1000 * 60 * 5);
 			await ctx.DeleteResponseAsync();
 		}
@@ -209,7 +238,7 @@ namespace ChariotSanzzo.Commands.Slash {
 		public async Task Loop(InteractionContext ctx, [Choice("none", 0)][Choice("track", 1)][Choice("queue", 2)][Option("Type", "What should be looped.")] long type = 1) {
 			await ctx.DeferAsync();
 		// 0. Initialization
-			var testObj = await this.PreChecksPass(ctx, 0);
+			var testObj = await MusicCommands.PreChecksPass(ctx, 0);
 			if (testObj.Item1 == false)
 				return ;
 			t_tools	tools = testObj.Item2;
@@ -238,7 +267,7 @@ namespace ChariotSanzzo.Commands.Slash {
 		public async Task Skip(InteractionContext ctx, [Option("count", "How many tracks should bem skipped. (Defatults to 1)")] long count = 1) {
 			await ctx.DeferAsync();
 		// 0. Initialization
-			var testObj = await this.PreChecksPass(ctx, 0);
+			var testObj = await MusicCommands.PreChecksPass(ctx, 0);
 			if (testObj.Item1 == false)
 				return ;
 			t_tools	tools = testObj.Item2;
@@ -272,7 +301,7 @@ namespace ChariotSanzzo.Commands.Slash {
 		public async Task Previous(InteractionContext ctx) {
 			await ctx.DeferAsync();
 		// 0. Initialization
-			var testObj = await this.PreChecksPass(ctx, 0);
+			var testObj = await MusicCommands.PreChecksPass(ctx, 0);
 			if (testObj.Item1 == false)
 				return ;
 			t_tools	tools = testObj.Item2;
@@ -298,7 +327,7 @@ namespace ChariotSanzzo.Commands.Slash {
 		public async Task Replay(InteractionContext ctx) {
 			await ctx.DeferAsync();
 		// 0. Initialization
-			var testObj = await this.PreChecksPass(ctx, 0);
+			var testObj = await MusicCommands.PreChecksPass(ctx, 0);
 			if (testObj.Item1 == false)
 				return ;
 			t_tools	tools = testObj.Item2;
@@ -324,7 +353,7 @@ namespace ChariotSanzzo.Commands.Slash {
 		public async Task Index(InteractionContext ctx, [Option("index", "The track's position in the queue.")] long index) {
 			await ctx.DeferAsync();
 		// 0. Initialization
-			var testObj = await this.PreChecksPass(ctx, 0);
+			var testObj = await MusicCommands.PreChecksPass(ctx, 0);
 			if (testObj.Item1 == false)
 				return ;
 			t_tools	tools = testObj.Item2;
@@ -358,7 +387,7 @@ namespace ChariotSanzzo.Commands.Slash {
 		public async Task Shuffle(InteractionContext ctx) {
 			await ctx.DeferAsync();
 		// 0. Initialization
-			var testObj = await this.PreChecksPass(ctx, 0);
+			var testObj = await MusicCommands.PreChecksPass(ctx, 0);
 			if (testObj.Item1 == false)
 				return ;
 			t_tools	tools = testObj.Item2;
@@ -377,9 +406,42 @@ namespace ChariotSanzzo.Commands.Slash {
 			await Task.Delay(1000 * 10);
 			await ctx.DeleteResponseAsync();
 		}
+		[SlashCommand("remove", "Removes a track from the queue.")]
+		public async Task Remove(InteractionContext ctx, [Option("index", "Index from the music to be removed.")] long index) {
+				await ctx.DeferAsync();
+		// 0. Initialization
+			var testObj = await MusicCommands.PreChecksPass(ctx, 0);
+			if (testObj.Item1 == false)
+				return ;
+			t_tools	tools = testObj.Item2;
 
-	// 4. Checks
-		public async Task<(bool, t_tools)>	PreChecksPass(InteractionContext ctx, short type) {
+		// 1. Core
+			var embed = new DiscordEmbedBuilder();
+			if (index < 1 || index > tools.queue._tracks.Length) {
+				embed.WithColor(DiscordColor.Red);
+				embed.WithDescription("There is no track with such index.");
+				await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
+				await Task.Delay(1000 * 10);
+				await ctx.DeleteResponseAsync();
+				return ;
+			}
+			embed.WithColor(DiscordColor.Black);
+			embed.WithDescription($"[{tools.queue._tracks[index - 1]._title}]({tools.queue._tracks[index - 1]._uri}) was removed from queue.");
+			tools.queue.RemoveTrackFromQueue((int)(index - 1));
+			if (tools.queue._currentIndex == index - 1) {
+				var	toPlayNow = await tools.queue.UseIndexTrackAsync(tools.queue._currentIndex);
+				if (toPlayNow != null)
+					await tools.queue._conn.PlayAsync(toPlayNow);
+				else
+					await tools.queue._conn.StopAsync();
+			}
+			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
+			await Task.Delay(1000 * 10);
+			await ctx.DeleteResponseAsync();
+		}
+
+	// 5. Checks
+		public static async Task<(bool, t_tools)>	PreChecksPass(InteractionContext ctx, short type) {
 			t_tools	tools = new t_tools();
 			tools.llInstace = ctx.Client.GetLavalink();
 			tools.serverId = (long)ctx.Guild.Id;

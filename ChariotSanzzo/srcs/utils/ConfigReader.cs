@@ -22,12 +22,12 @@ namespace ChariotSanzzo.Config {
 		}
 	}
 	internal class DBConfig {
-		public string	_conn {get; private set;} = "";
-		public string?	_hostname {get; private set;}
-		public string?	_username {get; private set;}
-		public string?	_password {get; private set;}
-		public string?	_database {get; private set;}
-		public string?	_port {get; private set;}
+		public static string	_conn {get; private set;} = "";
+		public string?			_hostname {get; private set;}
+		public string?			_username {get; private set;}
+		public string?			_password {get; private set;}
+		public string?			_database {get; private set;}
+		public string?			_port {get; private set;}
 		public DBConfig() {
 			var	builder = new ConfigurationBuilder()
 			.SetBasePath($"{Directory.GetCurrentDirectory()}/Config/")
@@ -44,7 +44,7 @@ namespace ChariotSanzzo.Config {
 				this._password == null ||
 				this._database == null)
 				return ;
-			this._conn = $"Host={this._hostname};Username={this._username};Password={this._password};Database={this._database}";
+			DBConfig._conn = $"Host={this._hostname};Username={this._username};Password={this._password};Database={this._database}";
 		}
 	}
 }

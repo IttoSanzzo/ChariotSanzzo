@@ -66,4 +66,32 @@ public static class STPStr {
 				str = str.Replace($"{chr}", string.Empty);
 		return (str);
 	}
+	/*
+	public static int FindSubStringIndex(this string? str, string target) {
+		if (str == null)
+			return (-1);
+		int	retIndex = -1;
+		int	j;
+		for (int i = 0; i < str.Length; i++) {
+			j = 0;
+			while (str[i + j] == target[j])
+				j++;
+			if ()
+				return (i);
+		}
+		return (-1);
+	}
+	*/
+	public static string GetBetween(this string? strSource, string strStart, string strEnd) {
+		if (strSource == null)
+			return ("");
+		if (strSource.Contains(strStart) && strSource.Contains(strEnd)) {
+			int	Start;
+			int	End;
+			Start = strSource.IndexOf(strStart, 0) + strStart.Length;
+			End = strSource.IndexOf(strEnd, Start);
+			return strSource.Substring(Start, End - Start);
+		}
+		return ("");
+	}
 }

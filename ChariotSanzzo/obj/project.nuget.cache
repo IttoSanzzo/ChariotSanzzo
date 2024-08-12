@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "fhLEpfsv3YHbIHo88eZu+7eBwT6K0+XR4i5ZBG6m9dTQTTiSNHarSdGec09qwf82UDgzOEqcSKGrDZzHRcPupg==",
+  "dgSpecHash": "4rfI6/GH0boBrMb/8p/RMKo+na1nwYyBIsY0TAyoXUpjKce5pqpmga585mijOFmFtdxVX2T0G6F4ovyTpGFTsg==",
   "success": true,
   "projectFilePath": "/home/Itto/Lab/ChariotSanzzo/ChariotSanzzo/ChariotSanzzo.csproj",
   "expectedPackageFiles": [
@@ -95,7 +95,7 @@
     "/home/Itto/.nuget/packages/system.threading.tasks/4.3.0/system.threading.tasks.4.3.0.nupkg.sha512",
     "/home/Itto/.nuget/packages/system.threading.threadpool/4.3.0/system.threading.threadpool.4.3.0.nupkg.sha512",
     "/home/Itto/.nuget/packages/system.threading.timer/4.3.0/system.threading.timer.4.3.0.nupkg.sha512",
-    "/home/Itto/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.6/microsoft.aspnetcore.app.ref.8.0.6.nupkg.sha512"
+    "/home/Itto/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.7/microsoft.aspnetcore.app.ref.8.0.7.nupkg.sha512"
   ],
   "logs": []
 }
