@@ -88,6 +88,7 @@ namespace ChariotSanzzo.Components.MusicQueue {
 					}
 				break;
 				case ("soundcloud.com"):
+					artwork = await Program.SoundcloudConn.GetArtWorkAsync(uri);
 				break;
 				case ("open.spotify.com"):
 					artwork = await Program.SpotifyConn.GetArtWorkAsync(uri);

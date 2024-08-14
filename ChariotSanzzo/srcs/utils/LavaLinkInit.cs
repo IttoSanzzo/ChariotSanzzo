@@ -48,20 +48,7 @@ namespace ChariotSanzzo {
 				RestEndpoint = (ConnectionEndpoint)LavalinkInit._endPoint,
 				SocketEndpoint = (ConnectionEndpoint)LavalinkInit._endPoint
 			};
-			_lavalink = Program.Client.UseLavalink();
-			/*
-			LavalinkInit._endPoint = new ConnectionEndpoint {
-				Hostname = "v3.lavalink.rocks",
-				Port = 443,
-				Secured = true
-			};
-			LavalinkInit._config = new LavalinkConfiguration {
-				Password = "horizxon.tech",
-				RestEndpoint = (ConnectionEndpoint)LavalinkInit._endPoint,
-				SocketEndpoint = (ConnectionEndpoint)LavalinkInit._endPoint
-			};
-			_lavalink = Program.Client.UseLavalink();
-			*/
+			LavalinkInit._lavalink = Program.Client.UseLavalink();
 		}
 		public static void LavalinkConnectAsync(this DiscordClient commands) {
 			if (LavalinkInit._config != null && LavalinkInit._lavalink != null)

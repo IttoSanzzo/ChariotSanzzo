@@ -9,7 +9,7 @@ using Npgsql;
 using STPlib;
 
 namespace ChariotSanzzo.Commands.Slash {
-	[SlashCommandGroup("Playlist", "General Playlist Slash Commands.")]
+	[SlashCommandGroup("music_playlist", "General Playlist Slash Commands.")]
 	public class PlaylistCommands : ApplicationCommandModule {
 	// 0. Member Variables
 
@@ -18,46 +18,79 @@ namespace ChariotSanzzo.Commands.Slash {
 
 	// 1. Constructor
 		[SlashCommand("show", "Shows your saved playlists.")]
-		public static async Task show(InteractionContext ctx) {
+		public static async Task show(InteractionContext ctx, [Option("index", "Index for the playlist to be shown.")] long listindex = 0, [Option("User", "The user from which I should retrieve the list.")] DiscordUser? givenUser = null) {
 			await ctx.DeferAsync();
 			var		embed = new DiscordEmbedBuilder();
-			long	entriesCount = await DBEngine.GetAllRowsCountAsync("data.cm_playlists", $"userid = {ctx.User.Id}");
-			var		entriesValue = await PlaylistCommands.GetUserPlaylistsAsync((long)ctx.User.Id);
+			DiscordUser dUser = ctx.User;
+			if (givenUser != null)
+				dUser = givenUser;
+			long	entriesCount = await DBEngine.GetAllRowsCountAsync("data.cm_playlists", $"userid = {dUser.Id}");
+			var		entriesValue = await PlaylistCommands.GetUserPlaylistsAsync((long)dUser.Id);
 			if (entriesCount == 0 || entriesValue == null) {
 				embed.WithColor(DiscordColor.Red);
-				embed.WithDescription("You have no playlists saved to be shown!");
-				await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
-				await Task.Delay(1000 * 20);
-				await ctx.DeleteResponseAsync();
+				embed.WithDescription("There where no playlists saved to be shown!");
+				await DelMssTimerAsync(20, await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build())));
 				return ;
 			}
-			embed.WithColor(DiscordColor.Aquamarine);
-			embed.WithThumbnail(ctx.User.AvatarUrl);
-			embed.WithTitle($"{ctx.User.Username}'s Playlists");
-			string description = "";
-			for (int i = 0; i < entriesValue.Length; i++) {
-				Uri? uri = null;
-				if (entriesValue[i][1].Contains("https://") == true || entriesValue[i][1].Contains("http://") == true)
-					uri = new Uri(entriesValue[i][1]);
-				if (uri != null)
-					switch (uri.Host) { // Chooses favicon based on the plataform
-						case ("youtube.com"):
-						case ("www.youtube.com"):
-							description += "<:YoutubeIcon:1269684532777320448> ";
-						break;
-						case ("soundcloud.com"):
-							description += "<:SoundCloudIcon:1269685534737825822> ";
-						break;
-						case ("open.spotify.com"):
-							description += "<:SpotifyIcon:1269685522528211004> ";
-						break;
-					}
-				description += $"` {i + 1} ` -> {entriesValue[i][0]}\n";
+			else if (listindex < 0 || listindex > entriesCount) {
+				embed.WithColor(DiscordColor.Red);
+				embed.WithDescription("A playlist does not exist in that index!");
+				await DelMssTimerAsync(20, await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build())));
+				return ;
 			}
-			embed.WithDescription(description);
-			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
-			await Task.Delay(1000 * 30);
-			await ctx.DeleteResponseAsync();
+			if (listindex == 0) {
+				embed.WithColor(DiscordColor.Aquamarine);
+				embed.WithThumbnail(dUser.AvatarUrl);
+				embed.WithTitle($"{dUser.Username}'s Playlists");
+				string description = "";
+				for (int i = 0; i < entriesValue.Length; i++) {
+					Uri? uri = null;
+					if (entriesValue[i][1].Contains("https://") == true || entriesValue[i][1].Contains("http://") == true)
+						uri = new Uri(entriesValue[i][1]);
+					if (uri != null)
+						switch (uri.Host) { // Chooses favicon based on the plataform
+							case ("youtube.com"):
+							case ("www.youtube.com"):
+								description += "<:YoutubeIcon:1269684532777320448> ";
+							break;
+							case ("soundcloud.com"):
+								description += "<:SoundCloudIcon:1269685534737825822> ";
+							break;
+							case ("open.spotify.com"):
+								description += "<:SpotifyIcon:1269685522528211004> ";
+							break;
+						}
+					description += $"` {i + 1} ` -> {entriesValue[i][0]}\n";
+				}
+				embed.WithDescription(description);
+				await DelMssTimerAsync(30, await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build())));
+				return ;
+			} else {
+			// Error Search
+				var llInstace = ctx.Client.GetLavalink();
+				if (!llInstace.ConnectedNodes.Any()) {
+					embed.WithColor(DiscordColor.Red);
+					embed.WithDescription("The connection is not stablished!");
+					await DelMssTimerAsync(20, await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build())));
+					return ;
+				}
+				var node = llInstace.ConnectedNodes.Values.First();
+				LavalinkLoadResult	searchQuery = await node.Rest.GetTracksAsync(entriesValue[listindex - 1][1], LavalinkSearchType.Plain);
+				if (searchQuery.LoadResultType == LavalinkLoadResultType.NoMatches || searchQuery.LoadResultType == LavalinkLoadResultType.LoadFailed) {
+					embed.WithColor(DiscordColor.Red);
+					embed.WithDescription("Failed to find proper music using the given query.");
+					await DelMssTimerAsync(20, await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build())));
+					return ;
+				}
+			
+			// Search Playlists
+				LavalinkTrack[]	musicTracks = searchQuery.Tracks.ToArray();
+				ChariotTrack[] tracks = new ChariotTrack[musicTracks.Length];
+				for (int i = 0; i < musicTracks.Length; i++)
+					tracks[i] = new ChariotTrack(musicTracks[i], ctx.User);
+			// Sending Response
+				await DelMssTimerAsync(90, await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbeds(GetPlaylistEmbed(tracks, ctx.User))));
+			}
 		}
 		[SlashCommand("export", "Exports the given playlist to the users database.")]
 		public static async Task export(InteractionContext ctx, [Option("Name", "A nickname for the playlist.")] string listname, [Option("Link", "The playlist's link.")] string listlink) {
@@ -66,9 +99,7 @@ namespace ChariotSanzzo.Commands.Slash {
 			if (await PlaylistCommands.CountNameEntriesAsync((long)ctx.User.Id, listname) != 0) {
 				embed.WithColor(DiscordColor.Red);
 				embed.WithDescription("There is already a playlist saved with that name!");
-				await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
-				await Task.Delay(1000 * 20);
-				await ctx.DeleteResponseAsync();
+				await DelMssTimerAsync(20, await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build())));
 				return ;
 			}
 			else {
@@ -77,18 +108,14 @@ namespace ChariotSanzzo.Commands.Slash {
 						&& (listlink.Contains("soundcloud.com/") == false && listlink.Contains("/sets") == false)) {
 					embed.WithColor(DiscordColor.Red);
 					embed.WithDescription("The given link does not lead to a valid playlist!");
-					await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
-					await Task.Delay(1000 * 20);
-					await ctx.DeleteResponseAsync();
+					await DelMssTimerAsync(20, await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build())));
 					return ;
 				}
 			}
 			embed.WithColor(DiscordColor.Aquamarine);
 			embed.WithDescription("Playlist Saved!");
 			await PlaylistCommands.ExportPlaylistAsync((long)ctx.User.Id, ctx.User.Username, listname, listlink);
-			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
-			await Task.Delay(1000 * 20);
-			await ctx.DeleteResponseAsync();
+			await DelMssTimerAsync(20, await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build())));
 		}
 		[SlashCommand("delete", "Deletes permanently a playlist from your database.")]
 		public static async Task delete(InteractionContext ctx, [Option("Name", "A the exact name from the playlist to be deleted.")] string listname) {
@@ -97,9 +124,7 @@ namespace ChariotSanzzo.Commands.Slash {
 			if (await PlaylistCommands.CountNameEntriesAsync((long)ctx.User.Id, listname) == 0) {
 				embed.WithColor(DiscordColor.Red);
 				embed.WithDescription("There no playlist saved with that name!");
-				await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
-				await Task.Delay(1000 * 20);
-				await ctx.DeleteResponseAsync();
+				await DelMssTimerAsync(20, await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build())));
 				return ;
 			}
 			embed.WithColor(DiscordColor.Aquamarine);
@@ -107,12 +132,10 @@ namespace ChariotSanzzo.Commands.Slash {
 				embed.WithDescription("Playlist Deleted!");
 			else
 				embed.WithDescription("Something went wrong!");
-			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
-			await Task.Delay(1000 * 20);
-			await ctx.DeleteResponseAsync();
+			await DelMssTimerAsync(20, await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build())));
 		}
 		[SlashCommand("import", "Imports the selected playlist from the user.")]
-		public static async Task import(InteractionContext ctx, [Option("index", "The index from the playlist you want to import.")] long playlistIndex = 0) {
+		public static async Task import(InteractionContext ctx, [Option("index", "The index from the playlist you want to import.")] long playlistIndex = 0, [Option("User", "The user from which I should retrieve the list.")] DiscordUser? givenUser = null) {
 			await ctx.DeferAsync();
 		// 0. Initialization
 			var testObj = await MusicCommands.PreChecksPass(ctx, 0);
@@ -121,19 +144,20 @@ namespace ChariotSanzzo.Commands.Slash {
 			t_tools	tools = testObj.Item2;
 		
 		// 1. Start
-			long	entriesCount = await DBEngine.GetAllRowsCountAsync("data.cm_playlists", $"userid = {ctx.User.Id}");
-			var		entriesValue = await PlaylistCommands.GetUserPlaylistsAsync((long)ctx.User.Id);
+			DiscordUser dUser = ctx.User;
+			if (givenUser != null)
+				dUser = givenUser;
+			long	entriesCount = await DBEngine.GetAllRowsCountAsync("data.cm_playlists", $"userid = {dUser.Id}");
+			var		entriesValue = await PlaylistCommands.GetUserPlaylistsAsync((long)dUser.Id);
 			if (!(playlistIndex >= 1 && playlistIndex <= entriesCount)) {
 				var selectEmbed = new DiscordEmbedBuilder();
 				selectEmbed.WithColor(DiscordColor.Aquamarine);
-				selectEmbed.WithThumbnail(ctx.User.AvatarUrl);
-				selectEmbed.WithTitle($"{ctx.User.Username}'s Playlists");
+				selectEmbed.WithThumbnail(dUser.AvatarUrl);
+				selectEmbed.WithTitle($"{dUser.Username}'s Playlists");
 				if (entriesCount == -1 || entriesValue == null) {
 					selectEmbed.WithColor(DiscordColor.Black);
 					selectEmbed.WithDescription("Empty...");
-					await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(selectEmbed.Build()));
-					await Task.Delay(1000 * 10);
-					await ctx.DeleteResponseAsync();
+					await DelMssTimerAsync(10, await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(selectEmbed.Build())));
 					return ;
 				}
 				string description = "";
@@ -171,9 +195,7 @@ namespace ChariotSanzzo.Commands.Slash {
 						Color = DiscordColor.Black,
 						Description = "Invalid index."
 					};
-					await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(errEmbed.Build()));
-					await Task.Delay(1000 * 10);
-					await ctx.DeleteResponseAsync();
+					await DelMssTimerAsync(10, await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(errEmbed.Build())));
 					return ;
 				}
 			}
@@ -184,16 +206,14 @@ namespace ChariotSanzzo.Commands.Slash {
 					Color = DiscordColor.Aquamarine,
 					Description = "Wait a second, I'm processing it."
 				};
-				var waitmss = await ctx.Channel.SendMessageAsync(embed: waitembed);
-				LavalinkLoadResult	searchQuery;
-				searchQuery = await tools.node.Rest.GetTracksAsync(entriesValue[playlistIndex][1], LavalinkSearchType.Plain);
+				var waitmss = await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(waitembed.Build()));
+				LavalinkLoadResult	searchQuery = await tools.node.Rest.GetTracksAsync(entriesValue[playlistIndex][1], LavalinkSearchType.Plain);
 				var musicTracks = searchQuery.Tracks.ToArray();
 				for (int i = 0; i < musicTracks.Length; i++)
 					tools.queue.AddTrackToQueue(new ChariotTrack(musicTracks[i], ctx.User));
 				var lastEmbed = new DiscordEmbedBuilder();
 				lastEmbed.WithColor(tools.queue._tracks[^1]._color);
 				lastEmbed.WithDescription($"{tools.queue._tracks[^1]._favicon}{ctx.User.Username} imported a playlist! {musicTracks.Length} new tracks!");
-				// await waitmss.DeleteAsync();
 				await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(lastEmbed.Build()));
 				if (tools.conn.CurrentState.CurrentTrack == null)
 					await tools.queue._conn.PlayAsync(await tools.queue.UseNextTrackAsync());
@@ -204,7 +224,7 @@ namespace ChariotSanzzo.Commands.Slash {
 				await ctx.DeleteResponseAsync();
 			return ;
 		}
-				// 4. ChariotMusicRelated
+	// 4. Database ChariotMusicRelated
 
 	// 3. Database Stuff
 		public static async Task<bool>			ExportPlaylistAsync(long userid, string username, string listname, string listlink) {
@@ -312,6 +332,48 @@ namespace ChariotSanzzo.Commands.Slash {
 					Console.WriteLine($"[->ImportPlaylistAsyncError\n{ex.ToString()}\n]");
 				return (0);
 			}
+		}
+	
+	// 5. Miscs
+		private static DiscordEmbed[]				GetPlaylistEmbed(ChariotTrack[] tracks, DiscordUser user) {
+			Console.WriteLine("GET Playlist QUEUE ENTER");
+		// 0. Base Check
+			if (tracks.Length == 0) {
+				var	errembed = new DiscordEmbedBuilder();
+				errembed.WithColor(DiscordColor.Gray);
+				errembed.WithDescription("The playlist is empty...");
+				return (new DiscordEmbed[1] {errembed.Build()});
+			}
+		// 1. Core
+			var retEmbedArr = new DiscordEmbed[0];
+			int i = 0;
+			while (i < tracks.Length) {
+				var	tempArr = new DiscordEmbed[retEmbedArr.Length + 1];
+				for (int j = 0; j < retEmbedArr.Length; j++)
+					tempArr[j] = retEmbedArr[j];
+				retEmbedArr = tempArr;
+				var	embed = new DiscordEmbedBuilder();
+				embed.WithColor(DiscordColor.Black);
+				if (retEmbedArr.Length == 1) {
+					embed.WithTitle($"{user.Username}'s Playlist");
+					embed.WithThumbnail(user.AvatarUrl);
+				}
+				string description = "";
+				while (i < tracks.Length && description.Length < 3700) {
+					Console.WriteLine($"Entry index [{i}]");
+					description += $"{tracks[i]._favicon} ` {i + 1} ` -> {tracks[i]._title}\n";
+					i++;
+				}
+				embed.WithDescription(description);
+				retEmbedArr[^1] = embed.Build();
+			}
+		// 2. Return
+			return (retEmbedArr);
+		}
+		private static async Task					DelMssTimerAsync(int seconds, DiscordMessage message) /* Deletes the given discord message past the given seconds */ {
+			await Task.Delay(1000 * seconds);
+			await message.DeleteAsync();
+			return ;
 		}
 	}
 }

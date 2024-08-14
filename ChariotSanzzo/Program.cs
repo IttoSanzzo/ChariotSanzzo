@@ -9,12 +9,14 @@ using DSharpPlus.SlashCommands;
 using ChariotSanzzo.Components.SpotifyApi;
 using ChariotSanzzo.Database;
 using ChariotSanzzo.Commands.Slash;
+using ChariotSanzzo.Components.SoundcloudApi;
 
 namespace ChariotSanzzo {
 	internal class Program {
 		public static DiscordClient?			Client {get; set;}
 		public static CommandsNextExtension?	Commands {get; set;}
 		public static SpotifyConn				SpotifyConn {get; set;} = new SpotifyConn();
+		public static SoundcloudConn			SoundcloudConn {get; set;} = new SoundcloudConn();
 		static async Task Main(string[] args) {
 		// -1. Unreasonable
 			var DBConfigHolder = new DBConfig();
@@ -53,7 +55,7 @@ namespace ChariotSanzzo {
 			Commands.EventsInitRun();
 
 		// 4. Lavalink Setup
-			SpotifyConn.RunInit();
+			// SpotifyConn.RunInit();
 			Client.LavalinkRunInit();
 
 		// 5. Finishing, Connecting and Looping

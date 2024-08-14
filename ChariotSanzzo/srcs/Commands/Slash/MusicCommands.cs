@@ -43,7 +43,11 @@ namespace ChariotSanzzo.Commands.Slash {
 				return ;
 			t_tools	tools = testObj.Item2;
 
-			// 1. Core
+			// 1 Embed Initialization
+			var embed = new DiscordEmbedBuilder();
+			embed.WithColor(DiscordColor.Purple);
+
+			// 2. Core
 			LavalinkLoadResult	searchQuery;
 			if (query.Contains("https://") == true || query.Contains("http://") == true)
 				searchQuery = await tools.node.Rest.GetTracksAsync(query, LavalinkSearchType.Plain);
@@ -60,13 +64,13 @@ namespace ChariotSanzzo.Commands.Slash {
 					break;
 				}
 			if (searchQuery.LoadResultType == LavalinkLoadResultType.NoMatches || searchQuery.LoadResultType == LavalinkLoadResultType.LoadFailed) {
-				await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Failed to find proper music using the given query."));
-				return ;
-			}
-
-			// 2. Embed Initialization
-			var embed = new DiscordEmbedBuilder();
-			embed.WithColor(DiscordColor.Purple);
+					embed.WithColor(DiscordColor.Red);
+					embed.WithDescription("Failed to find proper music using the given query.");
+					await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
+					await Task.Delay(1000 * 20);
+					await ctx.DeleteResponseAsync();
+					return ;
+				}
 
 			// 3. Playing Track
 			LavalinkTrack[]	musicTracks;
@@ -113,7 +117,6 @@ namespace ChariotSanzzo.Commands.Slash {
 										$"\t\t**Index:** ` {tools.queue._tracks.Length} `" );
 				embed.WithThumbnail(await ChariotTrack.GetArtworkAsync(musicTracks[0].Uri));
 			}
-			
 			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed: embed));
 			await Task.Delay(1000 * 60);
 			await ctx.DeleteResponseAsync();
@@ -231,7 +234,7 @@ namespace ChariotSanzzo.Commands.Slash {
 
 		// 1. Prepare Embed
 			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbeds(tools.queue.GetQueueEmbed()));
-			await Task.Delay(1000 * 60 * 5);
+			await Task.Delay(1000 * 60 * 2);
 			await ctx.DeleteResponseAsync();
 		}
 		[SlashCommand("loop", "Changes the loop setting! (Defaults to Loop Track)")]
@@ -446,18 +449,29 @@ namespace ChariotSanzzo.Commands.Slash {
 			tools.llInstace = ctx.Client.GetLavalink();
 			tools.serverId = (long)ctx.Guild.Id;
 			Console.WriteLine($"[ServerId..: {tools.serverId}]");
+			var embed = new DiscordEmbedBuilder();
+			embed.WithColor(DiscordColor.Red);
 
 			// 1. Primary Checks
 			if (ctx.Member.VoiceState == null || ctx.Member.VoiceState.Channel == null) {
-				await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Please enter a Voice Channel!"));
+				embed.WithDescription("Please enter a Voice Channel!");
+				await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
+				await Task.Delay(1000 * 20);
+				await ctx.DeleteResponseAsync();
 				return (false, tools);
 			}
 			else if (!tools.llInstace.ConnectedNodes.Any()) {
-				await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("The connection is not stablished!"));
+				embed.WithDescription("The connection is not stablished!");
+				await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
+				await Task.Delay(1000 * 20);
+				await ctx.DeleteResponseAsync();
 				return (false, tools);
 			}
 			else if (ctx.Member.VoiceState.Channel.Type != DSharpPlus.ChannelType.Voice) {
-				await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Please enter a valid Voice Channel!"));
+				embed.WithDescription("Please enter a valid Voice Channel!");
+				await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
+				await Task.Delay(1000 * 20);
+				await ctx.DeleteResponseAsync();
 				return (false, tools);
 			}
 			tools.node = tools.llInstace.ConnectedNodes.Values.First();
@@ -465,7 +479,10 @@ namespace ChariotSanzzo.Commands.Slash {
 				await tools.node.ConnectAsync(ctx.Member.VoiceState.Channel);
 			tools.conn = tools.node.GetGuildConnection(ctx.Member.VoiceState.Guild);
 			if (tools.conn == null) {
-				await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Chariot is not in a channel to perform such action!"));
+				embed.WithDescription("Chariot is not in a channel to perform such action!");
+				await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
+				await Task.Delay(1000 * 20);
+				await ctx.DeleteResponseAsync();
 				return (false, tools);
 			}
 			if (type != 1)
@@ -475,19 +492,28 @@ namespace ChariotSanzzo.Commands.Slash {
 			switch (type) {
 				case (1): // Stop
 					if (tools.conn.CurrentState.CurrentTrack == null) {
-						await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("There's no music playing to be stopped!"));
+						embed.WithDescription("There's no music playing to be stopped!");
+						await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
+						await Task.Delay(1000 * 20);
+						await ctx.DeleteResponseAsync();
 						return (false, tools);
 					}
 				break;
 				case (2): // Pause
 					if (tools.conn.CurrentState.CurrentTrack == null) {
-						await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("There's no music playing to be paused!"));
+						embed.WithDescription("There's no music playing to be paused!");
+						await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
+						await Task.Delay(1000 * 20);
+						await ctx.DeleteResponseAsync();
 						return (false, tools);
 					}
 				break;
 				case (3): // Resume
 					if (tools.conn.CurrentState.CurrentTrack == null) {
-						await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("There's no music playing to be resumed!"));
+						embed.WithDescription("There's no music playing to be resumed!");
+						await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
+						await Task.Delay(1000 * 20);
+						await ctx.DeleteResponseAsync();
 						return (false, tools);
 					}
 				break;

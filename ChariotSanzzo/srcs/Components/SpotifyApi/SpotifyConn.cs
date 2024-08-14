@@ -19,6 +19,7 @@ namespace ChariotSanzzo.Components.SpotifyApi {
 
 	// 1. Constructors
 		public SpotifyConn() {
+			this.RunInit();
 			this._TimeSpanToken = DateTime.Now;
 		}
 		public SpotifyConn(string clientID, string clientSecret) {
@@ -34,8 +35,8 @@ namespace ChariotSanzzo.Components.SpotifyApi {
 			.AddJsonFile("spotifyAPIconfig.json", optional: true, reloadOnChange: true)
 			.AddUserSecrets<Program>();
 			IConfiguration config = builder.Build();
-			string? tempID = config.GetValue<string>("AppData:ClientId");
-			string? tempSecret = config.GetValue<string>("AppData:ClientSecret");
+			string? tempID = config.GetValue<string>("SpotifyApiData:ClientId");
+			string? tempSecret = config.GetValue<string>("SpotifyApiData:ClientSecret");
 			if (tempID == null || tempSecret == null) {
 				Console.WriteLine("Error: SpotifyConn: ClientID or ClientSecret null!");
 				return ;

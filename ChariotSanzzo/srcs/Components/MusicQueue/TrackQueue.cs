@@ -149,7 +149,7 @@ namespace ChariotSanzzo.Components.MusicQueue {
 				if (retEmbedArr.Length == 1)
 					embed.WithTitle("Queue");
 				string description = "";
-				while (i < this._tracks.Length && description.Length < 3700) {
+				while (i < this._tracks.Length && description.Length < 3600) {
 					Console.WriteLine($"Entry index [{i}]");
 					if (i == this._currentIndex)
 						description += $"```ansi\n[2;34m{i + 1} -> {this._tracks[i]._title}[0m\n```";
