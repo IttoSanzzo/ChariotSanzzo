@@ -19,6 +19,7 @@ namespace ChariotSanzzo.Commands {
 			commands.RegisterCommands<Slash.DiceCommands>();
 			commands.RegisterCommands<Slash.MusicCommands>();
 			commands.RegisterCommands<Slash.PlaylistCommands>();
+			commands.RegisterCommands<Slash.SFXCommands>();
 		}
 	}
 }

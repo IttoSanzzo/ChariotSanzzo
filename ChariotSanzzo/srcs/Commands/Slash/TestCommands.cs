@@ -14,5 +14,11 @@ namespace ChariotSanzzo.Commands.Slash {
 			await ctx.DeferAsync();
 			await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Hello, {arg}."));
 		}
+		[SlashCommand("sendChariotGjalLinkTest", "Tests if Chariot is able to connect.")]
+		public async Task SendChariotGjalLinkTest(InteractionContext ctx) {
+			await ctx.DeferAsync();
+			await ctx.Channel.SendMessageAsync("GjallarhornCall\nJustTesting\nUmu Umu\nhehehehe\nhahahaha");
+			await ctx.DeleteResponseAsync();
+		}
 	}
 }

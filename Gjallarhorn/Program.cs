@@ -1,30 +1,22 @@
-﻿using ChariotSanzzo.Commands;
-using ChariotSanzzo.Events;
-using ChariotSanzzo.Config;
+﻿using Gjallarhorn.Commands;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
-using ChariotSanzzo.Components.SpotifyApi;
-using ChariotSanzzo.Database;
-using ChariotSanzzo.Commands.Slash;
-using ChariotSanzzo.Components.SoundcloudApi;
+using Gjallarhorn.Config;
+using Gjallarhorn.Events;
 
-namespace ChariotSanzzo {
+namespace Gjallarhorn {
 	internal class Program {
 		public static DiscordClient?			Client {get; set;}
 		public static CommandsNextExtension?	Commands {get; set;}
-		public static SpotifyConn				SpotifyConn {get; set;} = new SpotifyConn();
-		public static SoundcloudConn			SoundcloudConn {get; set;} = new SoundcloudConn();
 		static async Task Main(string[] args) {
-		// -1. Unreasonable
-			var DBConfigHolder = new DBConfig();
 		// 0. TESTING GROUNDS
 
 		// 1. Importing Json configs and starting
 			var config = new ConfigReader();
-			Console.ForegroundColor = ConsoleColor.Blue;
+			Console.ForegroundColor = ConsoleColor.Yellow;
 			Console.WriteLine($"Ohayou... {config._name} is waking up!");
 			Console.ResetColor();
 
@@ -55,13 +47,12 @@ namespace ChariotSanzzo {
 			Commands.EventsInitRun();
 
 		// 4. Lavalink Setup
-			// SpotifyConn.RunInit();
 			Client.LavalinkRunInit();
 
 		// 5. Finishing, Connecting and Looping
 			await Client.ConnectAsync();
 			Client.LavalinkConnectAsync();
-			Console.ForegroundColor = ConsoleColor.Blue;
+			Console.ForegroundColor = ConsoleColor.Yellow;
 			Console.WriteLine($"{config._name} is up!");
 			Console.ResetColor();
 			await Task.Delay(-1);

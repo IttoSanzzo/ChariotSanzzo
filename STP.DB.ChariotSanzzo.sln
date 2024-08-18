@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChariotSanzzo", "ChariotSan
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "STPlib", "STPlib\STPlib.csproj", "{4C1749F0-E557-434F-9ECE-7DA84A219C92}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gjallarhorn", "Gjallarhorn\Gjallarhorn.csproj", "{C1CDF72F-6DCD-4C15-8617-6967A105C96C}"
+EndProject
 Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -44,5 +46,17 @@ Global
 		{4C1749F0-E557-434F-9ECE-7DA84A219C92}.Release|x64.Build.0 = Release|Any CPU
 		{4C1749F0-E557-434F-9ECE-7DA84A219C92}.Release|x86.ActiveCfg = Release|Any CPU
 		{4C1749F0-E557-434F-9ECE-7DA84A219C92}.Release|x86.Build.0 = Release|Any CPU
+		{C1CDF72F-6DCD-4C15-8617-6967A105C96C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1CDF72F-6DCD-4C15-8617-6967A105C96C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1CDF72F-6DCD-4C15-8617-6967A105C96C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C1CDF72F-6DCD-4C15-8617-6967A105C96C}.Debug|x64.Build.0 = Debug|Any CPU
+		{C1CDF72F-6DCD-4C15-8617-6967A105C96C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C1CDF72F-6DCD-4C15-8617-6967A105C96C}.Debug|x86.Build.0 = Debug|Any CPU
+		{C1CDF72F-6DCD-4C15-8617-6967A105C96C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1CDF72F-6DCD-4C15-8617-6967A105C96C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1CDF72F-6DCD-4C15-8617-6967A105C96C}.Release|x64.ActiveCfg = Release|Any CPU
+		{C1CDF72F-6DCD-4C15-8617-6967A105C96C}.Release|x64.Build.0 = Release|Any CPU
+		{C1CDF72F-6DCD-4C15-8617-6967A105C96C}.Release|x86.ActiveCfg = Release|Any CPU
+		{C1CDF72F-6DCD-4C15-8617-6967A105C96C}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

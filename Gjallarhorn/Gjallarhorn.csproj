@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UserSecretsId>31803c94-c47e-423b-ab93-d2b1ce820bbb</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DSharpPlus" Version="4.4.9" />
+    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.4.9" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="4.4.9" />
+    <PackageReference Include="DSharpPlus.Lavalink" Version="4.4.9" />
+    <PackageReference Include="DSharpPlus.SlashCommands" Version="4.4.9" />
+	<PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="8.0.0" />
+  </ItemGroup>
+
+</Project>
