@@ -9,6 +9,7 @@ namespace core {
 	// 0. Member Variables
 		private static bool		_testing			{get; set;} = false;
 		private static int		_CurrentPID			{get; set;} = Environment.ProcessId;
+		private static Process?	_Lavalink			{get; set;} = null;
 		private static Process	_Gjallarhorn		{get; set;} = new Process();
 		private static string	_ExecArgs			{get; set;} = "";
 		private static Process	_ChariotSanzzo		{get; set;} = new Process();
@@ -34,12 +35,7 @@ namespace core {
 			Program._ExecArgs = $"SafeStart {Program._ArgLavalink}";
 		
 		// 2. Start Processes
-			if (Program._ArgLavalink == "true") {
-				StartProcess("pm2", "Lavalink", "start ./Start.sh -n LAVA0");
-				await Task.Delay(1000);
-				Program.ColorWriteLine(ConsoleColor.Green, "Waiting Lavalink to init...");
-				await Task.Delay(2000);
-			}
+			Program._Lavalink = Program.LaunchLavalink().Result;
 			Program._Gjallarhorn = Program.LaunchModule("Gjallarhorn", Program._ExecArgs);
 			Program._ChariotSanzzo = Program.LaunchModule("ChariotSanzzo", Program._ExecArgs);
 
@@ -76,6 +72,18 @@ namespace core {
 			if (proc.Start() == false)
 				Program.Exit(1, $"Aborting: {path} failed to run!");
 			return (proc);
+		}
+		private static async Task<Process?>	LaunchLavalink() {
+			Process? temp = null;
+			if (Program._ArgLavalink == "true") {
+				temp = StartProcess("pm2", "Lavalink", "del all");
+				temp.WaitForExit();
+				temp = StartProcess("pm2", "Lavalink", "start ./Start.sh -n LAVA0");
+				await Task.Delay(1000);
+				Program.ColorWriteLine(ConsoleColor.Green, "Waiting Lavalink to init...");
+				await Task.Delay(3000);
+			}
+			return (temp);
 		}
 		private static void		Exit(int code, string mss) {
 			if (code == 0)
