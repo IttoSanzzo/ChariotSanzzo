@@ -10,7 +10,7 @@ namespace ChariotSanzzo.Components.MusicQueue {
 		private static Random			_random			{get; set;} = new Random();
 		public LavalinkGuildConnection	_conn			{get; private set;}
 		public DiscordChannel?			_chat			{get; private set;} = null;
-		public long						_serverId		{get; private set;}
+		public ulong						_serverId		{get; private set;}
 		public bool						_pauseState		{get; private set;} = false;
 		public int						_length			{get; private set;} = 0;
 		public int						_loop			{get; private set;} = 0;
@@ -23,9 +23,9 @@ namespace ChariotSanzzo.Components.MusicQueue {
 
 	// 1. Constructors
 		~TrackQueue() {
-			Console.WriteLine("Queue Destructed!");
+			Program.WriteLine("Queue Destructed!");
 		}
-		public TrackQueue(long serverId, LavalinkGuildConnection conn, DiscordChannel? chat, QueueCollection qColle) {
+		public TrackQueue(ulong serverId, LavalinkGuildConnection conn, DiscordChannel? chat, QueueCollection qColle) {
 			this._qColle = qColle;
 			this._serverId = serverId;
 			this._conn = conn;
@@ -33,12 +33,12 @@ namespace ChariotSanzzo.Components.MusicQueue {
 			if (this._conn.CurrentState.CurrentTrack != null)
 				this._conn.StopAsync();
 			this._conn.PlaybackFinished += Music.PlayNext;
-			Console.WriteLine("Queue Constructed!");
+			Program.WriteLine("Queue Constructed!");
 		}
 
 	// 2. Sets
 		public void	AddTrackToQueue(ChariotTrack ctrack) {
-			Console.WriteLine($"AddTrackEntered {this._length + 1}");
+			Program.WriteLine($"AddTrackEntered {this._length + 1}");
 			if (TrackExist(ctrack) == true)
 				return ;
 			ChariotTrack[] temp = new ChariotTrack[this._length + 1];
@@ -52,7 +52,7 @@ namespace ChariotSanzzo.Components.MusicQueue {
 		public void	RemoveTrackFromQueue(int index) {
 			if ((index < 0 || index > this._tracks.Length - 1) && this._tracks.Length != 0)
 				return ;
-			Console.WriteLine($"RemoveTrackEntered {this._length}");
+			Program.WriteLine($"RemoveTrackEntered {this._length}");
 			ChariotTrack[] temp = new ChariotTrack[this._length - 1];
 			int	i = -1;
 			int	j = 0;
@@ -99,6 +99,11 @@ namespace ChariotSanzzo.Components.MusicQueue {
 		public QueueCollection				GetQueueCollection() {
 			return (this._qColle);
 		}
+		public LavalinkTrack?				GetIndexTrack(int index) {
+			if (index < 0 || index > this._tracks.Length - 1)
+				return (null);
+			return (this._tracks[index]._llTrack);
+		}
 		public async Task<LavalinkTrack?>	UseNextTrackAsync() {
 			if (this.GoNextIndex() == false)
 				return (null);
@@ -128,7 +133,7 @@ namespace ChariotSanzzo.Components.MusicQueue {
 			return (this._tracks[this._currentIndex]._llTrack);
 		}
 		public DiscordEmbed[]				GetQueueEmbed() {
-			Console.WriteLine("GET EMBED QUEUE ENTER");
+			Program.WriteLine("GET EMBED QUEUE ENTER");
 		// 0. Base Check
 			if (this._tracks.Length == 0) {
 				var	errembed = new DiscordEmbedBuilder();
@@ -150,7 +155,7 @@ namespace ChariotSanzzo.Components.MusicQueue {
 					embed.WithTitle("Queue");
 				string description = "";
 				while (i < this._tracks.Length && description.Length < 3600) {
-					Console.WriteLine($"Entry index [{i}]");
+					Program.WriteLine($"Entry index [{i}]");
 					if (i == this._currentIndex)
 						description += $"```ansi\n[2;34m{i + 1} -> {this._tracks[i]._title}[0m\n```";
 					else

@@ -240,7 +240,7 @@ namespace ChariotSanzzo.Commands.Slash {
 				return (true);
 			} catch (Exception ex) {
 				if (DBEngine._debug == true)
-					Console.WriteLine($"[->ImportPlaylistAsyncError\n{ex.ToString()}\n]");
+					Program.WriteLine($"[->ImportPlaylistAsyncError\n{ex.ToString()}\n]");
 				return (false);
 			}
 		}
@@ -257,7 +257,7 @@ namespace ChariotSanzzo.Commands.Slash {
 				return (true);
 			} catch (Exception ex) {
 				if (DBEngine._debug == true)
-					Console.WriteLine($"[->ImportPlaylistAsyncError\n{ex.ToString()}\n]");
+					Program.WriteLine($"[->ImportPlaylistAsyncError\n{ex.ToString()}\n]");
 				return (false);
 			}
 		}
@@ -275,18 +275,18 @@ namespace ChariotSanzzo.Commands.Slash {
 						retObj = new string[await DBEngine.GetAllRowsCountAsync("data.cm_playlists", $"userid = {userid}")][]; // TODO: function to count rows so it does not go BOOM
 						int i = -1;
 						do {
-							Console.WriteLine("ENTERING ROW " + (i + 1));
+							Program.WriteLine("ENTERING ROW " + (i + 1));
 							retObj[++i] = new string[2]; // TODO: function to count rows so it does not go BOOM
 							retObj[i][0] = await reader.GetFieldValueAsync<string>(0, CancellationToken.None);
 							retObj[i][1] = await reader.GetFieldValueAsync<string>(1, CancellationToken.None);
 						} while (await reader.ReadAsync() == true);
 					}
 				}
-				Console.WriteLine("Returning");
+				Program.WriteLine("Returning");
 				return (retObj);
 			} catch(Exception ex) {
 				if (DBEngine._debug == true)
-					Console.WriteLine($"[->ImportPlaylistAsyncError\n{ex.ToString()}\n]");
+					Program.WriteLine($"[->ImportPlaylistAsyncError\n{ex.ToString()}\n]");
 				return (null);
 			}
 		}
@@ -308,7 +308,7 @@ namespace ChariotSanzzo.Commands.Slash {
 				return (listlink);
 			} catch(Exception ex) {
 				if (DBEngine._debug == true)
-					Console.WriteLine($"[->ImportPlaylistAsyncError\n{ex.ToString()}\n]");
+					Program.WriteLine($"[->ImportPlaylistAsyncError\n{ex.ToString()}\n]");
 				return (null);
 			}
 		}
@@ -329,14 +329,14 @@ namespace ChariotSanzzo.Commands.Slash {
 				return (count);
 			} catch(Exception ex) {
 				if (DBEngine._debug == true)
-					Console.WriteLine($"[->ImportPlaylistAsyncError\n{ex.ToString()}\n]");
+					Program.WriteLine($"[->ImportPlaylistAsyncError\n{ex.ToString()}\n]");
 				return (0);
 			}
 		}
 	
 	// 5. Miscs
 		private static DiscordEmbed[]				GetPlaylistEmbed(ChariotTrack[] tracks, DiscordUser user) {
-			Console.WriteLine("GET Playlist QUEUE ENTER");
+			Program.WriteLine("GET Playlist QUEUE ENTER");
 		// 0. Base Check
 			if (tracks.Length == 0) {
 				var	errembed = new DiscordEmbedBuilder();
@@ -360,7 +360,7 @@ namespace ChariotSanzzo.Commands.Slash {
 				}
 				string description = "";
 				while (i < tracks.Length && description.Length < 3700) {
-					Console.WriteLine($"Entry index [{i}]");
+					Program.WriteLine($"Entry index [{i}]");
 					description += $"{tracks[i]._favicon} ` {i + 1} ` -> {tracks[i]._title}\n";
 					i++;
 				}

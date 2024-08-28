@@ -13,20 +13,25 @@ using ChariotSanzzo.Components.SoundcloudApi;
 
 namespace ChariotSanzzo {
 	internal class Program {
-		public static DiscordClient?			Client {get; set;}
-		public static CommandsNextExtension?	Commands {get; set;}
-		public static SpotifyConn				SpotifyConn {get; set;} = new SpotifyConn();
-		public static SoundcloudConn			SoundcloudConn {get; set;} = new SoundcloudConn();
+	// 0. Program Variables
+		public static DiscordClient?			Client			{get; set;}
+		public static CommandsNextExtension?	Commands		{get; set;}
+		public static SpotifyConn				SpotifyConn		{get; set;} = new SpotifyConn();
+		public static SoundcloudConn			SoundcloudConn	{get; set;} = new SoundcloudConn();
+	// 0.1. Config Program Variables
+		public static bool 							_LocalLavalink	{get; set;} = false;
+
+	// 1. Main
 		static async Task Main(string[] args) {
 		// -1. Unreasonable
 			var DBConfigHolder = new DBConfig();
+			if (args[1] == "true")
+				Program._LocalLavalink = true;
 		// 0. TESTING GROUNDS
 
 		// 1. Importing Json configs and starting
 			var config = new ConfigReader();
-			Console.ForegroundColor = ConsoleColor.Blue;
-			Console.WriteLine($"Ohayou... {config._name} is waking up!");
-			Console.ResetColor();
+			Program.ColorWriteLine(ConsoleColor.Blue, $"Ohayou... {config._name} is waking up!");
 
 		// 2. Setting Discord Client
 			var discordConfig = new DiscordConfiguration() {
@@ -61,10 +66,27 @@ namespace ChariotSanzzo {
 		// 5. Finishing, Connecting and Looping
 			await Client.ConnectAsync();
 			Client.LavalinkConnectAsync();
-			Console.ForegroundColor = ConsoleColor.Blue;
-			Console.WriteLine($"{config._name} is up!");
-			Console.ResetColor();
+			Program.ColorWriteLine(ConsoleColor.Blue, $"{config._name} is up!");
 			await Task.Delay(-1);
+		}
+		public static void	ColorWriteLine(ConsoleColor color, string text) {
+			Console.ForegroundColor = ConsoleColor.Blue;
+			Console.Write($"ChariotSanzzo: ");
+			Console.ForegroundColor = color;
+			Console.WriteLine(text);
+			Console.ResetColor();
+		}
+		public static void	WriteLine(string text) {
+			Console.ForegroundColor = ConsoleColor.Blue;
+			Console.Write($"ChariotSanzzo: ");
+			Console.ResetColor();
+			Console.WriteLine(text);
+		}
+		public static void	Write(string text) {
+			Console.ForegroundColor = ConsoleColor.Blue;
+			Console.Write($"ChariotSanzzo: ");
+			Console.ResetColor();
+			Console.Write(text);
 		}
 	}
 }

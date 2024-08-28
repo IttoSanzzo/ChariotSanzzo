@@ -9,16 +9,21 @@ using Gjallarhorn.Events;
 
 namespace Gjallarhorn {
 	internal class Program {
-		public static DiscordClient?			Client {get; set;}
-		public static CommandsNextExtension?	Commands {get; set;}
+	// 0. Program Variables
+		public static DiscordClient?			Client		{get; set;} = null;
+		public static CommandsNextExtension?	Commands	{get; set;}
+	// 0.1. Config Program Variables
+		public static bool 						_LocalLavalink	{get; set;} = false;
+
+	// 1. Main
 		static async Task Main(string[] args) {
+			if (args[1] == "true")
+				Program._LocalLavalink = true;
 		// 0. TESTING GROUNDS
 
 		// 1. Importing Json configs and starting
 			var config = new ConfigReader();
-			Console.ForegroundColor = ConsoleColor.Yellow;
-			Console.WriteLine($"Ohayou... {config._name} is waking up!");
-			Console.ResetColor();
+			Program.ColorWriteLine(ConsoleColor.DarkYellow, $"Ohayou... {config._name} is waking up!");
 
 		// 2. Setting Discord Client
 			var discordConfig = new DiscordConfiguration() {
@@ -52,10 +57,27 @@ namespace Gjallarhorn {
 		// 5. Finishing, Connecting and Looping
 			await Client.ConnectAsync();
 			Client.LavalinkConnectAsync();
-			Console.ForegroundColor = ConsoleColor.Yellow;
-			Console.WriteLine($"{config._name} is up!");
-			Console.ResetColor();
+			Program.ColorWriteLine(ConsoleColor.DarkYellow, $"{config._name} is up!");
 			await Task.Delay(-1);
+		}
+		public static void	ColorWriteLine(ConsoleColor color, string text) {
+			Console.ForegroundColor = ConsoleColor.DarkYellow;
+			Console.Write($"Gjallarhorn: ");
+			Console.ForegroundColor = color;
+			Console.WriteLine(text);
+			Console.ResetColor();
+		}
+		public static void	WriteLine(string text) {
+			Console.ForegroundColor = ConsoleColor.DarkYellow;
+			Console.Write($"Gjallarhorn: ");
+			Console.ResetColor();
+			Console.WriteLine(text);
+		}
+		public static void	Write(string text) {
+			Console.ForegroundColor = ConsoleColor.DarkYellow;
+			Console.Write($"Gjallarhorn: ");
+			Console.ResetColor();
+			Console.Write(text);
 		}
 	}
 }

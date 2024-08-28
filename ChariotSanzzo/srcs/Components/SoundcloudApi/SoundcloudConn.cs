@@ -26,7 +26,7 @@ namespace ChariotSanzzo.Components.SoundcloudApi {
 			IConfiguration config = builder.Build();
 			string? oAuthToken = config.GetValue<string>("SoundcloudApiData:OAuthToken");
 			if (oAuthToken == null) {
-				Console.WriteLine("Error: SoundcloudConn: OAuthToken null!");
+				Program.WriteLine("Error: SoundcloudConn: OAuthToken null!");
 				return ;
 			}
 			this._oAuthToken = oAuthToken;
@@ -60,7 +60,7 @@ namespace ChariotSanzzo.Components.SoundcloudApi {
 					fetchRet = await reader.ReadToEndAsync();
 			}
 			catch(HttpRequestException Ex) {
-				Console.WriteLine("HttpError: " + Ex.Message);
+				Program.WriteLine("HttpError: " + Ex.Message);
 				return (null);
 			}
 			return (fetchRet);

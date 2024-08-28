@@ -11,7 +11,7 @@ using STPlib;
 namespace ChariotSanzzo.Commands.Slash {
 	// -1. Struct
 	public struct t_tools {
-		public long						serverId {get; set;}
+		public ulong						serverId {get; set;}
 		public TrackQueue				queue {get; set;}
 		public LavalinkExtension		llInstace {get; set;}
 		public LavalinkNodeConnection	node {get; set;}
@@ -85,12 +85,12 @@ namespace ChariotSanzzo.Commands.Slash {
 		// Search Single Tracks
 			else {
 				/*
-				Console.WriteLine($"LONERS: {query}");
+				Program.WriteLine($"LONERS: {query}");
 				Uri? uri = null;
 				if (query.Contains("https://") == true || query.Contains("http://") == true)
 					uri = new Uri(query);
 				if (uri != null && uri.AbsoluteUri.Contains("youtube.com/watch?v=") && uri.Query.Contains("&index=") == true) {
-					Console.WriteLine($"LONERS 1: {uri.AbsoluteUri}");
+					Program.WriteLine($"LONERS 1: {uri.AbsoluteUri}");
 					// int index = uri.Query.Substring(uri.Query.IndexOf("&index=") + 7).StoI();
 					// musicTracks = new LavalinkTrack[1] {searchQuery.Tracks.ElementAt(index - 1)};
 				}
@@ -226,6 +226,7 @@ namespace ChariotSanzzo.Commands.Slash {
 		[SlashCommand("queue", "Shows the local queue.")]
 		public async Task GetQueue(InteractionContext ctx) {
 			await ctx.DeferAsync();
+			await ctx.DeleteResponseAsync();
 		// 0. Initialization
 			var testObj = await MusicCommands.PreChecksPass(ctx, 0);
 			if (testObj.Item1 == false)
@@ -233,9 +234,13 @@ namespace ChariotSanzzo.Commands.Slash {
 			t_tools	tools = testObj.Item2;
 
 		// 1. Prepare Embed
-			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbeds(tools.queue.GetQueueEmbed()));
+			DiscordEmbed[] embeds = tools.queue.GetQueueEmbed();
+			DiscordMessage[] excMss = new DiscordMessage[embeds.Length];
+			for (int i = 0; i < embeds.Length; i++)
+				excMss[i] = await ctx.Channel.SendMessageAsync(embeds[i]);
 			await Task.Delay(1000 * 60 * 2);
-			await ctx.DeleteResponseAsync();
+			for (int i = 0; i < excMss.Length; i++)
+				await excMss[i].DeleteAsync();
 		}
 		[SlashCommand("loop", "Changes the loop setting! (Defaults to Loop Track)")]
 		public async Task Loop(InteractionContext ctx, [Choice("none", 0)][Choice("track", 1)][Choice("queue", 2)][Option("Type", "What should be looped.")] long type = 1) {
@@ -447,8 +452,8 @@ namespace ChariotSanzzo.Commands.Slash {
 		public static async Task<(bool, t_tools)>	PreChecksPass(InteractionContext ctx, short type) {
 			t_tools	tools = new t_tools();
 			tools.llInstace = ctx.Client.GetLavalink();
-			tools.serverId = (long)ctx.Guild.Id;
-			Console.WriteLine($"[ServerId..: {tools.serverId}]");
+			tools.serverId = ctx.Guild.Id;
+			Program.WriteLine($"[ServerId..: {tools.serverId}]");
 			var embed = new DiscordEmbedBuilder();
 			embed.WithColor(DiscordColor.Red);
 

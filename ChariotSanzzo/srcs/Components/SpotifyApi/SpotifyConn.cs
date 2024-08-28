@@ -38,7 +38,7 @@ namespace ChariotSanzzo.Components.SpotifyApi {
 			string? tempID = config.GetValue<string>("SpotifyApiData:ClientId");
 			string? tempSecret = config.GetValue<string>("SpotifyApiData:ClientSecret");
 			if (tempID == null || tempSecret == null) {
-				Console.WriteLine("Error: SpotifyConn: ClientID or ClientSecret null!");
+				Program.WriteLine("Error: SpotifyConn: ClientID or ClientSecret null!");
 				return ;
 			}
 			this._ClientID = tempID;
@@ -47,7 +47,7 @@ namespace ChariotSanzzo.Components.SpotifyApi {
 
 	// 2. Mine
 		public async Task<string?>	GetArtWorkAsync(Uri trackUri) {
-			Console.WriteLine($"TrackSpotifyID: {trackUri.Segments[^1]}");
+			Program.WriteLine($"TrackSpotifyID: {trackUri.Segments[^1]}");
 			string? jsonFetch = await this.FetchWebApiAsync("v1/tracks", (trackUri.Segments[^1]));
 			if (jsonFetch == null)
 				return (null);
@@ -81,7 +81,7 @@ namespace ChariotSanzzo.Components.SpotifyApi {
 					this._TimeSpanToken = DateTime.Now.AddMinutes(58);
 				}
 				catch (HttpRequestException Ex) {
-					Console.WriteLine("HttpError: " + Ex.Message);
+					Program.WriteLine("HttpError: " + Ex.Message);
 					this._AccessToken = null;
 				}
 			}
@@ -105,7 +105,7 @@ namespace ChariotSanzzo.Components.SpotifyApi {
 					fetchRet = await reader.ReadToEndAsync();
 			}
 			catch(HttpRequestException Ex) {
-				Console.WriteLine("HttpError: " + Ex.Message);
+				Program.WriteLine("HttpError: " + Ex.Message);
 				return (null);
 			}
 			return (fetchRet);
@@ -118,7 +118,7 @@ namespace ChariotSanzzo.Components.SpotifyApi {
 			for (i = trackUrl.Length - 1; i > 0; i--)
 				if (trackUrl[i] == '/')
 					break;
-			Console.WriteLine($"TrackSpotifyID: {trackUrl.Substring(i + 1)}");
+			Program.WriteLine($"TrackSpotifyID: {trackUrl.Substring(i + 1)}");
 			return (trackUrl.Substring(i + 1));
 		}
 	}

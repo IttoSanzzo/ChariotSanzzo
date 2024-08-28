@@ -10,7 +10,7 @@ namespace Gjallarhorn.Commands.Prefix {
 		[Aliases("hello", "HelloWorld")]
 		[Description("Tests if Chariot is online and running correctly.")]
 		public async Task Test(CommandContext ctx) {
-			Console.WriteLine("Test Command Run");
+			Program.WriteLine("Test Command Run");
 			await ctx.Channel.SendMessageAsync("Hello World!");
 		}
 		[Command("chariotGjalLinkTest")]

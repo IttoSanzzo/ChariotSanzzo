@@ -2,9 +2,12 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Interactivity.Extensions;
-using System.Diagnostics;
 using ChariotSanzzo.Database;
 using DSharpPlus.Lavalink;
+using System.Diagnostics;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
 
 namespace ChariotSanzzo.Commands.Prefix {
 	public class TestCommands : BaseCommandModule {
@@ -64,12 +67,22 @@ namespace ChariotSanzzo.Commands.Prefix {
 		public async Task Stop(CommandContext ctx) {
 			if (ctx.User.Username == "ittosanzzo" || ctx.User.Username == "nasasanzzo")
 				await ctx.Message.RespondAsync("Stopping the Chariot!");
-				if (Program.Client != null) {
-					var	lavalink = Program.Client.GetLavalink();
-					var	node = lavalink.ConnectedNodes.Values.First();
-					await node.StopAsync();
-					await Program.Client.DisconnectAsync();
-					Environment.Exit(0);
+			// 0. Setting Up
+				string		hostName		= Dns.GetHostName();
+				IPHostEntry	localhost		= await Dns.GetHostEntryAsync(hostName);
+				IPAddress	localIpAddress	= localhost.AddressList[0];
+				IPEndPoint	ipEndPoint		= new(localIpAddress, 11365);
+
+
+			// 1. Building Socket
+				using Socket client = new(ipEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+				await client.ConnectAsync(ipEndPoint);
+
+			// 2. Running
+				while (true) {
+					await client.SendAsync(Encoding.UTF8.GetBytes("Stop ChariotSanzzo<|EOM|>"), SocketFlags.None);
+					client.Shutdown(SocketShutdown.Both);
+					break;
 				}
 		}
 		[Command("restartthechariot")]
@@ -77,22 +90,22 @@ namespace ChariotSanzzo.Commands.Prefix {
 		public async Task Restart(CommandContext ctx) {
 			if (ctx.User.Username == "ittosanzzo" || ctx.User.Username == "nasasanzzo")
 				await ctx.Message.RespondAsync("Restarting the Chariot!");
-				if (Program.Client != null) {
-					var	lavalink = Program.Client.GetLavalink();
-					var	node = lavalink.ConnectedNodes.Values.First();
-					await node.StopAsync();
-					await Program.Client.DisconnectAsync();
-					{
-						Process proc = new System.Diagnostics.Process();
-						proc.StartInfo.FileName = "dotnet";
-						proc.StartInfo.UseShellExecute = true;
-						proc.StartInfo.CreateNoWindow = false;
-						proc.StartInfo.RedirectStandardOutput = false;
-						proc.StartInfo.Arguments = "run";
-						proc.Start();
-						proc.WaitForExit();
-					}
-					Environment.Exit(0);
+			// 0. Setting Up
+				string		hostName		= Dns.GetHostName();
+				IPHostEntry	localhost		= await Dns.GetHostEntryAsync(hostName);
+				IPAddress	localIpAddress	= localhost.AddressList[0];
+				IPEndPoint	ipEndPoint		= new(localIpAddress, 11365);
+
+
+			// 1. Building Socket
+				using Socket client = new(ipEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+				await client.ConnectAsync(ipEndPoint);
+
+			// 2. Running
+				while (true) {
+					await client.SendAsync(Encoding.UTF8.GetBytes("Restart ChariotSanzzo<|EOM|>"), SocketFlags.None);
+					client.Shutdown(SocketShutdown.Both);
+					break;
 				}
 		}
 
@@ -101,7 +114,7 @@ namespace ChariotSanzzo.Commands.Prefix {
 			DBEngine engine = new DBEngine();
 			DBFanfare dicef = await engine.GetDiceFanfareAsync(20);
 			await ctx.Channel.SendMessageAsync("Testing");
-			Console.WriteLine($"[\n{dicef._message}\n{dicef._glink}\n]");
+			Program.WriteLine($"[\n{dicef._message}\n{dicef._glink}\n]");
 		}
 	}
 }

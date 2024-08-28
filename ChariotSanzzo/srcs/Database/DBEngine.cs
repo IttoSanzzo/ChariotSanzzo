@@ -28,7 +28,7 @@ namespace ChariotSanzzo.Database {
 				}
 				return (true);
 			} catch (Exception ex) {
-				Console.WriteLine(ex.ToString());
+				Program.WriteLine(ex.ToString());
 				return (false);
 			}
 		}
@@ -55,7 +55,7 @@ namespace ChariotSanzzo.Database {
 				return (true, user);
 			}
 			catch (Exception ex) {
-				Console.WriteLine($"[->GetUserAsyncError\n{ex.ToString()}\n]");
+				Program.WriteLine($"[->GetUserAsyncError\n{ex.ToString()}\n]");
 				return (false, null);
 			}
 		}
@@ -80,7 +80,7 @@ namespace ChariotSanzzo.Database {
 				return (dicef);
 			}
 			catch (Exception ex) {
-				Console.WriteLine($"[->GetDiceFanfareError\n{ex.ToString()}\n]");
+				Program.WriteLine($"[->GetDiceFanfareError\n{ex.ToString()}\n]");
 				return (dicef);
 			}
 		}
@@ -99,7 +99,7 @@ namespace ChariotSanzzo.Database {
 				}
 				return (Convert.ToInt64(userCount));
 			} catch (Exception ex) {
-				Console.WriteLine(ex.ToString());
+				Program.WriteLine(ex.ToString());
 				return (-1);
 			}
 		}

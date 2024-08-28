@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Gjallarhorn")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cc05c9283c6092c9b56c0956ba0ef8cc24021276")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bcfecb9650103a27d7e62f3ba3764e9bad099d62")]
 [assembly: System.Reflection.AssemblyProductAttribute("Gjallarhorn")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Gjallarhorn")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

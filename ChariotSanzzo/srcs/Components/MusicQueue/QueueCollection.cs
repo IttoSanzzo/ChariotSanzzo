@@ -9,11 +9,11 @@ namespace ChariotSanzzo.Components.MusicQueue {
 
 	// 1. Constructors
 		public QueueCollection() {
-			Console.WriteLine("Queue Collection Constructed!\n\n");
+			Program.WriteLine("Queue Collection Constructed!\n\n");
 		}
 
 	// 2. Utils
-		public void			CreateQueue(long serverId, LavalinkGuildConnection conn, DiscordChannel? chat) {
+		public void			CreateQueue(ulong serverId, LavalinkGuildConnection conn, DiscordChannel? chat) {
 			if (QueueExist(serverId) == true)
 				return ;
 			TrackQueue[] temp = new TrackQueue[this._length + 1];
@@ -24,7 +24,7 @@ namespace ChariotSanzzo.Components.MusicQueue {
 			this._queues = temp;
 			this._length += 1;
 		}
-		public void			DropQueue(long serverId) {
+		public void			DropQueue(ulong serverId) {
 			if (QueueExist(serverId) == false)
 				return ;
 			TrackQueue[] temp = new TrackQueue[this._length - 1];
@@ -35,14 +35,14 @@ namespace ChariotSanzzo.Components.MusicQueue {
 			this._queues = temp;
 			this._length -= 1;
 		}
-		public TrackQueue	GetQueue(long serverId, LavalinkGuildConnection conn, DiscordChannel? chat) {
+		public TrackQueue	GetQueue(ulong serverId, LavalinkGuildConnection conn, DiscordChannel? chat) {
 			for (int i = 0; i < this._length; i++)
 				if (this._queues[i]._serverId == serverId)
 					return (this._queues[i]);
 			this.CreateQueue(serverId, conn, chat);
 			return (this._queues[this._length - 1]);
 		}
-		public TrackQueue?	GetQueueUnsafe(long serverId) {
+		public TrackQueue?	GetQueueUnsafe(ulong serverId) {
 			for (int i = 0; i < this._length; i++)
 				if (this._queues[i]._serverId == serverId)
 					return (this._queues[i]);
@@ -50,7 +50,7 @@ namespace ChariotSanzzo.Components.MusicQueue {
 		}
 
 	// 3. Utils
-		public bool QueueExist(long serverId) {
+		public bool QueueExist(ulong serverId) {
 			for (int i = 0; i < this._length; i++)
 				if (this._queues[i]._serverId == serverId)
 					return (true);
