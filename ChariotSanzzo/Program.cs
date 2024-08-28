@@ -25,7 +25,11 @@ namespace ChariotSanzzo {
 		static async Task Main(string[] args) {
 		// -1. Unreasonable
 			var DBConfigHolder = new DBConfig();
-			if (args[1] == "true")
+			if (args.Length < 3 || args[1] != "SafeStart") {
+				Program.ColorWriteLine(ConsoleColor.Red, "Not initalized by Core, aborting...");
+				return ;
+			}
+			if (args[2] == "true")
 				Program._LocalLavalink = true;
 		// 0. TESTING GROUNDS
 

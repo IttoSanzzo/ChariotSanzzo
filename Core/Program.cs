@@ -17,22 +17,27 @@ namespace core {
 
 	// 1. Main
 		static async Task<int> Main(string[] args) {
+		// -1. Testing SafeStart
+			if (args.Length < 1 || args[0] != "SafeStart") {
+				Program.ColorWriteLine(ConsoleColor.Red, "Not initalized using the correct Start.sh, aborting...");
+				return (0);
+			}
 		// 0. Testing Grounds
 
 			if (Program._testing == true)
 				return (0);
 		// 1. Starting
-			Program.CWL(ConsoleColor.Green, $"Starting...");
+			Program.ColorWriteLine(ConsoleColor.Green, $"Starting...");
 			Console.CancelKeyPress += Program.SigIntHandler;
 			var thread = new Thread(new ThreadStart(SocketHandler));
 			thread.Start();
-			Program._ExecArgs = $"{Program._ArgLavalink}";
+			Program._ExecArgs = $"SafeStart {Program._ArgLavalink}";
 		
 		// 2. Start Processes
 			if (Program._ArgLavalink == "true") {
 				StartProcess("pm2", "Lavalink", "start ./Start.sh -n LAVA0");
 				await Task.Delay(1000);
-				Program.CWL(ConsoleColor.Green, "Waiting Lavalink to init...");
+				Program.ColorWriteLine(ConsoleColor.Green, "Waiting Lavalink to init...");
 				await Task.Delay(2000);
 			}
 			Program._Gjallarhorn = Program.LaunchModule("Gjallarhorn", Program._ExecArgs);
@@ -44,7 +49,7 @@ namespace core {
 				Program.Exit(2, "Error: Couldn't start properly.");
 
 		// E. Closing
-			Program.CWL(ConsoleColor.Green, $"Running!");
+			Program.ColorWriteLine(ConsoleColor.Green, $"Running!");
 			await Task.Delay(-1);
 			return (0);
 		}
@@ -74,9 +79,9 @@ namespace core {
 		}
 		private static void		Exit(int code, string mss) {
 			if (code == 0)
-				Program.CWL(ConsoleColor.Green, mss);
+				Program.ColorWriteLine(ConsoleColor.Green, mss);
 			else
-				Program.CWL(ConsoleColor.Red, mss);
+				Program.ColorWriteLine(ConsoleColor.Red, mss);
 			try {
 				Program._Gjallarhorn?.Kill(true);
 				Program._ChariotSanzzo?.Kill(true);
@@ -85,7 +90,7 @@ namespace core {
 					temp.WaitForExit();
 				}
 			} catch (Exception ex) {
-				Program.CWL(ConsoleColor.Gray, ex.ToString());
+				Program.ColorWriteLine(ConsoleColor.Gray, ex.ToString());
 			}
 			Environment.Exit(code);
 		}
@@ -113,7 +118,7 @@ namespace core {
 					response = Encoding.UTF8.GetString(buffer, 0, received);
 					if (response.Contains("<|EOM|>") == true) {
 						response = response.Replace("<|EOM|>", "");
-						Program.CWL(ConsoleColor.Magenta, $"Socket: Message received \"{response}\"");
+						Program.ColorWriteLine(ConsoleColor.Magenta, $"Socket: Message received \"{response}\"");
 						await handler.SendAsync(Encoding.UTF8.GetBytes("<|ACK|>"));
 					}
 					break;
@@ -133,7 +138,7 @@ namespace core {
 		private static void SigIntHandler(object? sender, ConsoleCancelEventArgs ctx) {
 			Program.Exit(0, "\rExiting via SigInt!");
 		}
-		private static void	CWL(ConsoleColor color, string text) {
+		private static void	ColorWriteLine(ConsoleColor color, string text) {
 			Console.ForegroundColor = color;
 			Console.WriteLine("Core: " + text);
 			Console.ResetColor();

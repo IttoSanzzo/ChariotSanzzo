@@ -1,3 +1,3 @@
 #!/bin/bash
 cd ./Core/
-dotnet run
+dotnet run SafeStart
