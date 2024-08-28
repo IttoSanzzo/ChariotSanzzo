@@ -1,4 +1,6 @@
 .vscode/
-./Lavalink/Lavalink.jar
-./Lavalink/plugins/
-./Lavalink/logs/
+**/bin
+**/obj
+/Lavalink/Lavalink.jar
+/Lavalink/plugins
+/Lavalink/logs
