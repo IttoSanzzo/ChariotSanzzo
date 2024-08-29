@@ -4,6 +4,7 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.Lavalink;
 using DSharpPlus.SlashCommands;
+using Gjallarhorn.Utils;
 
 namespace ChariotSanzzo.Commands.Slash {
 	[SlashCommandGroup("SFX", "SFX Commands")]
@@ -26,20 +27,20 @@ namespace ChariotSanzzo.Commands.Slash {
 			if (string.IsNullOrEmpty(username))
 				username = ctx.User.Username;
 			if (sfxLink.Contains("https://") == false) {
-				await SFXCommands.PostGjallarhornCall("Message", username, ctx.Member.AvatarUrl, DiscordColor.Red, $"ChatChannelId:\t{ctx.Channel.Id}\n" + "Message:\tInvalid SFX Link!");
+				await GjallarhornSocket.Post(SFXCommands.BuildPostBody(ctx, "Message", DiscordColor.Red, "Invalid SFX Link!"));
 				return ;
 			}
 			if (sfxLink.Contains("youtube.com/playlist?") == true
 				|| sfxLink.Contains("spotify.com/playlist") == true
 				|| (sfxLink.Contains("soundcloud.com/") == true && sfxLink.Contains("/sets") == true)) {
-				await SFXCommands.PostGjallarhornCall("Message", username, ctx.Member.AvatarUrl, DiscordColor.Red, $"ChatChannelId:\t{ctx.Channel.Id}\n" + "Message:\tPlaylists are forbidden in SFX!");
+				await GjallarhornSocket.Post(SFXCommands.BuildPostBody(ctx, "Message", DiscordColor.Red, "Playlists are forbidden in SFX!"));
 				return ;
 			}
 			else if (ctx.Member.VoiceState == null) {
-				await SFXCommands.PostGjallarhornCall("Message", username, ctx.Member.AvatarUrl, DiscordColor.Red, $"ChatChannelId:\t{ctx.Channel.Id}\n" + "Message:\tFirst, enter a Voice Channel!");
+				await GjallarhornSocket.Post(SFXCommands.BuildPostBody(ctx, "Message", DiscordColor.Red, "First, enter a Voice Channel!"));
 				return ;
 			}
-			await SFXCommands.SendGjallarhornCommAsync("Play", username, ctx.Member.AvatarUrl, DiscordColor.Aquamarine, ctx.Channel.Id, ctx.Member.VoiceState.Channel.Id, $"Link:\t{sfxLink}");
+			await GjallarhornSocket.Post(SFXCommands.BuildPostBody(ctx, "Play", DiscordColor.Aquamarine, null, sfxLink));
 		}
 		[SlashCommand("stop", "Plays the given track link as SFX.")]
 		public async Task Stop(InteractionContext ctx) {
@@ -50,7 +51,7 @@ namespace ChariotSanzzo.Commands.Slash {
 			string	username = ctx.Member.Nickname;
 			if (string.IsNullOrEmpty(username))
 				username = ctx.User.Username;
-			await SFXCommands.SendGjallarhornCommAsync("Exit", username, ctx.Member.AvatarUrl, DiscordColor.Black, ctx.Channel.Id, ctx.Member.VoiceState.Channel.Id, "");
+			await GjallarhornSocket.Post(SFXCommands.BuildPostBody(ctx, "Stop", DiscordColor.Black));
 		}
 		[SlashCommand("index", "Plays the track in the given index position from the current server Music Queue.")]
 		public async Task Play(InteractionContext ctx, [Option("index", "The index for the track")] long index) {
@@ -64,43 +65,24 @@ namespace ChariotSanzzo.Commands.Slash {
 			if (string.IsNullOrEmpty(username))
 				username = ctx.User.Username;
 			if (ctx.Member.VoiceState == null) {
-				await SFXCommands.PostGjallarhornCall("Message", username, ctx.Member.AvatarUrl, DiscordColor.Red, $"ChatChannelId:\t{ctx.Channel.Id}\n" + "Message:\tFirst, enter a Voice Channel!");
+				await GjallarhornSocket.Post(SFXCommands.BuildPostBody(ctx, "Message", DiscordColor.Red, "First, enter a Voice Channel!"));
 				return ;
 			}
 			var queue = MusicCommands.QColle.GetQueueUnsafe(ctx.Guild.Id);
 			if (queue == null) {
-				await SFXCommands.PostGjallarhornCall("Message", username, ctx.Member.AvatarUrl, DiscordColor.Red, $"ChatChannelId:\t{ctx.Channel.Id}\n" + "Message:\tThere is no queue currently in your server!");
+				await GjallarhornSocket.Post(SFXCommands.BuildPostBody(ctx, "Message", DiscordColor.Red, "There is no queue currently in your server!"));
 				return ;
 			}
 			LavalinkTrack? track = queue.GetIndexTrack((int)(index - 1));
 			if (track == null) {
-				await SFXCommands.PostGjallarhornCall("Message", username, ctx.Member.AvatarUrl, DiscordColor.Red, $"ChatChannelId:\t{ctx.Channel.Id}\n" + "Message:\tQueue does not have that index!");
+				await GjallarhornSocket.Post(SFXCommands.BuildPostBody(ctx, "Message", DiscordColor.Red, "Queue does not have that index!"));
 				return ;
 			}
 			string sfxLink = track.Uri.AbsoluteUri;
-			await SFXCommands.SendGjallarhornCommAsync("Play", username, ctx.Member.AvatarUrl, DiscordColor.Aquamarine, ctx.Channel.Id, ctx.Member.VoiceState.Channel.Id, $"Link:\t{sfxLink}");
+			await GjallarhornSocket.Post(SFXCommands.BuildPostBody(ctx, "Play", DiscordColor.Aquamarine, null, sfxLink));
 		}
 
 	// 2. Gjallarhorn Miscs
-	private static async Task<DiscordMessage?>	PostGjallarhornCall(string type, string username, string iconUrl, DiscordColor color, string args) {
-			Program.WriteLine("Sending SFX Query");
-			if (Program.Client == null || SFXCommands._LogChannel == null) {
-				Program.WriteLine("Error: PostGjallarhornCall Fail.");
-				return (null);
-			}
-			var embed = new DiscordEmbedBuilder();
-			embed.WithTitle(type);
-			embed.WithFooter($"By: {username}", iconUrl);
-			embed.WithColor(color.Value);
-			embed.WithDescription(args);
-			return (await SFXCommands._LogChannel.SendMessageAsync(embed.Build()));
-		}
-		private static async Task				SendGjallarhornCommAsync(string type, string username, string userIcon, DiscordColor color, ulong channelId, ulong voiceChannelId, string extras) {
-			await SFXCommands.PostGjallarhornCall(type, username, userIcon, color,
-													$"ChatChannelId:\t{channelId}\n"
-													+ $"VoiceChannelId:\t{voiceChannelId}\n"
-													+ $"{extras}");
-		}
 		private static bool						CheckGjallarhornInChannel(DiscordMember[] members) {
 			for (int i = 0; i < members.Length; i++)
 				if (members[i].Id == SFXCommands._GjallarhornId)
@@ -125,6 +107,21 @@ namespace ChariotSanzzo.Commands.Slash {
 			await Task.Delay(1000 * seconds);
 			await message.DeleteAsync();
 			return ;
+		}
+		private static string		BuildPostBody(InteractionContext ctx, string command, DiscordColor color, string? message = null, string? link = null) {
+			string body = "";
+			body += $"<|Command|><|Value|>{command}\n";
+			body += $"<|Color|><|Value|>{color}\n";
+			if (string.IsNullOrEmpty(message) == false)
+				body += $"<|Message|><|Value|>{message}\n";
+			if (string.IsNullOrEmpty(link) == false)
+				body += $"<|Link|><|Value|>{link}\n";
+			body += $"<|ChatChannelId|><|Value|>{ctx.Channel.Id}\n";
+			if (ctx.Member.VoiceState != null)
+				body += $"<|VoiceChannelId|><|Value|>{ctx.Member.VoiceState.Channel.Id}\n";
+			body += $"<|Username|><|Value|>{ctx.User.Username}\n";
+			body += $"<|Usericon|><|Value|>{ctx.User.AvatarUrl}";
+			return (body);
 		}
 	}
 }

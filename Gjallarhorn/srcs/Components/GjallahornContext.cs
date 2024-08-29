@@ -1,12 +1,13 @@
+using System.Data.Common;
 using DSharpPlus.Entities;
 
 namespace Gjallarhorn.Components {
 	public class GjallarhornContext {
 	// 0. Member Variables
 		public DiscordColor		_color			{get; set;}
-		public string			_command		{get; set;}
-		public string			_username		{get; set;}
-		public string			_userIcon		{get; set;}
+		public string			_command		{get; set;} = "";
+		public string			_username		{get; set;} = "";
+		public string			_userIcon		{get; set;} = "";
 		public string?			_message		{get; set;} = null;
 		public string			_trackLink		{get; set;} = "";
 		public DiscordGuild?	_guild			{get; set;} = null;
@@ -14,48 +15,73 @@ namespace Gjallarhorn.Components {
 		public DiscordChannel?	_voiceChannel	{get; set;} = null;
 		private ulong			_chatChannelId	{get; set;}
 		private ulong?			_voiceChannelId	{get; set;} = null;
+		private ulong?			_userId			{get; set;} = null;
 
 	// 1. Constructor
-		public GjallarhornContext(DiscordEmbed gEmbed) {
-		// 1.0 Base
-			this._color = gEmbed.Color.Value;
-			this._command = gEmbed.Title;
-			this._username = gEmbed.Footer.Text;
-			this._userIcon = gEmbed.Footer.IconUrl.ToString();
-		// 1.1 Ids
-			string[] args = gEmbed.Description.Split('\n');
+		public GjallarhornContext(string gString) {
+			string[] args = gString.Split('\n');
 			bool temp;
 			for (int i = 0; i < args.Length; i++)
 				temp = this.SetParameter(args[i]).Result;
+			if (this._userId != null)
+				temp = this.GetDataFromMember().Result;
 		}
 
 	// 2. Utils
 		private async Task<bool>	SetParameter(string argLine) {
 		// Checks and Sets
-			string[] parts = argLine.Split('\t');
+			string[] parts = argLine.Split("<|Value|>");
 			string	type = parts[0];
 			string	value = parts[1];
 		// Core
 			switch (type) {
-				case ("Message:"):
+				case ("<|UserId|>"):
+					this._userId = ulong.Parse(value);
+				break;
+				case ("<|Color|>"):
+					this._color = new DiscordColor(value);
+				break;
+				case ("<|Command|>"):
+					this._command = value;
+				break;
+				case ("<|Username|>"):
+					this._username = value;
+				break;
+				case ("<|Usericon|>"):
+					this._userIcon = value;
+				break;
+				case ("<|Message|>"):
 					this._message = value;
 				break;
-				case ("ChatChannelId:"):
+				case ("<|ChatChannelId|>"):
 					this._chatChannelId = ulong.Parse(value);
 					this._chatChannel = await GjallarhornContext.SetChannelAsync((ulong)this._chatChannelId);
 					if (this._chatChannel == null)
 						return (false);
 					this._guild = this._chatChannel.Guild;
 				break;
-				case ("VoiceChannelId:"):
+				case ("<|VoiceChannelId|>"):
 					this._voiceChannelId = ulong.Parse(value);
 					this._voiceChannel = await GjallarhornContext.SetChannelAsync((ulong)this._voiceChannelId);
 				break;
-				case ("Link:"):
+				case ("<|Link|>"):
 					this._trackLink = value;
 				break;
 				default:
 					return (false);
+			}
+			return (true);
+		}
+		private async Task<bool>	GetDataFromMember() {
+			if (Program.Client == null || this._guild == null || this._userId == null)
+				return (false);
+			DiscordMember member = await this._guild.GetMemberAsync((ulong)this._userId);
+			this._userIcon = member.AvatarUrl;
+			this._username = member.Username;
+			this._guild = member.Guild;
+			if (member.VoiceState != null) {
+				this._voiceChannel = member.VoiceState.Channel;
+				this._voiceChannelId = member.VoiceState.Channel.Id;
 			}
 			return (true);
 		}

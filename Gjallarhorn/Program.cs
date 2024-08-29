@@ -6,12 +6,15 @@ using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
 using Gjallarhorn.Config;
 using Gjallarhorn.Events;
+using System.Net.Sockets;
+using Gjallarhorn.Utils;
 
 namespace Gjallarhorn {
 	internal class Program {
 	// 0. Program Variables
-		public static DiscordClient?			Client		{get; set;} = null;
-		public static CommandsNextExtension?	Commands	{get; set;}
+		public static DiscordClient?			Client			{get; set;} = null;
+		public static CommandsNextExtension?	Commands		{get; set;}
+		public static Thread?					SocketThread	{get; set;} = null;
 	// 0.1. Config Program Variables
 		public static bool 						_LocalLavalink	{get; set;} = false;
 
@@ -61,23 +64,25 @@ namespace Gjallarhorn {
 		// 5. Finishing, Connecting and Looping
 			await Client.ConnectAsync();
 			Client.LavalinkConnectAsync();
+			// Program.SocketThread = GjallarhornSocket.OpenGjallarhornSocket();
+			GjallarhornSocket.OpenGjallarhornSocket();
 			Program.ColorWriteLine(ConsoleColor.DarkYellow, $"{config._name} is up!");
 			await Task.Delay(-1);
 		}
-		public static void	ColorWriteLine(ConsoleColor color, string text) {
+		public static void	ColorWriteLine(ConsoleColor color, string? text) {
 			Console.ForegroundColor = ConsoleColor.DarkYellow;
 			Console.Write($"Gjallarhorn: ");
 			Console.ForegroundColor = color;
 			Console.WriteLine(text);
 			Console.ResetColor();
 		}
-		public static void	WriteLine(string text) {
+		public static void	WriteLine(string? text) {
 			Console.ForegroundColor = ConsoleColor.DarkYellow;
 			Console.Write($"Gjallarhorn: ");
 			Console.ResetColor();
 			Console.WriteLine(text);
 		}
-		public static void	Write(string text) {
+		public static void	Write(string? text) {
 			Console.ForegroundColor = ConsoleColor.DarkYellow;
 			Console.Write($"Gjallarhorn: ");
 			Console.ResetColor();

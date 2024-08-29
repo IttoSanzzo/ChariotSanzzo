@@ -5,7 +5,7 @@ namespace Gjallarhorn.Events {
 	public static class	EventsInit{
 		public static void EventsInitRun(this DiscordClient client) {
 			client.Ready += Client_Ready;
-			client.MessageCreated += Events.ChariotConn.GetChariotCommunication;
+			// client.MessageCreated += Events.ChariotConn.GetChariotCommunication;
 			// client.ComponentInteractionCreated += Events.Music.MusicInterectionButton;
 		}
 		public static void EventsInitRun(this CommandsNextExtension command) {
