@@ -74,6 +74,8 @@ namespace ChariotSanzzo.Components.MusicQueue {
 		}
 		public static async Task<string>	GetArtworkAsync(Uri uri) {
 			string?	artwork = null;
+			try {
+
 			switch (uri.Host) {
 				case ("youtube.com"):
 				case ("www.youtube.com"):
@@ -93,6 +95,9 @@ namespace ChariotSanzzo.Components.MusicQueue {
 				case ("open.spotify.com"):
 					artwork = await Program.SpotifyConn.GetArtWorkAsync(uri);
 				break;
+			}
+			} catch (Exception ex) {
+				Program.WriteException(ex);
 			}
 			if (artwork == null)
 				return ("https://i.redd.it/dtljzwihuh861.jpg");

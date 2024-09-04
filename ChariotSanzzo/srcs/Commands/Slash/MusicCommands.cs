@@ -1,3 +1,4 @@
+using ChariotSanzzo.Components;
 using ChariotSanzzo.Components.MusicQueue;
 using ChariotSanzzo.Database;
 using ChariotSanzzo.Events;
@@ -11,7 +12,7 @@ using STPlib;
 namespace ChariotSanzzo.Commands.Slash {
 	// -1. Struct
 	public struct t_tools {
-		public ulong						serverId {get; set;}
+		public ulong					serverId {get; set;}
 		public TrackQueue				queue {get; set;}
 		public LavalinkExtension		llInstace {get; set;}
 		public LavalinkNodeConnection	node {get; set;}
@@ -21,7 +22,6 @@ namespace ChariotSanzzo.Commands.Slash {
 	[SlashCommandGroup("Music", "General Music Slash Commands.")]
 	public class MusicCommands : ApplicationCommandModule {
 	// -1. Member Variables
-		public static QueueCollection			QColle		{get; set;} = new QueueCollection();
 		private static LavalinkExtension		_llInstance	{get; set;} = Program.Client.GetLavalink();
 		private static LavalinkNodeConnection	_node		{get; set;} = _llInstance.ConnectedNodes.Values.First();
 
@@ -140,7 +140,7 @@ namespace ChariotSanzzo.Commands.Slash {
 			// 2. Core
 			await tools.conn.StopAsync();
 			await tools.conn.DisconnectAsync();
-			MusicCommands.QColle.DropQueue(tools.serverId);
+			ChariotMusicCalls.QColle.DropQueue(tools.serverId);
 
 			// 3. Respond
 			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed: embed));
@@ -457,7 +457,7 @@ namespace ChariotSanzzo.Commands.Slash {
 			var embed = new DiscordEmbedBuilder();
 			embed.WithColor(DiscordColor.Red);
 
-			// 1. Primary Checks
+		// 1. Primary Checks
 			if (ctx.Member.VoiceState == null || ctx.Member.VoiceState.Channel == null) {
 				embed.WithDescription("Please enter a Voice Channel!");
 				await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
@@ -491,7 +491,7 @@ namespace ChariotSanzzo.Commands.Slash {
 				return (false, tools);
 			}
 			if (type != 1)
-				tools.queue = MusicCommands.QColle.GetQueue(tools.serverId, tools.conn, ctx.Channel);
+				tools.queue = ChariotMusicCalls.QColle.GetQueue(tools.serverId, tools.conn, ctx.Channel);
 
 			// 2. Checks per type
 			switch (type) {

@@ -70,6 +70,7 @@ namespace ChariotSanzzo {
 		// 5. Finishing, Connecting and Looping
 			await Client.ConnectAsync();
 			Client.LavalinkConnectAsync();
+			ChariotSanzzoSocket.OpenChariotControlSocket();
 			Program.ColorWriteLine(ConsoleColor.Blue, $"{config._name} is up!");
 			await Task.Delay(-1);
 		}
@@ -91,6 +92,9 @@ namespace ChariotSanzzo {
 			Console.Write($"ChariotSanzzo: ");
 			Console.ResetColor();
 			Console.Write(text);
+		}
+		public static void	WriteException(Exception ex) {
+			Program.ColorWriteLine(ConsoleColor.Yellow ,ex.ToString());
 		}
 	}
 }

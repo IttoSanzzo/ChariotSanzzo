@@ -35,14 +35,22 @@ namespace core {
 			Program._ExecArgs = $"SafeStart {Program._ArgLavalink}";
 		
 		// 2. Start Processes
+		do {
+
 			Program._Lavalink = Program.LaunchLavalink().Result;
 			Program._Gjallarhorn = Program.LaunchModule("Gjallarhorn", Program._ExecArgs);
 			Program._ChariotSanzzo = Program.LaunchModule("ChariotSanzzo", Program._ExecArgs);
 
 		// 3. Checks
 			await Task.Delay(1000 * 7);
-			if (Program._ChariotSanzzo.HasExited == true || Program._Gjallarhorn.HasExited == true)
-				Program.Exit(2, "Error: Couldn't start properly.");
+			if (Program._ChariotSanzzo.HasExited == true || Program._Gjallarhorn.HasExited == true) {
+				Program.ColorWriteLine(ConsoleColor.Red, "Error: Couldn't start properly, trying again...");
+				if (Program._ChariotSanzzo.HasExited != true)
+					Program._ChariotSanzzo.Kill(true);
+				if (Program._Gjallarhorn.HasExited != true)
+					Program._Gjallarhorn.Kill(true);
+			}
+		} while (Program._ChariotSanzzo.HasExited == true || Program._Gjallarhorn.HasExited == true);
 
 		// E. Closing
 			Program.ColorWriteLine(ConsoleColor.Green, $"Running!");
@@ -146,12 +154,54 @@ namespace core {
 			}
 		}
 		private static void SigIntHandler(object? sender, ConsoleCancelEventArgs ctx) {
-			Program.Exit(0, "\rExiting via SigInt!");
+			while (true) {
+				Program.Write("\rInsert the Command --> ");
+				string? command = Console.ReadLine();
+				if (command == null)
+					continue;
+				switch (command) {
+					case("restart"):
+						Program.ColorWriteLine(ConsoleColor.Green, "Restarting all sub-bots!");
+						Program._Gjallarhorn.Kill(true);
+						Program._Gjallarhorn = Program.LaunchModule("Gjallarhorn", Program._ExecArgs);
+						Program._ChariotSanzzo.Kill(true);
+						Program._ChariotSanzzo = Program.LaunchModule("ChariotSanzzo", Program._ExecArgs);
+					break;
+					case("restart gjallarhorn"):
+						Program.ColorWriteLine(ConsoleColor.Green, "Restarting the Gjallarhorn!");
+						Program._Gjallarhorn.Kill(true);
+						Program._Gjallarhorn = Program.LaunchModule("Gjallarhorn", Program._ExecArgs);
+					break;
+					case("restart chariot"):
+						Program.ColorWriteLine(ConsoleColor.Green, "Restarting the Chariot!");
+						Program._ChariotSanzzo.Kill(true);
+						Program._ChariotSanzzo = Program.LaunchModule("ChariotSanzzo", Program._ExecArgs);
+					break;
+					case("stop"):
+						Program.Exit(0, "\rExiting via SigInt!");
+					break;
+					default:
+						Program.Write("Command Not Recognized, try again...");
+					break;
+				}
+			}
 		}
 		private static void	ColorWriteLine(ConsoleColor color, string text) {
 			Console.ForegroundColor = color;
 			Console.WriteLine("Core: " + text);
 			Console.ResetColor();
+		}
+		private static void	WriteLine(string text) {
+			Console.ForegroundColor = ConsoleColor.Magenta;
+			Console.Write("Core: ");
+			Console.ResetColor();
+			Console.WriteLine(text);
+		}
+		private static void	Write(string text) {
+			Console.ForegroundColor = ConsoleColor.Magenta;
+			Console.Write("Core: ");
+			Console.ResetColor();
+			Console.Write(text);
 		}
 	}
 }

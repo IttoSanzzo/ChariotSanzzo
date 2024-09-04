@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Net;
 using System.Runtime.CompilerServices;
 using ChariotSanzzo.Commands.Slash;
+using ChariotSanzzo.Components;
 using ChariotSanzzo.Components.MusicQueue;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -18,7 +19,7 @@ namespace ChariotSanzzo.Events {
 		public static async Task PlayNext(LavalinkGuildConnection conn, TrackFinishEventArgs ctx) {
 			if (ctx.Reason != TrackEndReason.Finished)
 				return ;
-			var	queue = MusicCommands.QColle.GetQueueUnsafe(ctx.Player.Guild.Id);
+			var	queue = ChariotMusicCalls.QColle.GetQueueUnsafe(ctx.Player.Guild.Id);
 			if (queue == null)
 				return ;
 			var	toPlayNow = await queue.UseNextTrackAsync();
@@ -37,13 +38,13 @@ namespace ChariotSanzzo.Events {
 		}
 		public static Task Disconnected(DiscordClient sender, VoiceStateUpdateEventArgs ctx) {
 			if (ctx.User.Id == 1070103829934260344 && ctx.After.Member.VoiceState == null)
-				MusicCommands.QColle.DropQueue(ctx.Before.Channel.Guild.Id);
+				ChariotMusicCalls.QColle.DropQueue(ctx.Before.Channel.Guild.Id);
 			return (Task.CompletedTask);
 		}
 		public static Task NewConn(LavalinkGuildConnection conn, GuildConnectionCreatedEventArgs ctx) {
 			Program.WriteLine("[CONNECTED!]");
 			conn.StopAsync();
-			MusicCommands.QColle.DropQueue(conn.Guild.Id);
+			ChariotMusicCalls.QColle.DropQueue(conn.Guild.Id);
 			return (Task.CompletedTask);
 		}
 
@@ -58,7 +59,7 @@ namespace ChariotSanzzo.Events {
 					await ctx.Interaction.DeferAsync();
 					await ctx.Interaction.DeleteOriginalResponseAsync();
 					// 0. Initialization
-					queue = MusicCommands.QColle.GetQueueUnsafe(ctx.Guild.Id);
+					queue = ChariotMusicCalls.QColle.GetQueueUnsafe(ctx.Guild.Id);
 					if (queue == null)
 						return ;
 					switch (queue._pauseState) {
@@ -81,7 +82,7 @@ namespace ChariotSanzzo.Events {
 					await ctx.Interaction.DeferAsync();
 					await ctx.Interaction.DeleteOriginalResponseAsync();
 				// 0. Initialization
-					queue = MusicCommands.QColle.GetQueueUnsafe(ctx.Guild.Id);
+					queue = ChariotMusicCalls.QColle.GetQueueUnsafe(ctx.Guild.Id);
 					if (queue == null)
 						return ;
 
@@ -102,7 +103,7 @@ namespace ChariotSanzzo.Events {
 					await ctx.Interaction.DeferAsync();
 					await ctx.Interaction.DeleteOriginalResponseAsync();
 				// 0. Initialization
-					queue = MusicCommands.QColle.GetQueueUnsafe(ctx.Guild.Id);
+					queue = ChariotMusicCalls.QColle.GetQueueUnsafe(ctx.Guild.Id);
 					if (queue == null)
 						return ;
 
@@ -123,7 +124,7 @@ namespace ChariotSanzzo.Events {
 					await ctx.Interaction.DeferAsync();
 					await ctx.Interaction.DeleteOriginalResponseAsync();
 				// 0. Initialization
-					queue = MusicCommands.QColle.GetQueueUnsafe(ctx.Guild.Id);
+					queue = ChariotMusicCalls.QColle.GetQueueUnsafe(ctx.Guild.Id);
 					if (queue == null)
 						return ;
 					queue.SetLoop(queue._loop + 1);
@@ -133,7 +134,7 @@ namespace ChariotSanzzo.Events {
 					await ctx.Interaction.DeferAsync();
 					await ctx.Interaction.DeleteOriginalResponseAsync();
 				// 0. Initialization
-					queue = MusicCommands.QColle.GetQueueUnsafe(ctx.Guild.Id);
+					queue = ChariotMusicCalls.QColle.GetQueueUnsafe(ctx.Guild.Id);
 					if (queue == null)
 						return ;
 					await queue.ShuffleTracks();
