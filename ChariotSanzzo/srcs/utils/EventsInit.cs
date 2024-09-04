@@ -1,19 +1,23 @@
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
-using DSharpPlus.Lavalink;
 
 namespace ChariotSanzzo.Events {
 	public static class	EventsInit{
+	// 0. ClientReady
+		private static Task ClientReady(DiscordClient sender, DSharpPlus.EventArgs.ReadyEventArgs args) {
+			return (Task.CompletedTask);
+		}
+
+	// 1. DiscordClient Events
 		public static void EventsInitRun(this DiscordClient client) {
-			client.Ready += Client_Ready;
+			client.Ready += ClientReady;
 			client.MessageCreated += Events.STPDiceRoller.DiceRoller;
 			client.ComponentInteractionCreated += Events.Music.MusicInterectionButton;
 		}
+
+	// 2. CommdsNextExtension Events Events
 		public static void EventsInitRun(this CommandsNextExtension command) {
 			command.CommandErrored += STPCommandErrored.CmdErrTask;
-		}
-		private static Task Client_Ready(DiscordClient sender, DSharpPlus.EventArgs.ReadyEventArgs args) {
-			return (Task.CompletedTask);
 		}
 	}
 }

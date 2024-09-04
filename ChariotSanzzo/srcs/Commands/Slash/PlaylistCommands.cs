@@ -1,4 +1,4 @@
-using ChariotSanzzo.Components.MusicQueue;
+using ChariotSanzzo.Components.MusicComponent;
 using ChariotSanzzo.Config;
 using ChariotSanzzo.Database;
 using DSharpPlus.Entities;
@@ -11,12 +11,10 @@ using STPlib;
 namespace ChariotSanzzo.Commands.Slash {
 	[SlashCommandGroup("music_playlist", "General Playlist Slash Commands.")]
 	public class PlaylistCommands : ApplicationCommandModule {
-	// 0. Member Variables
+	// C. Constructor
+		static PlaylistCommands() {}
 
-	// 1. Constructor
-	static PlaylistCommands() {}
-
-	// 1. Constructor
+	// 0. Core
 		[SlashCommand("show", "Shows your saved playlists.")]
 		public static async Task show(InteractionContext ctx, [Option("index", "Index for the playlist to be shown.")] long listindex = 0, [Option("User", "The user from which I should retrieve the list.")] DiscordUser? givenUser = null) {
 			await ctx.DeferAsync();
@@ -212,11 +210,11 @@ namespace ChariotSanzzo.Commands.Slash {
 				for (int i = 0; i < musicTracks.Length; i++)
 					tools.queue.AddTrackToQueue(new ChariotTrack(musicTracks[i], ctx.User));
 				var lastEmbed = new DiscordEmbedBuilder();
-				lastEmbed.WithColor(tools.queue._tracks[^1]._color);
-				lastEmbed.WithDescription($"{tools.queue._tracks[^1]._favicon}{ctx.User.Username} imported a playlist! {musicTracks.Length} new tracks!");
+				lastEmbed.WithColor(tools.queue.Tracks[^1].Color);
+				lastEmbed.WithDescription($"{tools.queue.Tracks[^1].Favicon}{ctx.User.Username} imported a playlist! {musicTracks.Length} new tracks!");
 				await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(lastEmbed.Build()));
 				if (tools.conn.CurrentState.CurrentTrack == null)
-					await tools.queue._conn.PlayAsync(await tools.queue.UseNextTrackAsync());
+					await tools.queue.Conn.PlayAsync(await tools.queue.UseNextTrackAsync());
 				await Task.Delay(1000 * 30);
 				await ctx.DeleteResponseAsync();
 			}
@@ -224,12 +222,13 @@ namespace ChariotSanzzo.Commands.Slash {
 				await ctx.DeleteResponseAsync();
 			return ;
 		}
-	// 4. Database ChariotMusicRelated
+	
+	// 1. Database ChariotMusicRelated
 
 	// 3. Database Stuff
 		public static async Task<bool>			ExportPlaylistAsync(long userid, string username, string listname, string listlink) {
 			try {
-				using (var conn = new NpgsqlConnection(DBConfig._conn)) {
+				using (var conn = new NpgsqlConnection(DBConfig.Conn)) {
 					await conn.OpenAsync();
 					string query = "INSERT INTO data.cm_playlists (userid, username, listname, listlink)\n"
 									+ $"VALUES ({userid}, '{username}', '{listname}', '{listlink}')";
@@ -239,14 +238,14 @@ namespace ChariotSanzzo.Commands.Slash {
 				}
 				return (true);
 			} catch (Exception ex) {
-				if (DBEngine._debug == true)
+				if (DBEngine.Debug == true)
 					Program.WriteLine($"[->ImportPlaylistAsyncError\n{ex.ToString()}\n]");
 				return (false);
 			}
 		}
 		public static async Task<bool>			DeletePlaylistAsync(long userid, string listname) {
 			try {
-				using (var conn = new NpgsqlConnection(DBConfig._conn)) {
+				using (var conn = new NpgsqlConnection(DBConfig.Conn)) {
 					await conn.OpenAsync();
 					string query = "DELETE FROM data.cm_playlists\n"
 									+ $"WHERE userid = {userid} AND listname = '{listname}'";
@@ -256,7 +255,7 @@ namespace ChariotSanzzo.Commands.Slash {
 				}
 				return (true);
 			} catch (Exception ex) {
-				if (DBEngine._debug == true)
+				if (DBEngine.Debug == true)
 					Program.WriteLine($"[->ImportPlaylistAsyncError\n{ex.ToString()}\n]");
 				return (false);
 			}
@@ -264,7 +263,7 @@ namespace ChariotSanzzo.Commands.Slash {
 		public static async Task<string[][]?>	GetUserPlaylistsAsync(long userid) {
 			string[][]?	retObj = null;
 			try {
-				using (var conn = new NpgsqlConnection(DBConfig._conn)) {
+				using (var conn = new NpgsqlConnection(DBConfig.Conn)) {
 					await conn.OpenAsync();
 					string query = "SELECT d.listname, d.listlink FROM data.cm_playlists d \n"
 									+ $"WHERE userid = {userid}\n"
@@ -285,7 +284,7 @@ namespace ChariotSanzzo.Commands.Slash {
 				Program.WriteLine("Returning");
 				return (retObj);
 			} catch(Exception ex) {
-				if (DBEngine._debug == true)
+				if (DBEngine.Debug == true)
 					Program.WriteLine($"[->ImportPlaylistAsyncError\n{ex.ToString()}\n]");
 				return (null);
 			}
@@ -293,7 +292,7 @@ namespace ChariotSanzzo.Commands.Slash {
 		public static async Task<string?>		ImportPlaylistAsync(long userid, int? listindex = 0) {
 			string	listlink;
 			try {
-				using (var conn = new NpgsqlConnection(DBConfig._conn)) {
+				using (var conn = new NpgsqlConnection(DBConfig.Conn)) {
 					await conn.OpenAsync();
 					string query = "SELECT d.listlink\n"
 									+ "FROM data.cm_playlists d\n"
@@ -307,7 +306,7 @@ namespace ChariotSanzzo.Commands.Slash {
 				}
 				return (listlink);
 			} catch(Exception ex) {
-				if (DBEngine._debug == true)
+				if (DBEngine.Debug == true)
 					Program.WriteLine($"[->ImportPlaylistAsyncError\n{ex.ToString()}\n]");
 				return (null);
 			}
@@ -315,7 +314,7 @@ namespace ChariotSanzzo.Commands.Slash {
 		public static async Task<int>			CountNameEntriesAsync(long userid, string listname) {
 			int count;
 			try {
-				using (var conn = new NpgsqlConnection(DBConfig._conn)) {
+				using (var conn = new NpgsqlConnection(DBConfig.Conn)) {
 					await conn.OpenAsync();
 					string query = "SELECT COUNT (*)\n"
 									+ "FROM data.cm_playlists\n"
@@ -328,14 +327,14 @@ namespace ChariotSanzzo.Commands.Slash {
 				}
 				return (count);
 			} catch(Exception ex) {
-				if (DBEngine._debug == true)
+				if (DBEngine.Debug == true)
 					Program.WriteLine($"[->ImportPlaylistAsyncError\n{ex.ToString()}\n]");
 				return (0);
 			}
 		}
 	
-	// 5. Miscs
-		private static DiscordEmbed[]				GetPlaylistEmbed(ChariotTrack[] tracks, DiscordUser user) {
+	// E. Miscs
+		private static DiscordEmbed[]			GetPlaylistEmbed(ChariotTrack[] tracks, DiscordUser user) {
 			Program.WriteLine("GET Playlist QUEUE ENTER");
 		// 0. Base Check
 			if (tracks.Length == 0) {
@@ -361,7 +360,7 @@ namespace ChariotSanzzo.Commands.Slash {
 				string description = "";
 				while (i < tracks.Length && description.Length < 3700) {
 					Program.WriteLine($"Entry index [{i}]");
-					description += $"{tracks[i]._favicon} ` {i + 1} ` -> {tracks[i]._title}\n";
+					description += $"{tracks[i].Favicon} ` {i + 1} ` -> {tracks[i].Title}\n";
 					i++;
 				}
 				embed.WithDescription(description);
@@ -370,7 +369,7 @@ namespace ChariotSanzzo.Commands.Slash {
 		// 2. Return
 			return (retEmbedArr);
 		}
-		private static async Task					DelMssTimerAsync(int seconds, DiscordMessage message) /* Deletes the given discord message past the given seconds */ {
+		private static async Task				DelMssTimerAsync(int seconds, DiscordMessage message) /* Deletes the given discord message past the given seconds */ {
 			await Task.Delay(1000 * seconds);
 			await message.DeleteAsync();
 			return ;

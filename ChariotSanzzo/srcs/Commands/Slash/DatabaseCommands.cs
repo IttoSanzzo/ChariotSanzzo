@@ -1,5 +1,3 @@
-using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
 using ChariotSanzzo.Database;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
@@ -26,9 +24,9 @@ namespace ChariotSanzzo.Commands.Slash {
 			if (retrieve.Item1 == true && retrieve.Item2 != null) {
 				var embed = new DiscordEmbedBuilder() {
 					Color = DiscordColor.DarkBlue,
-					Title = $"{retrieve.Item2._userName}'s Profile",
-					Description = $"Server: {retrieve.Item2._serverName}\n" +
-									$"ServerId: {retrieve.Item2._serverId}",
+					Title = $"{retrieve.Item2.UserName}'s Profile",
+					Description = $"Server: {retrieve.Item2.ServerName}\n" +
+									$"ServerId: {retrieve.Item2.ServerId}",
 				};
 				await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed: embed));
 			}

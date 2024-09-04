@@ -7,21 +7,19 @@ using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
 using ChariotSanzzo.Components.SpotifyApi;
-using ChariotSanzzo.Database;
-using ChariotSanzzo.Commands.Slash;
 using ChariotSanzzo.Components.SoundcloudApi;
 
 namespace ChariotSanzzo {
 	internal class Program {
-	// 0. Program Variables
+	// M. Program Variables
 		public static DiscordClient?			Client			{get; set;}
 		public static CommandsNextExtension?	Commands		{get; set;}
 		public static SpotifyConn				SpotifyConn		{get; set;} = new SpotifyConn();
 		public static SoundcloudConn			SoundcloudConn	{get; set;} = new SoundcloudConn();
-	// 0.1. Config Program Variables
-		public static bool 							_LocalLavalink	{get; set;} = false;
+	// M.1. Config Program Variables
+		public static bool 						LocalLavalink	{get; set;} = false;
 
-	// 1. Main
+	// 0. Main
 		static async Task Main(string[] args) {
 		// -1. Unreasonable
 			var DBConfigHolder = new DBConfig();
@@ -30,17 +28,17 @@ namespace ChariotSanzzo {
 				return ;
 			}
 			if (args[2] == "true")
-				Program._LocalLavalink = true;
+				Program.LocalLavalink = true;
 		// 0. TESTING GROUNDS
 
 		// 1. Importing Json configs and starting
 			var config = new ConfigReader();
-			Program.ColorWriteLine(ConsoleColor.Blue, $"Ohayou... {config._name} is waking up!");
+			Program.ColorWriteLine(ConsoleColor.Blue, $"Ohayou... {config.Name} is waking up!");
 
 		// 2. Setting Discord Client
 			var discordConfig = new DiscordConfiguration() {
 				Intents = DiscordIntents.All,
-				Token = config._token,
+				Token = config.Token,
 				TokenType = TokenType.Bot,
 				AutoReconnect = true
 			};
@@ -64,14 +62,13 @@ namespace ChariotSanzzo {
 			Commands.EventsInitRun();
 
 		// 4. Lavalink Setup
-			// SpotifyConn.RunInit();
 			Client.LavalinkRunInit();
 
 		// 5. Finishing, Connecting and Looping
 			await Client.ConnectAsync();
 			Client.LavalinkConnectAsync();
 			ChariotSanzzoSocket.OpenChariotControlSocket();
-			Program.ColorWriteLine(ConsoleColor.Blue, $"{config._name} is up!");
+			Program.ColorWriteLine(ConsoleColor.Blue, $"{config.Name} is up!");
 			await Task.Delay(-1);
 		}
 		public static void	ColorWriteLine(ConsoleColor color, string text) {

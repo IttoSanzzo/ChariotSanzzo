@@ -10,10 +10,10 @@ using Newtonsoft.Json.Linq;
 
 namespace ChariotSanzzo.Components.SoundcloudApi {
 	public class SoundcloudConn {
-	// 0. Member Variables
-		private static HttpClient	_httpClient	{get; set;} = new HttpClient(new SocketsHttpHandler {PooledConnectionLifetime = TimeSpan.FromMinutes(1)});
-		public string				_oAuthToken	{get; private set;} = "";
-	// 1. Constructors
+	// M. Member Variables
+		private static HttpClient	HttpClient	{get; set;} = new HttpClient(new SocketsHttpHandler {PooledConnectionLifetime = TimeSpan.FromMinutes(1)});
+		public string				OAuthToken	{get; private set;} = "";
+	// C. Constructors
 		public SoundcloudConn() {
 			this.RunInit();
 		}
@@ -29,10 +29,10 @@ namespace ChariotSanzzo.Components.SoundcloudApi {
 				Program.WriteLine("Error: SoundcloudConn: OAuthToken null!");
 				return ;
 			}
-			this._oAuthToken = oAuthToken;
+			this.OAuthToken = oAuthToken;
 		}
 	
-	// 2. Gets
+	// G. Gets
 		public async Task<string?>	GetArtWorkAsync(Uri trackUri) {
 			string? jsonFetch = await this.FetchWebApiAsync(trackUri.AbsolutePath);
 			if (jsonFetch == null)
@@ -44,17 +44,17 @@ namespace ChariotSanzzo.Components.SoundcloudApi {
 			return (subStr.Remove(len));
 		}
 
-	// 3. Core
+	// 0. Core
 		private async Task<string?>	FetchWebApiAsync(string endpoint) {
 		// 0. Form HttpRequestMessage
 			var requestQuery = new HttpRequestMessage(HttpMethod.Get, new Uri($"https://soundcloud.com/{endpoint}"));
 			requestQuery.Headers.Add("Accept", $"application/json; charset=utf-8");
-			requestQuery.Headers.Add("Authorization", $"OAuth {this._oAuthToken}");
+			requestQuery.Headers.Add("Authorization", $"OAuth {this.OAuthToken}");
 			string?	fetchRet = null;
 
 		// 1. Getting Response
 			try {
-				HttpResponseMessage response = await SoundcloudConn._httpClient.SendAsync(requestQuery);
+				HttpResponseMessage response = await SoundcloudConn.HttpClient.SendAsync(requestQuery);
 				response.EnsureSuccessStatusCode();
 				using (var reader = new StreamReader(await response.Content.ReadAsStreamAsync()))
 					fetchRet = await reader.ReadToEndAsync();

@@ -2,14 +2,17 @@ using DSharpPlus.SlashCommands;
 
 namespace ChariotSanzzo.Database {
 	public class DBUser {
-		public string	_userName {get; set;} = "";
-		public string	_serverName {get; set;} = "";
-		public ulong	_serverId {get; set;} = 0;
+	// M. Member Variables
+		public string	UserName	{get; set;} = "";
+		public string	ServerName	{get; set;} = "";
+		public ulong	ServerId	{get; set;} = 0;
+	
+	// C. Constructors
 		public	DBUser() {}
 		public	DBUser(InteractionContext ctx) {
-			_userName = ctx.User.Username;
-			_serverName = ctx.Guild.Name;
-			_serverId = ctx.Guild.Id;
+			UserName = ctx.User.Username;
+			ServerName = ctx.Guild.Name;
+			ServerId = ctx.Guild.Id;
 		}
 	}
 }

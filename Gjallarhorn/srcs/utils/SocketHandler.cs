@@ -11,8 +11,8 @@ namespace Gjallarhorn.Utils {
 		private static readonly string		_hostName				= Dns.GetHostName();
 		private static readonly IPHostEntry	_localhost				= Dns.GetHostEntryAsync(_hostName).Result;
 		private static readonly IPAddress	_localIpAddress			= _localhost.AddressList[0];
-		private const int					_chariotSanzzoPort		= 11366;
-		private const int					_controlPanelPort		= 11367;
+		private const int					_chariotSanzzoPort		= 11766;
+		private const int					_controlPanelPort		= 11767;
 		private static readonly IPEndPoint	_chariotSanzzoEndpoint	= new(_localIpAddress, _chariotSanzzoPort);
 		private static readonly IPEndPoint	_controlPanelEndpoint	= new(_localIpAddress, _controlPanelPort);
 
@@ -29,7 +29,7 @@ namespace Gjallarhorn.Utils {
 	// 2. Core Functions
 		private static async void	ControlPanelSocketHandler() {
 			var listener = new HttpListener();
-			listener.Prefixes.Add($"http://localhost:{_controlPanelPort}/");
+			listener.Prefixes.Add($"http://+:{_controlPanelPort}/");
 			listener.Start();
 			Program.WriteLine("ControlPanel Socket Ready...");
 			while (true) {

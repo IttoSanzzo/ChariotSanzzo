@@ -1,141 +1,153 @@
-using System.Collections;
 using ChariotSanzzo.Events;
 using DSharpPlus.Entities;
 using DSharpPlus.Lavalink;
 
-namespace ChariotSanzzo.Components.MusicQueue {
+namespace ChariotSanzzo.Components.MusicComponent {
 	public class TrackQueue {
-	// 0. Member Variables
-		private QueueCollection			_qColle			{get; set;}
-		private static Random			_random			{get; set;} = new Random();
-		public LavalinkGuildConnection	_conn			{get; private set;}
-		public DiscordChannel?			_chat			{get; private set;} = null;
-		public ulong						_serverId		{get; private set;}
-		public bool						_pauseState		{get; private set;} = false;
-		public int						_length			{get; private set;} = 0;
-		public int						_loop			{get; private set;} = 0;
-		public int						_currentIndex	{get; private set;} = -1;
-		public ChariotTrack[]			_tracks			{get; set;} = new ChariotTrack[0];
-		private bool					_cleanConfig	{get; set;} = true;
-		private bool					_advanConfig	{get; set;} = true;
-		public DiscordMessage?			_pauseMss		{get; private set;} = null;
-		public DiscordMessage?			_lastPlayerMss	{get; private set;} = null;
+	// M. Member Variables
+		private QueueCollection			QColle			{get; set;}
+		private static Random			Random			{get; set;} = new Random();
+		public LavalinkGuildConnection	Conn			{get; private set;}
+		public DiscordChannel?			Chat			{get; private set;} = null;
+		public ulong					ServerId		{get; private set;}
+		public bool						PauseState		{get; private set;} = false;
+		public int						Length			{get; private set;} = 0;
+		public int						Loop			{get; private set;} = 0;
+		public int						CurrentIndex	{get; private set;} = -1;
+		public ChariotTrack[]			Tracks			{get; set;} = new ChariotTrack[0];
+		private bool					CleanConfig		{get; set;} = true;
+		private bool					AdvanConfig		{get; set;} = true;
+		public DiscordMessage?			PauseMss		{get; private set;} = null;
+		public DiscordMessage?			LastPlayerMss	{get; private set;} = null;
 
-	// 1. Constructors
+	// C. Constructors
 		~TrackQueue() {
-			Program.WriteLine("Queue Destructed!");
+			Program.WriteLine($"Queue Destructed! Guild: {this.ServerId}");
 		}
 		public TrackQueue(ulong serverId, LavalinkGuildConnection conn, DiscordChannel? chat, QueueCollection qColle) {
-			this._qColle = qColle;
-			this._serverId = serverId;
-			this._conn = conn;
-			this._chat = chat;
-			if (this._conn.CurrentState.CurrentTrack != null)
-				this._conn.StopAsync();
-			this._conn.PlaybackFinished += Music.PlayNext;
-			Program.WriteLine("Queue Constructed!");
+			this.QColle = qColle;
+			this.ServerId = serverId;
+			this.Conn = conn;
+			this.Chat = chat;
+			if (this.Conn.CurrentState.CurrentTrack != null)
+				this.Conn.StopAsync();
+			this.Conn.PlaybackFinished += Music.PlayNext;
+			Program.WriteLine($"Queue Constructed! Guild: {this.ServerId}");
 		}
 
-	// 2. Sets
+	// S. Sets
 		public void	AddTrackToQueue(ChariotTrack ctrack) {
-			Program.WriteLine($"AddTrackEntered {this._length + 1}");
+			Program.WriteLine($"AddTrackEntered {this.Length + 1}");
 			if (TrackExist(ctrack) == true)
 				return ;
-			ChariotTrack[] temp = new ChariotTrack[this._length + 1];
+			ChariotTrack[] temp = new ChariotTrack[this.Length + 1];
 			int	i = -1;
-			while (++i < this._length)
-				temp[i] = this._tracks[i];
+			while (++i < this.Length)
+				temp[i] = this.Tracks[i];
 			temp[i] = ctrack;
-			this._tracks = temp;
-			this._length += 1;
+			this.Tracks = temp;
+			this.Length += 1;
 		}
 		public void	RemoveTrackFromQueue(int index) {
-			if ((index < 0 || index > this._tracks.Length - 1) && this._tracks.Length != 0)
+			if ((index < 0 || index > this.Tracks.Length - 1) && this.Tracks.Length != 0)
 				return ;
-			Program.WriteLine($"RemoveTrackEntered {this._length}");
-			ChariotTrack[] temp = new ChariotTrack[this._length - 1];
+			Program.WriteLine($"RemoveTrackEntered {this.Length}");
+			ChariotTrack[] temp = new ChariotTrack[this.Length - 1];
 			int	i = -1;
 			int	j = 0;
-			while (++i < this._length) {
+			while (++i < this.Length) {
 				if (i == index) {
 					j = 1;
 					continue;
 				}
-				temp[i - j] = this._tracks[i];
+				temp[i - j] = this.Tracks[i];
 			}
-			this._tracks = temp;
-			this._length -= 1;
+			this.Tracks = temp;
+			this.Length -= 1;
 		}
 		public void	SetLoop(int type) {
 			if (type >= 0 && type <= 2)
-				this._loop = type;
+				this.Loop = type;
 			else
-				this._loop = 0;
+				this.Loop = 0;
 		}
 		public bool	GoNextIndex() {
-			if (this._currentIndex >= this._length - 1) {
-				if (this._loop == 2)
-					this._currentIndex = -1;
-				else if (this._loop == 0)
+			if (this.CurrentIndex >= this.Length - 1) {
+				if (this.Loop == 2)
+					this.CurrentIndex = -1;
+				else if (this.Loop == 0)
 					return (false);
 			}
-			if (this._loop != 1)
-				this._currentIndex += 1;
-			if (this._currentIndex < 0)
-				this._currentIndex = 0;
+			if (this.Loop != 1)
+				this.CurrentIndex += 1;
+			if (this.CurrentIndex < 0)
+				this.CurrentIndex = 0;
 			return (true);
 		}
 		public void SetPauseMessage(DiscordMessage? pauseMss) {
-			this._pauseMss = pauseMss;
+			this.PauseMss = pauseMss;
 		}
 		public void SetLastPlayerMessage(DiscordMessage? lastPlayerMss) {
-			this._lastPlayerMss = lastPlayerMss;
+			this.LastPlayerMss = lastPlayerMss;
 		}
 		public bool SetPauseState(bool state) {
-			this._pauseState = state;
+			this.PauseState = state;
 			return (state);
 		}
-	// 3. Gets
+	
+	// G. Gets
 		public QueueCollection				GetQueueCollection() {
-			return (this._qColle);
+			return (this.QColle);
 		}
 		public LavalinkTrack?				GetIndexTrack(int index) {
-			if (index < 0 || index > this._tracks.Length - 1)
+			if (index < 0 || index > this.Tracks.Length - 1)
 				return (null);
-			return (this._tracks[index]._llTrack);
+			return (this.Tracks[index].LlTrack);
+		}
+		public int							GetTrackIndex(ChariotTrack track) {
+			for (int i = 0; i < this.Length; i++)
+				if (this.Tracks[i].Uri.AbsoluteUri == track.Uri.AbsoluteUri)
+					return (i);
+			return (-1);
+		}
+		public async Task<LavalinkTrack?>	UseTrackAsync(ChariotTrack track) {
+			int index = this.GetTrackIndex(track);
+			if (index == -1)
+				return (null);
+			return (await this.UseIndexTrackAsync(index));
 		}
 		public async Task<LavalinkTrack?>	UseNextTrackAsync() {
 			if (this.GoNextIndex() == false)
 				return (null);
 			await this.NowPlayingAsync();
-			this._pauseState = false;
-			return (this._tracks[this._currentIndex]._llTrack);
+			this.PauseState = false;
+			return (this.Tracks[this.CurrentIndex].LlTrack);
 		}
 		public async Task<LavalinkTrack?>	UsePreviousTrackAsync() {
-			this._currentIndex -= 1;
-			if (this._currentIndex < 0)
-				this._currentIndex = this._length - 1;
+			this.CurrentIndex -= 1;
+			if (this.CurrentIndex < 0)
+				this.CurrentIndex = this.Length - 1;
 			await this.NowPlayingAsync();
-			this._pauseState = false;
-			return (this._tracks[this._currentIndex]._llTrack);
+			this.PauseState = false;
+			return (this.Tracks[this.CurrentIndex].LlTrack);
 		}
 		public async Task<LavalinkTrack?>	UseCurrentTrackAsync() {
 			await this.NowPlayingAsync();
-			this._pauseState = false;
-			return (this._tracks[this._currentIndex]._llTrack);
+			this.PauseState = false;
+			return (this.Tracks[this.CurrentIndex].LlTrack);
 		}
 		public async Task<LavalinkTrack?>	UseIndexTrackAsync(int index) {
-			if (index < 0 || index > this._tracks.Length - 1)
+			if (index < 0 || index > this.Tracks.Length - 1)
 				return (null);
-			this._currentIndex = index;
+			this.CurrentIndex = index;
 			await this.NowPlayingAsync();
-			this._pauseState = false;
-			return (this._tracks[this._currentIndex]._llTrack);
+			this.PauseState = false;
+			return (this.Tracks[this.CurrentIndex].LlTrack);
 		}
 		public DiscordEmbed[]				GetQueueEmbed() {
 			Program.WriteLine("GET EMBED QUEUE ENTER");
 		// 0. Base Check
-			if (this._tracks.Length == 0) {
+			if (this.Tracks.Length == 0) {
 				var	errembed = new DiscordEmbedBuilder();
 				errembed.WithColor(DiscordColor.Gray);
 				errembed.WithDescription("The queue is empty...");
@@ -144,7 +156,7 @@ namespace ChariotSanzzo.Components.MusicQueue {
 		// 1. Core
 			var retEmbedArr = new DiscordEmbed[0];
 			int i = 0;
-			while (i < this._tracks.Length) {
+			while (i < this.Tracks.Length) {
 				var	tempArr = new DiscordEmbed[retEmbedArr.Length + 1];
 				for (int j = 0; j < retEmbedArr.Length; j++)
 					tempArr[j] = retEmbedArr[j];
@@ -154,12 +166,12 @@ namespace ChariotSanzzo.Components.MusicQueue {
 				if (retEmbedArr.Length == 1)
 					embed.WithTitle("Queue");
 				string description = "";
-				while (i < this._tracks.Length && description.Length < 3600) {
+				while (i < this.Tracks.Length && description.Length < 3600) {
 					Program.WriteLine($"Entry index [{i}]");
-					if (i == this._currentIndex)
-						description += $"```ansi\n[2;34m{i + 1} -> {this._tracks[i]._title}[0m\n```";
+					if (i == this.CurrentIndex)
+						description += $"```ansi\n[2;34m{i + 1} -> {this.Tracks[i].Title}[0m\n```";
 					else
-						description += $"{this._tracks[i]._favicon} ` {i + 1} ` -> {this._tracks[i]._title}\n";
+						description += $"{this.Tracks[i].Favicon} ` {i + 1} ` -> {this.Tracks[i].Title}\n";
 					i++;
 				}
 				embed.WithDescription(description);
@@ -169,38 +181,38 @@ namespace ChariotSanzzo.Components.MusicQueue {
 			return (retEmbedArr);
 		}
 
-	// 4. Utils
+	// U. Utils
 		public bool									TrackExist(ChariotTrack track) {
-			for (int i = 0; i < this._length; i++)
-				if (this._tracks[i]._uri.AbsoluteUri == track._uri.AbsoluteUri)
+			for (int i = 0; i < this.Length; i++)
+				if (this.Tracks[i].Uri.AbsoluteUri == track.Uri.AbsoluteUri)
 					return (true);
 			return (false);
 		}
 		public async Task							NowPlayingAsync() {
-			if (this._loop == 1)
+			if (this.Loop == 1)
 				return ;
-			if (this._cleanConfig == true && this._lastPlayerMss != null)
-				await this._lastPlayerMss.DeleteAsync();
-			if (this._chat != null){
+			if (this.CleanConfig == true && this.LastPlayerMss != null)
+				await this.LastPlayerMss.DeleteAsync();
+			if (this.Chat != null){
 				var message = await GenNowPlayingAsync();
 				if (message != null)
-					this._lastPlayerMss = await this._chat.SendMessageAsync(message);
+					this.LastPlayerMss = await this.Chat.SendMessageAsync(message);
 			}
 		}
 		public async Task<DiscordMessageBuilder?>	GenNowPlayingAsync() {
 		// 0. Message Construction
 			var message = new DiscordMessageBuilder();
-			message.AddEmbed(await this._tracks[this._currentIndex].GetEmbed(this._currentIndex));
-			if (this._advanConfig == true) {
+			message.AddEmbed(await this.Tracks[this.CurrentIndex].GetEmbed(this.CurrentIndex));
+			if (this.AdvanConfig == true) {
 				message.AddComponents(
-					((this._loop == 0)
+					((this.Loop == 0)
 						? (new DiscordButtonComponent(DSharpPlus.ButtonStyle.Secondary, "MusicLoopButton", null, false, new DiscordComponentEmoji(1271598875374784644)))
-						: (((this._loop == 1)
+						: (((this.Loop == 1)
 							? (new DiscordButtonComponent(DSharpPlus.ButtonStyle.Success, "MusicLoopButton", null, false, new DiscordComponentEmoji(1269881536552108135)))
 							: (new DiscordButtonComponent(DSharpPlus.ButtonStyle.Danger, "MusicLoopButton", null, false, new DiscordComponentEmoji(1271598889501196290)))
 						))),
 					new DiscordButtonComponent(DSharpPlus.ButtonStyle.Primary, "MusicPreviousTrackButton", null, false, new DiscordComponentEmoji(1269698996830605342)),
-					((this._pauseState == false)
+					((this.PauseState == false)
 						? (new DiscordButtonComponent(DSharpPlus.ButtonStyle.Success, "MusicPlayPauseButton", null, false, new DiscordComponentEmoji(1269697085834395738)))
 						: (new DiscordButtonComponent(DSharpPlus.ButtonStyle.Secondary, "MusicPlayPauseButton", null, false, new DiscordComponentEmoji(1269697085834395738)))),
 					new DiscordButtonComponent(DSharpPlus.ButtonStyle.Primary, "MusicNextTrackButton", null, false, new DiscordComponentEmoji(1269698987259330702)),
@@ -209,26 +221,26 @@ namespace ChariotSanzzo.Components.MusicQueue {
 			return (message);
 		}
 		public int									SwitchPause() {
-			this._pauseState = !this._pauseState;
-			if (this._pauseState == true)
+			this.PauseState = !this.PauseState;
+			if (this.PauseState == true)
 				return (1);
 			return (0);
 		}
 
-		// 5. Shuffle
+	// E. Miscs
 		public async Task<bool>	ShuffleTracks() {
-			if (this._tracks.Length == 0)
+			if (this.Tracks.Length == 0)
 				return (false);
-			TrackQueue.Shuffle(this._tracks);
+			TrackQueue.Shuffle(this.Tracks);
 			var toPlayNow = await this.UseIndexTrackAsync(0);
 			if (toPlayNow != null)
-				await this._conn.PlayAsync(toPlayNow);
+				await this.Conn.PlayAsync(toPlayNow);
 			return (true);
 		}
 		private static void		Shuffle(ChariotTrack[] tracks) {
 			int n = tracks.Length;
 			while (n > 1) {
-				int k = TrackQueue._random.Next(n--);
+				int k = TrackQueue.Random.Next(n--);
 				ChariotTrack temp = tracks[n];
 				tracks[n] = tracks[k];
 				tracks[k] = temp;

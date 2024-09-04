@@ -1,7 +1,4 @@
-using System.Drawing;
-using ChariotSanzzo.Components;
-using ChariotSanzzo.Events;
-using DSharpPlus;
+using ChariotSanzzo.Components.MusicComponent;
 using DSharpPlus.Entities;
 using DSharpPlus.Lavalink;
 using DSharpPlus.SlashCommands;
@@ -9,12 +6,12 @@ using DSharpPlus.SlashCommands;
 namespace ChariotSanzzo.Commands.Slash {
 	[SlashCommandGroup("SFX", "SFX Commands")]
 	public class SFXCommands : ApplicationCommandModule {
-	// 0. Member Variables
-		private static ulong			_NasaId			{get; set;} = 982651003134419057;
-		private static ulong			_GjallarhornId	{get; set;} = 1273070668451418122;
-		private static DiscordChannel?	_LogChannel		{get; set;} = ((Program.Client != null) ? Program.Client.GetChannelAsync(1273347333429399633).Result : null);
+	// M. Member Variables
+		private static ulong			NasaId			{get; set;} = 982651003134419057;
+		private static ulong			GjallarhornId	{get; set;} = 1273070668451418122;
+		private static DiscordChannel?	LogChannel		{get; set;} = ((Program.Client != null) ? Program.Client.GetChannelAsync(1273347333429399633).Result : null);
 		
-	// 1. Core
+	// 0. Core
 		[SlashCommand("play", "Plays the given track link as SFX.")]
 		public async Task Play(InteractionContext ctx, [Option("link", "The link for the SFX")] string sfxLink) {
 			await ctx.DeferAsync();
@@ -82,19 +79,19 @@ namespace ChariotSanzzo.Commands.Slash {
 			await ChariotSanzzoSocket.GjallarhornPost(SFXCommands.BuildPostBody(ctx, "Play", DiscordColor.Aquamarine, null, sfxLink));
 		}
 
-	// 2. Gjallarhorn Miscs
+	// 1. Gjallarhorn Miscs
 		private static bool						CheckGjallarhornInChannel(DiscordMember[] members) {
 			for (int i = 0; i < members.Length; i++)
-				if (members[i].Id == SFXCommands._GjallarhornId)
+				if (members[i].Id == SFXCommands.GjallarhornId)
 					return (true);
 			return (false);
 		}
 		private static async Task<bool>			CheckGajPresence(DiscordChannel channel) {
-			if (channel.Guild.Members.ContainsKey(SFXCommands._GjallarhornId) == false || SFXCommands.CheckGjallarhornInChannel(channel.Users.ToArray()) == false) {
+			if (channel.Guild.Members.ContainsKey(SFXCommands.GjallarhornId) == false || SFXCommands.CheckGjallarhornInChannel(channel.Users.ToArray()) == false) {
 				Program.WriteLine("GjarNULL");
 				var embedNoGaj = new DiscordEmbedBuilder();
 				embedNoGaj.WithColor(DiscordColor.Red);
-				if (channel.Guild.Members.ContainsKey(SFXCommands._GjallarhornId) == false)
+				if (channel.Guild.Members.ContainsKey(SFXCommands.GjallarhornId) == false)
 					embedNoGaj.WithDescription("Gjallarhorn is not in the server, but you can add it througth this [Invite Link](https://discord.com/oauth2/authorize?client_id=1273070668451418122&permissions=3149056&integration_type=0&scope=bot).");
 				else if (SFXCommands.CheckGjallarhornInChannel(channel.Users.ToArray()) == false)
 					embedNoGaj.WithDescription("Gjallarhorn does not meet the requirements to be in this channel.");

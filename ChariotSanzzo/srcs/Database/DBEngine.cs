@@ -1,27 +1,25 @@
-using System.Data;
 using ChariotSanzzo.Config;
-using DSharpPlus.Entities;
 using Npgsql;
 
 namespace ChariotSanzzo.Database {
 	public class DBEngine {
-		// 0. Member Variables
-			public static bool	_debug	{get; set;} = true;
+	// M. Member Variables
+		public static bool	Debug	{get; set;} = true;
 
-		// 1. Main Functions
-		public async Task<bool> StoreUserAsync(DBUser user) {
+	// 0. Main Functions
+		public async Task<bool>				StoreUserAsync(DBUser user) {
 			var	DBEngine = new DBEngine();
-			var	retrieve = await DBEngine.GetUserAsync(user._userName, user._serverId);
+			var	retrieve = await DBEngine.GetUserAsync(user.UserName, user.ServerId);
 			if (retrieve.Item1 == true)
 				return (true);
 			var	userNo = await GetAllRowsCountAsync("data.userinfo") + 1;
 			if (userNo == -1)
 				throw new Exception();
 			try {
-				using (var conn = new NpgsqlConnection(DBConfig._conn)) {
+				using (var conn = new NpgsqlConnection(DBConfig.Conn)) {
 					await conn.OpenAsync();
 					string	query = "INSERT INTO data.userinfo (userno, username, servername, serverid) " + 
-									$"VALUES ('{userNo}', '{user._userName}', '{user._serverName}', '{user._serverId}')";
+									$"VALUES ('{userNo}', '{user.UserName}', '{user.ServerName}', '{user.ServerId}')";
 					using (var cmd = new NpgsqlCommand(query, conn)) {
 						await cmd.ExecuteNonQueryAsync();
 					}
@@ -33,11 +31,11 @@ namespace ChariotSanzzo.Database {
 			}
 		}
 		
-		// 2. Get Functions
+	// G. Get Functions
 		public async Task<(bool, DBUser?)>	GetUserAsync(string userName, ulong serverId) {
 			DBUser	user;
 			try {
-				using (var conn = new NpgsqlConnection(DBConfig._conn)) {
+				using (var conn = new NpgsqlConnection(DBConfig.Conn)) {
 					await conn.OpenAsync(); 
 					string query = "SELECT u.userno, u.username, u.servername, u.serverid " + 
 					"FROM data.userinfo u " +
@@ -46,9 +44,9 @@ namespace ChariotSanzzo.Database {
 						var	reader = await cmd.ExecuteReaderAsync();
 						await reader.ReadAsync();
 						user = new DBUser {
-							_userName = reader.GetString(1),
-							_serverName = reader.GetString(2),
-							_serverId = (ulong)reader.GetInt64(3)
+							UserName = reader.GetString(1),
+							ServerName = reader.GetString(2),
+							ServerId = (ulong)reader.GetInt64(3)
 						};
 					}
 				}
@@ -64,7 +62,7 @@ namespace ChariotSanzzo.Database {
 			if (dice != 1 && dice != 20)
 				return (dicef);
 			try {
-				using (var conn = new NpgsqlConnection(DBConfig._conn)) {
+				using (var conn = new NpgsqlConnection(DBConfig.Conn)) {
 					await conn.OpenAsync();
 					string query = "SELECT d.message, d.glink " +
 									"FROM botmiscs.dfanfare d " +
@@ -73,8 +71,8 @@ namespace ChariotSanzzo.Database {
 					using (var cmd = new NpgsqlCommand(query, conn)) {
 						var reader = await cmd.ExecuteReaderAsync();
 						await reader.ReadAsync();
-						dicef._message = reader.GetString(0);
-						dicef._glink = reader.GetString(1);
+						dicef.Message = reader.GetString(0);
+						dicef.GifLink = reader.GetString(1);
 					}
 				}
 				return (dicef);
@@ -84,11 +82,11 @@ namespace ChariotSanzzo.Database {
 				return (dicef);
 			}
 		}
-		// 3. Utils
-		public static async Task<long> GetAllRowsCountAsync(string table, string? condition = null) {
+	// U. Utils
+		public static async Task<long>		GetAllRowsCountAsync(string table, string? condition = null) {
 			Object?	userCount;
 			try {
-				using (var conn = new NpgsqlConnection(DBConfig._conn)) {
+				using (var conn = new NpgsqlConnection(DBConfig.Conn)) {
 					await conn.OpenAsync();
 					string query = $"SELECT COUNT (*) FROM {table}";
 					if (condition != null)

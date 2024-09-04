@@ -10,25 +10,25 @@ using Newtonsoft.Json.Linq;
 
 namespace ChariotSanzzo.Components.SpotifyApi {
 	public class SpotifyConn {
-	// 0. Member Variables
-		private static HttpClient	_httpClient		{get; set;} = new HttpClient(new SocketsHttpHandler {PooledConnectionLifetime = TimeSpan.FromMinutes(1)});
-		public string				_ClientID		{get; private set;} = "";
-		public string				_ClientSecret	{get; private set;} = "";
-		public string?				_AccessToken	{get; private set;} = null;
-		public DateTime				_TimeSpanToken	{get; private set;}
+	// M. Member Variables
+		private static HttpClient	HttpClient		{get; set;} = new HttpClient(new SocketsHttpHandler {PooledConnectionLifetime = TimeSpan.FromMinutes(1)});
+		public string				ClientID		{get; private set;} = "";
+		public string				ClientSecret	{get; private set;} = "";
+		public string?				AccessToken		{get; private set;} = null;
+		public DateTime				TimeSpanToken	{get; private set;}
 
-	// 1. Constructors
+	// C. Constructors
 		public SpotifyConn() {
 			this.RunInit();
-			this._TimeSpanToken = DateTime.Now;
+			this.TimeSpanToken = DateTime.Now;
 		}
 		public SpotifyConn(string clientID, string clientSecret) {
-			this._ClientID = clientID;
-			this._ClientSecret = clientSecret;
-			this._TimeSpanToken = DateTime.Now;
+			this.ClientID = clientID;
+			this.ClientSecret = clientSecret;
+			this.TimeSpanToken = DateTime.Now;
 		}
 
-	// 1. RunInit
+	// 0. RunInit
 		public void	RunInit() {
 			var	builder = new ConfigurationBuilder()
 			.SetBasePath($"{Directory.GetCurrentDirectory()}/Config/")
@@ -41,11 +41,11 @@ namespace ChariotSanzzo.Components.SpotifyApi {
 				Program.WriteLine("Error: SpotifyConn: ClientID or ClientSecret null!");
 				return ;
 			}
-			this._ClientID = tempID;
-			this._ClientSecret = tempSecret;
+			this.ClientID = tempID;
+			this.ClientSecret = tempSecret;
 		}
 
-	// 2. Mine
+	// 1. Mine
 		public async Task<string?>	GetArtWorkAsync(Uri trackUri) {
 			Program.WriteLine($"TrackSpotifyID: {trackUri.Segments[^1]}");
 			string? jsonFetch = await this.FetchWebApiAsync("v1/tracks", (trackUri.Segments[^1]));
@@ -60,32 +60,32 @@ namespace ChariotSanzzo.Components.SpotifyApi {
 			var artWorkLink = JsonConvert.DeserializeObject<List<SpotifyApi.Image>>(images.ToString());
 			if (artWorkLink == null)
 				return (null);
-			return (artWorkLink.First()._url);
+			return (artWorkLink.First().Url);
 		}
 
-	// 3. Core
+	// 2. Core
 		private async Task<string?>	GetAccessTokenAsync() {
 			// 0. Form HttpRequestMessage
-			if (this._AccessToken == null || DateTime.Now > this._TimeSpanToken) {
+			if (this.AccessToken == null || DateTime.Now > this.TimeSpanToken) {
 				var requestQuery = new HttpRequestMessage(HttpMethod.Post, new Uri("https://accounts.spotify.com/api/token"));
-				requestQuery.Content = new StringContent($"grant_type=client_credentials&client_id={this._ClientID}&client_secret={this._ClientSecret}", Encoding.UTF8, "application/x-www-form-urlencoded");
+				requestQuery.Content = new StringContent($"grant_type=client_credentials&client_id={this.ClientID}&client_secret={this.ClientSecret}", Encoding.UTF8, "application/x-www-form-urlencoded");
 
 			// 1. Getting Response
 				try {
-					HttpResponseMessage response = await SpotifyConn._httpClient.SendAsync(requestQuery);
+					HttpResponseMessage response = await SpotifyConn.HttpClient.SendAsync(requestQuery);
 					response.EnsureSuccessStatusCode();
 					string jsonRet;
 					using (var reader = new StreamReader(await response.Content.ReadAsStreamAsync()))
 					    jsonRet = await reader.ReadToEndAsync();
-					this._AccessToken = ((string?)JObject.Parse(jsonRet)["access_token"]);
-					this._TimeSpanToken = DateTime.Now.AddMinutes(58);
+					this.AccessToken = ((string?)JObject.Parse(jsonRet)["access_token"]);
+					this.TimeSpanToken = DateTime.Now.AddMinutes(58);
 				}
 				catch (HttpRequestException Ex) {
 					Program.WriteLine("HttpError: " + Ex.Message);
-					this._AccessToken = null;
+					this.AccessToken = null;
 				}
 			}
-			return (this._AccessToken);
+			return (this.AccessToken);
 		}
 		private async Task<string?>	FetchWebApiAsync(string endpoint, string? id) {
 		// 0. Common Setup
@@ -95,11 +95,11 @@ namespace ChariotSanzzo.Components.SpotifyApi {
 
 		// 1. Form HttpRequestMessage
 			var requestQuery = new HttpRequestMessage(HttpMethod.Get, new Uri($"https://api.spotify.com/{endpoint}" + ((id != null) ? ($"/{id}") : (null))));
-			requestQuery.Headers.Add("Authorization", $"Bearer {this._AccessToken}");
+			requestQuery.Headers.Add("Authorization", $"Bearer {this.AccessToken}");
 
 		// 1. Getting Response
 			try {
-				HttpResponseMessage response = await SpotifyConn._httpClient.SendAsync(requestQuery);
+				HttpResponseMessage response = await SpotifyConn.HttpClient.SendAsync(requestQuery);
 				response.EnsureSuccessStatusCode();
 				using (var reader = new StreamReader(await response.Content.ReadAsStreamAsync()))
 					fetchRet = await reader.ReadToEndAsync();
@@ -109,17 +109,6 @@ namespace ChariotSanzzo.Components.SpotifyApi {
 				return (null);
 			}
 			return (fetchRet);
-		}
-	
-	// 4. Utils
-		private static string?	GetTrackId(string trackUrl) {
-			// https://open.spotify.com/intl-pt/track/3UpHW2joNoKO2HfEv8Mchp
-			int	i;
-			for (i = trackUrl.Length - 1; i > 0; i--)
-				if (trackUrl[i] == '/')
-					break;
-			Program.WriteLine($"TrackSpotifyID: {trackUrl.Substring(i + 1)}");
-			return (trackUrl.Substring(i + 1));
 		}
 	}
 }

@@ -1,5 +1,4 @@
-using ChariotSanzzo;
-using ChariotSanzzo.Components;
+using ChariotSanzzo.Components.MusicComponent;
 using System.Net;
 using System.Net.Sockets;
 using System.Net.WebSockets;
@@ -7,20 +6,20 @@ using System.Text;
 
 namespace ChariotSanzzo {
 	public static class ChariotSanzzoSocket {
-	// 0. Members Variables
-		private static ulong				_GjallarhornId	{get; set;} = 1273070668451418122;
-		private static string				_hostName		= Dns.GetHostName();
-		private static IPHostEntry			_localhost		= Dns.GetHostEntryAsync(_hostName).Result;
-		private static IPAddress			_localIpAddress	= _localhost.AddressList[0];
-		private const int					_gjallarhornPort		= 11366;
-		private const int					_controlPanelPort		= 11368;
+	// M. Members Variables
+		private static string				_hostName				{get; set;} = Dns.GetHostName();
+		private static IPHostEntry			_localhost				{get; set;} = Dns.GetHostEntryAsync(_hostName).Result;
+		private static IPAddress			_localIpAddress			{get; set;} = _localhost.AddressList[0];
+		private const int					_gjallarhornPort 		= 11766;
+		private const int					_controlPanelPort		= 11768;
 		private static readonly IPEndPoint	_gjallarhornEndpoint	= new(_localIpAddress, _gjallarhornPort);
-		private static readonly IPEndPoint	_controlPanelEndpoint	= new(_localIpAddress, _controlPanelPort);
 
-	// 1. Constructors
+	// C. Constructors
 		static ChariotSanzzoSocket() {
 		}
-		public static Thread? OpenChariotControlSocket() {
+		
+	// 0. Start
+		public static Thread?		OpenChariotControlSocket() {
 			Program.WriteLine("Opening Sockets");
 			var thread2 = new Thread(new ThreadStart(ControlPanelSocketHandler));
 			thread2.Start();
@@ -28,7 +27,7 @@ namespace ChariotSanzzo {
 		}
 		private static async void	ControlPanelSocketHandler() {
 			var listener = new HttpListener();
-			listener.Prefixes.Add($"http://localhost:{_controlPanelPort}/");
+			listener.Prefixes.Add($"http://+:{_controlPanelPort}/");
 			listener.Start();
 			Program.WriteLine("ControlPanel Socket Ready...");
 			while (true) {
@@ -60,7 +59,7 @@ namespace ChariotSanzzo {
 		}
 
 	// 2. Core Functions
-		public static async Task GjallarhornPost(string? content) {
+		public static async Task	GjallarhornPost(string? content) {
 			if (string.IsNullOrEmpty(content) == true) {
 				Program.ColorWriteLine(ConsoleColor.Red, "Tried post empty or null content to Gjallarhorn via Socket!");
 				return ;
@@ -81,47 +80,11 @@ namespace ChariotSanzzo {
 			}
 			client.Shutdown(SocketShutdown.Both);
 		}
-	
 		private static async void	FunctionsSwitch(string src) {
 			try {
 				var gCtx = new GjallarhornContext(src);
-				switch (gCtx._command) {
-					case ("Message"):
-						Program.WriteLine($"Command received: {gCtx._command}.");
-						await ChariotMusicCalls.SendEmbedMessageAsync(gCtx);
-					break;
-					case ("Play"):
-						Program.WriteLine($"Command received: {gCtx._command}.");
-						await ChariotMusicCalls.PlayAsync(gCtx);
-					break;
-					case ("Loop"):
-						Program.WriteLine($"Command received: {gCtx._command}.");
-						await ChariotMusicCalls.LoopAsync(gCtx);
-					break;
-					case ("Previous"):
-						Program.WriteLine($"Command received: {gCtx._command}.");
-						// await ChariotMusicCalls.PreviousAsync(gCtx);
-					break;
-					case ("Pause"):
-						Program.WriteLine($"Command received: {gCtx._command}.");
-						await ChariotMusicCalls.PauseAsync(gCtx);
-					break;
-					case ("Next"):
-						Program.WriteLine($"Command received: {gCtx._command}.");
-						// await ChariotMusicCalls.NextAsync(gCtx);
-					break;
-					case ("Shuffle"):
-						Program.WriteLine($"Command received: {gCtx._command}.");
-						// await ChariotMusicCalls.ShuffleAsync(gCtx);
-					break;
-					case ("Stop"):
-						Program.WriteLine($"Command received: {gCtx._command}.");
-						await ChariotMusicCalls.StopAsync(gCtx);
-					break;
-					default:
-						Program.ColorWriteLine(ConsoleColor.Red, $"FunctionsSwitch: Command received was not valid. ({gCtx._command})");
-					break;
-				}
+				gCtx.Data.Priority = true;
+				await ChariotMusicCalls.TryCallAsync(gCtx);
 			} catch(Exception ex) {
 				Program.WriteException(ex);
 			}

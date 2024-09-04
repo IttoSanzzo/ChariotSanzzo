@@ -4,76 +4,76 @@ using STPlib;
 
 namespace ChariotSanzzo.Components.DiceRoller {
 	public class DiceSet {
-		// 0. Member Variables
-		private static Random	_rRandom {get; set;} = new Random();
-		public string			_dString {get; set;} = "";
-		public string			_dEquat {get; set;} = "";
-		public int				_dTimes {get; set;} = 0;
-		public int				_dCount {get; set;} = 0;
-		public int				_dSides {get; set;} = 0;
-		public int				_dAdvan {get; set;} = 0;
-		public bool				_bManual {get; set;} = false;
-		private bool			_rError {get; set;} = false;
-		private DiscordEmbed?	_embed {get; set;} = null;
-		private DiceStr?		_cStr {get; set;} = null;
-		private DiceRes[]?		_dResul {get; set;} = null;
+	// M. Member Variables
+		private static Random	Random	{get; set;} = new Random();
+		public string			DString	{get; set;} = "";
+		public string			DEquat	{get; set;} = "";
+		public int				DTimes	{get; set;} = 0;
+		public int				DCount	{get; set;} = 0;
+		public int				DSides	{get; set;} = 0;
+		public int				DAdvan	{get; set;} = 0;
+		public bool				DManual	{get; set;} = false;
+		private bool			RError	{get; set;} = false;
+		private DiscordEmbed?	Embed	{get; set;} = null;
+		private DiceStr?		CStr	{get; set;} = null;
+		private DiceRes[]?		DResul	{get; set;} = null;
 
-		// 1. Constructors
+	// C. Constructors
 		public		DiceSet(int dTimes, int dCount, int dSides, int dAdvan, string dEquat) {
-			this._bManual = true;
-			this._dTimes = dTimes;
-			this._dCount = dCount;
-			this._dSides = dSides;
-			this._dAdvan = dAdvan;
-			this._dEquat = dEquat;
+			this.DManual = true;
+			this.DTimes = dTimes;
+			this.DCount = dCount;
+			this.DSides = dSides;
+			this.DAdvan = dAdvan;
+			this.DEquat = dEquat;
 			this.FormStringFromParams();
 			this.CheckDice();
 			this.RunDice();
 			this.GenFinalEmbed();
 		}
 		public		DiceSet(string dLine) {
-			this._dString = dLine;
+			this.DString = dLine;
 			this.CheckDice();
 			this.FormStringFromParams();
 			this.RunDice();
 			this.GenFinalEmbed();
 		}
 
-		// 2. Checking & Running
+	// 0. Checking & Running
 		public bool		CheckDice() {
-			if (this._cStr == null)
-				this._cStr = new DiceStr(this);
-			return (this._cStr._sCheck);
+			if (this.CStr == null)
+				this.CStr = new DiceStr(this);
+			return (this.CStr.SCheck);
 		}
 		private bool	RunDice() {
-			if ((this._dTimes <= 0 || this._dTimes > 200)
-				|| (this._dCount <= 0 || this._dCount > 1000)
-				|| (this._dSides <= 0 || this._dSides > 1000)
-				|| (this._dTimes * this._dCount) > 10000) {
-				this._rError = true;
+			if ((this.DTimes <= 0 || this.DTimes > 200)
+				|| (this.DCount <= 0 || this.DCount > 1000)
+				|| (this.DSides <= 0 || this.DSides > 1000)
+				|| (this.DTimes * this.DCount) > 10000) {
+				this.RError = true;
 				return (false);
 			}
-			this._dResul = new DiceRes[this._dTimes];
-			for (int i = 0; i < this._dTimes; i++)
-				this._dResul[i] = new DiceRes(this);
+			this.DResul = new DiceRes[this.DTimes];
+			for (int i = 0; i < this.DTimes; i++)
+				this.DResul[i] = new DiceRes(this);
 			return (true);
 		}
 
-		// 3. Returning
+	// 1. Returning
 		private void		GenFinalEmbed() {
 			var embed = new DiscordEmbedBuilder();
-			if (this._rError || this._cStr != null && this._cStr._sCheck == false) {
+			if (this.RError || this.CStr != null && this.CStr.SCheck == false) {
 				embed.WithColor(DiscordColor.Red);
-				embed.WithDescription($"{((this._dTimes > 200 || this._dCount > 1000 || this._dSides > 1000 || (this._dTimes * this._dCount) > 10000) ?
+				embed.WithDescription($"{((this.DTimes > 200 || this.DCount > 1000 || this.DSides > 1000 || (this.DTimes * this.DCount) > 10000) ?
 										"That dice set is WAAAY too big." : "Dice Set was invalid.")}");
-				this._embed = embed.Build();
+				this.Embed = embed.Build();
 				return ;
 			}
 			string	context = "";
-			if (this._dResul != null)
-				for (int i = 0; i < this._dTimes; i++) {
-					context += this._dResul[i]._rString;
-					if (i < this._dTimes - 1)
+			if (this.DResul != null)
+				for (int i = 0; i < this.DTimes; i++) {
+					context += this.DResul[i].RString;
+					if (i < this.DTimes - 1)
 						context += "\n";
 				}
 			else
@@ -82,13 +82,13 @@ namespace ChariotSanzzo.Components.DiceRoller {
 				context = "That Dice Set was too big for embeds.";
 			embed.WithColor(DiscordColor.DarkBlue);
 			embed.WithDescription(context);
-			if (this._dTimes > 3)
-				embed.WithTitle($"Dice Set..: {this._dString}");
-			this._embed = embed.Build();
+			if (this.DTimes > 3)
+				embed.WithTitle($"Dice Set..: {this.DString}");
+			this.Embed = embed.Build();
 		}
 		public DiscordEmbed	GetEmbed() {
-			if (this._embed != null)
-				return (this._embed);
+			if (this.Embed != null)
+				return (this.Embed);
 			var	embed = new DiscordEmbedBuilder() {
 						Color = DiscordColor.Red,
 						Description = "No embed to retrieve."};
@@ -97,15 +97,15 @@ namespace ChariotSanzzo.Components.DiceRoller {
 		public string		GetFinalString() {
 			string	context = "";
 
-			if (this._dResul != null)
-				for (int i = 0; i < this._dTimes; i++) {
-					context += this._dResul[i]._rString;
-					if (this._dTimes > 3)
-						context += $"Dice Set..: {this._dString}";
-					if (i < this._dTimes - 1)
+			if (this.DResul != null)
+				for (int i = 0; i < this.DTimes; i++) {
+					context += this.DResul[i].RString;
+					if (this.DTimes > 3)
+						context += $"Dice Set..: {this.DString}";
+					if (i < this.DTimes - 1)
 						context += "\n";
 				}
-			else if ((this._dTimes * this._dCount) > 30000)
+			else if ((this.DTimes * this.DCount) > 30000)
 				context = "That dice set is WAAAY too big.";
 			else
 				context = "So... what happened?";
@@ -114,55 +114,55 @@ namespace ChariotSanzzo.Components.DiceRoller {
 			return (context);
 		}
 
-		// 4. Utils
+	// U. Utils
 		public DiscordEmbed	GetSetConfigEmbed() {
 			var embed = new DiscordEmbedBuilder() {
 				Color = DiscordColor.Gold,
 				Title = "Dice Set:",
-				Description = $"String.......: {this._dString}\n" +
-								$"Equation..: {this._dEquat}\n" +
-								$"Times.......: {this._dTimes}\n" +
-								$"Count.......: {this._dCount}\n" +
-								$"Sides........: {this._dSides}\n" +
-								$"Removes..: {this._dAdvan}\n"};
+				Description = $"String.......: {this.DString}\n" +
+								$"Equation..: {this.DEquat}\n" +
+								$"Times.......: {this.DTimes}\n" +
+								$"Count.......: {this.DCount}\n" +
+								$"Sides........: {this.DSides}\n" +
+								$"Removes..: {this.DAdvan}\n"};
 			return (embed.Build());
 		}
 		private string		FormStringFromParams() {
-			this._dString = "";
-			if (this._dTimes > 1)
-				this._dString += $"{this._dTimes}#";
-			if (this._dCount > 1)
-				this._dString += $"{this._dCount}";
-			this._dString += $"d{this._dSides}";
-			if (this._dAdvan > 0)
-				this._dString += $"A{this._dAdvan}";
-			else if (this._dAdvan < 0)
-				this._dString += $"a{this._dAdvan * -1}";
-			if (this._dEquat != "")
-				this._dString += $" ({this._dEquat})";
-			return (this._dString);
+			this.DString = "";
+			if (this.DTimes > 1)
+				this.DString += $"{this.DTimes}#";
+			if (this.DCount > 1)
+				this.DString += $"{this.DCount}";
+			this.DString += $"d{this.DSides}";
+			if (this.DAdvan > 0)
+				this.DString += $"A{this.DAdvan}";
+			else if (this.DAdvan < 0)
+				this.DString += $"a{this.DAdvan * -1}";
+			if (this.DEquat != "")
+				this.DString += $" ({this.DEquat})";
+			return (this.DString);
 		}
 		public int			TriggerNatDice() {
-			if (this._cStr == null || this._cStr._sCheck == false || this._rError == true)
+			if (this.CStr == null || this.CStr.SCheck == false || this.RError == true)
 				return (0);
-			if (this._dTimes == 1 && ((this._dCount - int.Abs(this._dAdvan)) == 1)
-				&& (this._dResul != null && (this._dResul[0]._rValues[0] == 1 || this._dResul[0]._rValues[0] == 20)))
-				return (this._dResul[0]._rValues[0]);
+			if (this.DTimes == 1 && ((this.DCount - int.Abs(this.DAdvan)) == 1)
+				&& (this.DResul != null && (this.DResul[0].RValues[0] == 1 || this.DResul[0].RValues[0] == 20)))
+				return (this.DResul[0].RValues[0]);
 			return (0);
 		}
 		public async Task<DiscordEmbed>	GetEventEmbed(int diceres, string name) {
 			DBEngine	engine = new DBEngine();
 			DBFanfare	dicef = await engine.GetDiceFanfareAsync(diceres);
-			string[]	mssprts = dicef._message.Split('&');
+			string[]	mssprts = dicef.Message.Split('&');
 			if (mssprts.Length != 1) {
-					dicef._message = mssprts[0];
-					dicef._message += name;
-					dicef._message += mssprts[1];
+					dicef.Message = mssprts[0];
+					dicef.Message += name;
+					dicef.Message += mssprts[1];
 			}
 			var	embed = new DiscordEmbedBuilder() {
 					Color = DiscordColor.Black,
-					Title = dicef._message,
-					ImageUrl = dicef._glink
+					Title = dicef.Message,
+					ImageUrl = dicef.GifLink
 					};
 			return (embed.Build());
 		}

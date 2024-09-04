@@ -1,14 +1,13 @@
-using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
-using DSharpPlus.EventArgs;
 
 namespace ChariotSanzzo.Events {
 	public static class STPCommandErrored {
+	// 0. Core
 		public static async Task CmdErrTask(CommandsNextExtension sender, CommandErrorEventArgs ctx) {
-			string?				timeLeft = null;
+			string? timeLeft = null;
 			DiscordEmbedBuilder	embed;
 			if (ctx.Command == null) {
 				embed = new DiscordEmbedBuilder()

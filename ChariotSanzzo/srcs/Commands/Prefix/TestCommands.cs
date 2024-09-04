@@ -3,8 +3,6 @@ using DSharpPlus.Entities;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Interactivity.Extensions;
 using ChariotSanzzo.Database;
-using DSharpPlus.Lavalink;
-using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -114,7 +112,7 @@ namespace ChariotSanzzo.Commands.Prefix {
 			DBEngine engine = new DBEngine();
 			DBFanfare dicef = await engine.GetDiceFanfareAsync(20);
 			await ctx.Channel.SendMessageAsync("Testing");
-			Program.WriteLine($"[\n{dicef._message}\n{dicef._glink}\n]");
+			Program.WriteLine($"[\n{dicef.Message}\n{dicef.GifLink}\n]");
 		}
 	}
 }

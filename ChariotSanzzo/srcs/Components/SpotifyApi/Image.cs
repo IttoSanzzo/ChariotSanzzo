@@ -2,11 +2,12 @@ using Newtonsoft.Json;
 
 namespace ChariotSanzzo.Components.SpotifyApi {
 	public class Image {
+	// JM. Json Member Variables
 		[JsonProperty("height")]
-		public int		_height {get; set;}
+		public int		Height	{get; set;}
 		[JsonProperty("url")]
-		public string?	_url {get; set;} = null;
+		public string?	Url		{get; set;} = null;
 		[JsonProperty("width")]
-		public int		_width {get; set;}
+		public int		Width	{get; set;}
 	}
 }
