@@ -4,12 +4,12 @@ using DSharpPlus.Entities;
 namespace Gjallarhorn.Components {
 	public class GjallarhornContext {
 	// 0. Member Variables
-		public DiscordColor		_color			{get; set;}
-		public string			_command		{get; set;} = "";
-		public string			_username		{get; set;} = "";
-		public string			_userIcon		{get; set;} = "";
+		public DiscordColor		_color			{get; set;} = DiscordColor.Black;
+		public string			_command		{get; set;} = "Missing";
+		public string			_username		{get; set;} = "Missing";
+		public string			_userIcon		{get; set;} = "Missing";
 		public string?			_message		{get; set;} = null;
-		public string			_trackLink		{get; set;} = "";
+		public string			_trackLink		{get; set;} = "Missing";
 		public DiscordGuild?	_guild			{get; set;} = null;
 		public DiscordChannel?	_chatChannel	{get; set;} = null;
 		public DiscordChannel?	_voiceChannel	{get; set;} = null;
@@ -30,9 +30,13 @@ namespace Gjallarhorn.Components {
 	// 2. Utils
 		private async Task<bool>	SetParameter(string argLine) {
 		// Checks and Sets
+			if (argLine == null)
+				return false;
 			string[] parts = argLine.Split("<|Value|>");
-			string	type = parts[0];
-			string	value = parts[1];
+			if (parts.Length != 2)
+				return (false);
+			string type = parts[0];
+			string value = parts[1];
 		// Core
 			switch (type) {
 				case ("<|UserId|>"):

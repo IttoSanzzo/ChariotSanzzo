@@ -31,9 +31,13 @@ namespace Gjallarhorn.Components {
 				|| ctx._chatChannel == null
 				|| ctx._voiceChannel == null)
 				return ;
+				var obj = await GjallarhorCalls.GetLavalinkTools(ctx._voiceChannel, 0);
+			if (obj.Item1 == false)
+				return ;
+			t_tools tools = obj.Item2;
+		//  Start
 			var embed = new DiscordEmbedBuilder();
 			embed.WithFooter(ctx._username, ctx._userIcon);
-			t_tools tools = await GjallarhorCalls.GetLavalinkTools(ctx._voiceChannel, 0);
 		// 0. Find Track
 			LavalinkLoadResult searchQuery = await tools.node.Rest.GetTracksAsync(ctx._trackLink, LavalinkSearchType.Plain);
 			if (searchQuery.LoadResultType == LavalinkLoadResultType.NoMatches || searchQuery.LoadResultType == LavalinkLoadResultType.LoadFailed) {
@@ -54,7 +58,11 @@ namespace Gjallarhorn.Components {
 				|| ctx._chatChannel == null
 				|| ctx._voiceChannel == null)
 				return ;
-			t_tools tools = await GjallarhorCalls.GetLavalinkTools(ctx._voiceChannel, 1);
+			var obj = await GjallarhorCalls.GetLavalinkTools(ctx._voiceChannel, 1);
+			if (obj.Item1 == false)
+				return ;
+			t_tools tools = obj.Item2;
+		// Start
 			var embed = new DiscordEmbedBuilder();
 			embed.WithFooter(ctx._username, ctx._userIcon);
 			embed.WithColor(ctx._color);
@@ -64,7 +72,7 @@ namespace Gjallarhorn.Components {
 			await GjallarhorCalls.DelMssTimerAsync(20, await ctx._chatChannel.SendMessageAsync(embed.Build()));
 		}
 	// E. Miscs
-		private static async Task<t_tools>	GetLavalinkTools(DiscordChannel channel, int type) {
+		private static async Task<(bool, t_tools)>	GetLavalinkTools(DiscordChannel channel, int type) {
 			t_tools	tools = new t_tools();
 			tools.llInstace = Program.Client.GetLavalink();
 			tools.node = tools.llInstace.ConnectedNodes.Values.First();
@@ -72,15 +80,19 @@ namespace Gjallarhorn.Components {
 				await tools.node.ConnectAsync(channel);
 			tools.conn = tools.node.GetGuildConnection(channel.Guild);
 			tools.serverId = channel.Guild.Id;
-			return (tools);
+			if (tools.conn == null) {
+				Program.ColorWriteLine(ConsoleColor.Red, "LavalinkConnetion NULL!");
+				return (false, tools);
+			}
+			return (true, tools);
 		}
-		private static bool	CheckInChannel(DiscordMember[] members) {
+		private static bool					CheckInChannel(DiscordMember[] members) {
 			for (int i = 0; i < members.Length; i++)
 				if (members[i].Id == GjallarhorCalls._GjallarhornId)
 					return (true);
 			return (false);
 		}
-		private static async Task	DelMssTimerAsync(int seconds, DiscordMessage message) /* Deletes the given discord message past the given seconds */ {
+		private static async Task			DelMssTimerAsync(int seconds, DiscordMessage message) /* Deletes the given discord message past the given seconds */ {
 			await Task.Delay(1000 * seconds);
 			await message.DeleteAsync();
 			return ;

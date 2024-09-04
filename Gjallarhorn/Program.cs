@@ -88,5 +88,8 @@ namespace Gjallarhorn {
 			Console.ResetColor();
 			Console.Write(text);
 		}
+		public static void	WriteException(Exception ex) {
+			Program.ColorWriteLine(ConsoleColor.Yellow ,ex.ToString());
+		}
 	}
 }

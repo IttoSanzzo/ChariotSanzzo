@@ -26,7 +26,7 @@ namespace Gjallarhorn.Utils {
 	// 2. Core Functions
 		private static async void	ControlPanelSocketHandler() {
 			var listener = new HttpListener();
-			listener.Prefixes.Add("http://localhost:11366/");
+			listener.Prefixes.Add("http://localhost:11367/");
 			listener.Start();
 			Program.WriteLine("ControlPanel Socket Ready...");
 			while (true) {
@@ -36,17 +36,21 @@ namespace Gjallarhorn.Utils {
 				string response = "";
 				var	webSocket = webSocketContext.WebSocket;
 				var	buffer = new byte[2048];
-				var	result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-				Program.WriteLine("Socket received connectionn from ControlPanel!");
-				while (!webSocket.CloseStatus.HasValue) {
-					response = Encoding.UTF8.GetString(buffer, 0, result.Count);
-					await webSocket.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes($"<|ACK|>")), WebSocketMessageType.Text, true, CancellationToken.None);
+				try {
+					var	result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
 					Program.WriteLine("Socket received connectionn from ControlPanel!");
-					if (string.IsNullOrEmpty(response) == false)
-						GjallarhornSocket.FunctionsSwitch(response);
-					result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+					while (!webSocket.CloseStatus.HasValue) {
+						response = Encoding.UTF8.GetString(buffer, 0, result.Count);
+						await webSocket.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes($"<|ACK|>")), WebSocketMessageType.Text, true, CancellationToken.None);
+						Program.WriteLine("Socket received connectionn from ControlPanel!");
+						if (string.IsNullOrEmpty(response) == false)
+							GjallarhornSocket.FunctionsSwitch(response);
+						result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+					}
+					await webSocket.CloseAsync(webSocket.CloseStatus.Value, webSocket.CloseStatusDescription, CancellationToken.None);
+				} catch(Exception ex) {
+					Program.WriteException(ex);
 				}
-				await webSocket.CloseAsync(webSocket.CloseStatus.Value, webSocket.CloseStatusDescription, CancellationToken.None);
 			}
 		}
 		private static async void	ChariotSanzzoSocketHandler() {
@@ -76,23 +80,29 @@ namespace Gjallarhorn.Utils {
 			}
 		}
 		private static async void	FunctionsSwitch(string src) {
-			var gCtx = new GjallarhornContext(src);
-			switch (gCtx._command) {
-				case ("Message"):
-					Program.WriteLine($"Command received: {gCtx._command}.");
-					await GjallarhorCalls.SendEmbedMessageAsync(gCtx);
-				break;
-				case ("Play"):
-					Program.WriteLine($"Command received: {gCtx._command}.");
-					await GjallarhorCalls.PlayAsync(gCtx);
-				break;
-				case ("Stop"):
-					Program.WriteLine($"Command received: {gCtx._command}.");
-					await GjallarhorCalls.StopAsync(gCtx);
-				break;
-				default:
-					Program.ColorWriteLine(ConsoleColor.Red, $"Command received was not valid. ({gCtx._command})");
-				break;
+			try {
+				var gCtx = new GjallarhornContext(src);
+	Program.WriteLine($"{gCtx._guild}\n{gCtx._chatChannel}\n{gCtx._voiceChannel}\n{gCtx._command}\n\n\n\n\n");
+
+				switch (gCtx._command) {
+					case ("Message"):
+						Program.WriteLine($"Command received: {gCtx._command}.");
+						await GjallarhorCalls.SendEmbedMessageAsync(gCtx);
+					break;
+					case ("Play"):
+						Program.WriteLine($"Command received: {gCtx._command}.");
+						await GjallarhorCalls.PlayAsync(gCtx);
+					break;
+					case ("Stop"):
+						Program.WriteLine($"Command received: {gCtx._command}.");
+						await GjallarhorCalls.StopAsync(gCtx);
+					break;
+					default:
+						Program.ColorWriteLine(ConsoleColor.Red, $"FunctionsSwitch: Command received was not valid. ({gCtx._command})");
+					break;
+				}
+			} catch(Exception ex) {
+				Program.WriteException(ex);
 			}
 		}
 	}
