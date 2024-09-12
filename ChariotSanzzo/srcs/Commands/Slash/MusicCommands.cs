@@ -17,15 +17,14 @@ namespace ChariotSanzzo.Commands.Slash {
 	[SlashCommandGroup("Music", "General Music Slash Commands.")]
 	public class MusicCommands : ApplicationCommandModule {
 	// M. Member Variables
-		private static LavalinkExtension		_llInstance	{get; set;} = Program.Client.GetLavalink();
-		private static LavalinkNodeConnection	_node		{get; set;} = _llInstance.ConnectedNodes.Values.First();
+		private static LavalinkExtension		LlInstance	{get; set;} = Program.Client.GetLavalink();
+		private static LavalinkNodeConnection	Node		{get; set;} = LlInstance.ConnectedNodes.Values.First();
 
 	// C. Constructor
 	static MusicCommands() {
-		MusicCommands._node.GuildConnectionCreated += Music.NewConn;
-		// MusicCommands._node.GuildConnectionRemoved += Music.Disconnected;
+		MusicCommands.Node.GuildConnectionCreated += CharitoMusicEvents.NewConn;
 		if (Program.Client != null)
-			Program.Client.VoiceStateUpdated += Music.Disconnected;
+			Program.Client.VoiceStateUpdated += CharitoMusicEvents.Disconnected;
 	}
 
 	// 0. Main
@@ -44,13 +43,12 @@ namespace ChariotSanzzo.Commands.Slash {
 			var	gCtx = new GjallarhornContext(ctx, "Stop");
 			await ChariotMusicCalls.TryCallAsync(gCtx);
 		}
-
-	// 1. Miscs
 		[SlashCommand("pause", "Switches the track's pause state.")]
 		public async Task Pause(InteractionContext ctx, [Choice("Switch", 2)][Choice("Pause", 1)][Choice("Resume", 0)][Option("Action", "What should happen. (Defaults to Switch)")] long type = 2) {
 			await ctx.DeferAsync();
 			var	gCtx = new GjallarhornContext(ctx, "Pause");
 			gCtx.Data.PauseType = (int)type;
+			gCtx.Data.MiscValue = 1;
 			await ChariotMusicCalls.TryCallAsync(gCtx);
 		}
 		[SlashCommand("volume", "Tweakes the volume of the music.")]
@@ -78,8 +76,6 @@ namespace ChariotSanzzo.Commands.Slash {
 			await Task.Delay(1000 * 20);
 			await ctx.DeleteResponseAsync();
 		}
-	
-	// 2. Queue
 		[SlashCommand("queue", "Shows the local queue.")]
 		public async Task GetQueue(InteractionContext ctx) {
 			await ctx.DeferAsync();
@@ -115,35 +111,15 @@ namespace ChariotSanzzo.Commands.Slash {
 		}
 		[SlashCommand("previous", "Goes back to the previous track!")]
 		public async Task Previous(InteractionContext ctx) {
-		await ctx.DeferAsync();
+			await ctx.DeferAsync();
 			var	gCtx = new GjallarhornContext(ctx, "Previous");
 			await ChariotMusicCalls.TryCallAsync(gCtx);
 		}
 		[SlashCommand("replay", "Replays the current track!")]
 		public async Task Replay(InteractionContext ctx) {
 			await ctx.DeferAsync();
-		// 0. Initialization
-			var testObj = await MusicCommands.PreChecksPass(ctx, 0);
-			if (testObj.Item1 == false)
-				return ;
-			t_tools	tools = testObj.Item2;
-
-		// 1. Prepare Embed
-			var	embed = new DiscordEmbedBuilder() {
-				Color = DiscordColor.Aquamarine
-			};
-
-		// 1. Core
-			var	toPlayNow = await tools.queue.UseCurrentTrackAsync();
-			if (toPlayNow != null) {
-				await tools.queue.Conn.PlayAsync(toPlayNow);
-				embed.WithDescription("Track replayed.");
-			}
-			else
-				embed.WithDescription("Coundn't replay (Probably no tracks left).");
-			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed: embed));
-			await Task.Delay(1000 * 10);
-			await ctx.DeleteResponseAsync();
+			var	gCtx = new GjallarhornContext(ctx, "Replay");
+			await ChariotMusicCalls.TryCallAsync(gCtx);
 		}
 		[SlashCommand("index", "Plays the track at the given index position!")]
 		public async Task Index(InteractionContext ctx, [Option("index", "The track's position in the queue.")] long index) {
@@ -218,7 +194,20 @@ namespace ChariotSanzzo.Commands.Slash {
 			await Task.Delay(1000 * 10);
 			await ctx.DeleteResponseAsync();
 		}
+		[SlashCommand("reset", "Resets the guild queue.")]
+		public async Task Reset(InteractionContext ctx) {
+			await ctx.DeferAsync();
+			var	gCtx = new GjallarhornContext(ctx, "Reset");
+			await ChariotMusicCalls.TryCallAsync(gCtx);
+		}
 
+	// 1. ControlPanel
+		[SlashCommand("ControlPanel", "Returns your Music ControlPanel link for this Channel.")]
+		public async Task ControlPanel(InteractionContext ctx) {
+			await ctx.DeferAsync();
+			var	gCtx = new GjallarhornContext(ctx, "ControlPanel");
+			await ChariotMusicCalls.TryCallAsync(gCtx);
+		}
 	// 3. Checks
 		public static async Task<(bool, t_tools)>	PreChecksPass(InteractionContext ctx, short type) {
 			t_tools	tools = new t_tools();
@@ -262,7 +251,7 @@ namespace ChariotSanzzo.Commands.Slash {
 				return (false, tools);
 			}
 			if (type != 1)
-				tools.queue = ChariotMusicCalls.QColle.GetQueue(tools.serverId, tools.conn, ctx.Channel);
+				tools.queue = ChariotMusicCalls.QColle.GetQueue(tools.serverId, ctx.Member, tools.conn, ctx.Channel);
 
 			// 2. Checks per type
 			switch (type) {

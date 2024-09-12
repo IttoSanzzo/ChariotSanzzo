@@ -1,4 +1,5 @@
 .vscode/
+.env
 **/bin
 **/obj
 /Lavalink/Lavalink.jar

@@ -1,9 +1,9 @@
-using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Net.WebSockets;
 using System.Text;
 using Gjallarhorn.Components;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Gjallarhorn.Utils {
 	public static class GjallarhornSocket {
@@ -31,7 +31,7 @@ namespace Gjallarhorn.Utils {
 			var listener = new HttpListener();
 			listener.Prefixes.Add($"http://+:{_controlPanelPort}/");
 			listener.Start();
-			Program.WriteLine("ControlPanel Socket Ready...");
+			Program.WriteLine($"ControlPanel Socket Ready...");
 			while (true) {
 				var context = await listener.GetContextAsync();
 				GjallarhornSocket.ControlPanelClientThread(context);
@@ -108,6 +108,10 @@ namespace Gjallarhorn.Utils {
 					case ("Stop"):
 						Program.WriteLine($"Command received: {gCtx._command}.");
 						await GjallarhorCalls.StopAsync(gCtx);
+					break;
+					case ("ControlPanel"):
+						Program.WriteLine($"Command received: {gCtx._command}.");
+						await GjallarhorCalls.ControlPanelAsync(gCtx);
 					break;
 					default:
 						Program.ColorWriteLine(ConsoleColor.Red, $"FunctionsSwitch: Command received was not valid. ({gCtx._command})");

@@ -6,6 +6,7 @@ namespace ChariotSanzzo.Components.MusicComponent {
 	public class TrackQueue {
 	// M. Member Variables
 		private QueueCollection			QColle			{get; set;}
+		public DiscordMember			Owner			{get; set;}
 		private static Random			Random			{get; set;} = new Random();
 		public LavalinkGuildConnection	Conn			{get; private set;}
 		public DiscordChannel?			Chat			{get; private set;} = null;
@@ -18,20 +19,23 @@ namespace ChariotSanzzo.Components.MusicComponent {
 		private bool					CleanConfig		{get; set;} = true;
 		private bool					AdvanConfig		{get; set;} = true;
 		public DiscordMessage?			PauseMss		{get; private set;} = null;
-		public DiscordMessage?			LastPlayerMss	{get; private set;} = null;
+		public DiscordMessage?			ActivePlayerMss	{get; private set;} = null;
 
 	// C. Constructors
 		~TrackQueue() {
+			if (this.ActivePlayerMss != null)
+				this.ActivePlayerMss.DeleteAsync();
 			Program.WriteLine($"Queue Destructed! Guild: {this.ServerId}");
 		}
-		public TrackQueue(ulong serverId, LavalinkGuildConnection conn, DiscordChannel? chat, QueueCollection qColle) {
+		public TrackQueue(ulong serverId, DiscordMember owner, LavalinkGuildConnection conn, DiscordChannel? chat, QueueCollection qColle) {
+			this.Owner = owner;
 			this.QColle = qColle;
 			this.ServerId = serverId;
 			this.Conn = conn;
 			this.Chat = chat;
 			if (this.Conn.CurrentState.CurrentTrack != null)
 				this.Conn.StopAsync();
-			this.Conn.PlaybackFinished += Music.PlayNext;
+			this.Conn.PlaybackFinished += CharitoMusicEvents.TrackEndedEvent;
 			Program.WriteLine($"Queue Constructed! Guild: {this.ServerId}");
 		}
 
@@ -75,11 +79,10 @@ namespace ChariotSanzzo.Components.MusicComponent {
 			if (this.CurrentIndex >= this.Length - 1) {
 				if (this.Loop == 2)
 					this.CurrentIndex = -1;
-				else if (this.Loop == 0)
+				else
 					return (false);
 			}
-			if (this.Loop != 1)
-				this.CurrentIndex += 1;
+			this.CurrentIndex += 1;
 			if (this.CurrentIndex < 0)
 				this.CurrentIndex = 0;
 			return (true);
@@ -88,7 +91,7 @@ namespace ChariotSanzzo.Components.MusicComponent {
 			this.PauseMss = pauseMss;
 		}
 		public void SetLastPlayerMessage(DiscordMessage? lastPlayerMss) {
-			this.LastPlayerMss = lastPlayerMss;
+			this.ActivePlayerMss = lastPlayerMss;
 		}
 		public bool SetPauseState(bool state) {
 			this.PauseState = state;
@@ -125,8 +128,14 @@ namespace ChariotSanzzo.Components.MusicComponent {
 		}
 		public async Task<LavalinkTrack?>	UsePreviousTrackAsync() {
 			this.CurrentIndex -= 1;
-			if (this.CurrentIndex < 0)
-				this.CurrentIndex = this.Length - 1;
+			if (this.CurrentIndex < 0) {
+				if (this.Loop == 2)
+					this.CurrentIndex = this.Length - 1;
+				else {
+					this.CurrentIndex = 0;
+					return (null);
+				}
+			}
 			await this.NowPlayingAsync();
 			this.PauseState = false;
 			return (this.Tracks[this.CurrentIndex].LlTrack);
@@ -189,14 +198,12 @@ namespace ChariotSanzzo.Components.MusicComponent {
 			return (false);
 		}
 		public async Task							NowPlayingAsync() {
-			if (this.Loop == 1)
-				return ;
-			if (this.CleanConfig == true && this.LastPlayerMss != null)
-				await this.LastPlayerMss.DeleteAsync();
+			if (this.CleanConfig == true && this.ActivePlayerMss != null)
+				await this.ActivePlayerMss.DeleteAsync();
 			if (this.Chat != null){
 				var message = await GenNowPlayingAsync();
 				if (message != null)
-					this.LastPlayerMss = await this.Chat.SendMessageAsync(message);
+					this.ActivePlayerMss = await this.Chat.SendMessageAsync(message);
 			}
 		}
 		public async Task<DiscordMessageBuilder?>	GenNowPlayingAsync() {
@@ -206,17 +213,30 @@ namespace ChariotSanzzo.Components.MusicComponent {
 			if (this.AdvanConfig == true) {
 				message.AddComponents(
 					((this.Loop == 0)
-						? (new DiscordButtonComponent(DSharpPlus.ButtonStyle.Secondary, "MusicLoopButton", null, false, new DiscordComponentEmoji(1271598875374784644)))
+						? (new DiscordButtonComponent(DSharpPlus.ButtonStyle.Secondary,		"MusicLoopButton",			null, false, 	new DiscordComponentEmoji(1271598875374784644)))
 						: (((this.Loop == 1)
-							? (new DiscordButtonComponent(DSharpPlus.ButtonStyle.Success, "MusicLoopButton", null, false, new DiscordComponentEmoji(1269881536552108135)))
-							: (new DiscordButtonComponent(DSharpPlus.ButtonStyle.Danger, "MusicLoopButton", null, false, new DiscordComponentEmoji(1271598889501196290)))
-						))),
-					new DiscordButtonComponent(DSharpPlus.ButtonStyle.Primary, "MusicPreviousTrackButton", null, false, new DiscordComponentEmoji(1269698996830605342)),
+							? (new DiscordButtonComponent(DSharpPlus.ButtonStyle.Success,	"MusicLoopButton",			null, false, 	new DiscordComponentEmoji(1269881536552108135)))
+							: (new DiscordButtonComponent(DSharpPlus.ButtonStyle.Danger,	"MusicLoopButton",			null, false, 	new DiscordComponentEmoji(1271598889501196290)))
+					))),
+					((this.CheckSOQ())
+						? (new DiscordButtonComponent(DSharpPlus.ButtonStyle.Primary,		"MusicPreviousTrackButton",	null, true,		new DiscordComponentEmoji(1269698996830605342)))
+						: (new DiscordButtonComponent(DSharpPlus.ButtonStyle.Primary,		"MusicPreviousTrackButton",	null, false,	new DiscordComponentEmoji(1269698996830605342)))
+					),
 					((this.PauseState == false)
-						? (new DiscordButtonComponent(DSharpPlus.ButtonStyle.Success, "MusicPlayPauseButton", null, false, new DiscordComponentEmoji(1269697085834395738)))
-						: (new DiscordButtonComponent(DSharpPlus.ButtonStyle.Secondary, "MusicPlayPauseButton", null, false, new DiscordComponentEmoji(1269697085834395738)))),
-					new DiscordButtonComponent(DSharpPlus.ButtonStyle.Primary, "MusicNextTrackButton", null, false, new DiscordComponentEmoji(1269698987259330702)),
-					new DiscordButtonComponent(DSharpPlus.ButtonStyle.Secondary, "MusicShuffleButton", null, false, new DiscordComponentEmoji(1271602111783895150)));
+						? (new DiscordButtonComponent(DSharpPlus.ButtonStyle.Success,		"MusicPlayPauseButton",		null, false, 	new DiscordComponentEmoji(1269697085834395738)))
+						: (new DiscordButtonComponent(DSharpPlus.ButtonStyle.Secondary,		"MusicPlayPauseButton",		null, false, 	new DiscordComponentEmoji(1269697085834395738)))
+					),
+					((this.CheckEOQ())
+						? (new DiscordButtonComponent(DSharpPlus.ButtonStyle.Primary,		"MusicNextTrackButton",		null, true,		new DiscordComponentEmoji(1269698987259330702)))
+						: (new DiscordButtonComponent(DSharpPlus.ButtonStyle.Primary,		"MusicNextTrackButton",		null, false,	new DiscordComponentEmoji(1269698987259330702)))
+					),
+					((this.Loop == 0)
+						? (new DiscordButtonComponent(DSharpPlus.ButtonStyle.Secondary,		"MusicShuffleButton",		null, false, 	new DiscordComponentEmoji(1271602111783895150)))
+						: ((this.Loop == 1)
+							? (new DiscordButtonComponent(DSharpPlus.ButtonStyle.Success,		"MusicReplayTrackButton",	null, false, new DiscordComponentEmoji(1281561425864691735)))
+							: (new DiscordButtonComponent(DSharpPlus.ButtonStyle.Danger,		"MusicShuffleButton",		null, false, new DiscordComponentEmoji(1271602111783895150)))
+					))
+					);
 			}
 			return (message);
 		}
@@ -225,6 +245,20 @@ namespace ChariotSanzzo.Components.MusicComponent {
 			if (this.PauseState == true)
 				return (1);
 			return (0);
+		}
+		private bool								CheckSOQ() {
+			if (this.Length < 2)
+				return (true);
+			if (this.Loop == 2)
+				return (false);
+			return (this.CurrentIndex <= 0);
+		}
+		private bool								CheckEOQ() {
+			if (this.Length < 2)
+				return (true);
+			if (this.Loop == 2)
+				return (false);
+			return (this.CurrentIndex >= this.Length - 1);
 		}
 
 	// E. Miscs

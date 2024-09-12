@@ -35,8 +35,6 @@ namespace core {
 			Program._ExecArgs = $"SafeStart {Program._ArgLavalink}";
 		
 		// 2. Start Processes
-		do {
-
 			Program._Lavalink = Program.LaunchLavalink().Result;
 			Program._Gjallarhorn = Program.LaunchModule("Gjallarhorn", Program._ExecArgs);
 			Program._ChariotSanzzo = Program.LaunchModule("ChariotSanzzo", Program._ExecArgs);
@@ -45,15 +43,13 @@ namespace core {
 			await Task.Delay(1000 * 7);
 			if (Program._ChariotSanzzo.HasExited == true || Program._Gjallarhorn.HasExited == true) {
 				Program.ColorWriteLine(ConsoleColor.Red, "Error: Couldn't start properly, trying again...");
-				if (Program._ChariotSanzzo.HasExited != true)
-					Program._ChariotSanzzo.Kill(true);
-				if (Program._Gjallarhorn.HasExited != true)
-					Program._Gjallarhorn.Kill(true);
+				Program._ChariotSanzzo.Kill(true);
+				Program._Gjallarhorn.Kill(true);
 			}
-		} while (Program._ChariotSanzzo.HasExited == true || Program._Gjallarhorn.HasExited == true);
 
 		// E. Closing
 			Program.ColorWriteLine(ConsoleColor.Green, $"Running!");
+			Program.ConsoleListener();
 			await Task.Delay(-1);
 			return (0);
 		}
@@ -154,8 +150,10 @@ namespace core {
 			}
 		}
 		private static void SigIntHandler(object? sender, ConsoleCancelEventArgs ctx) {
+			Program.Exit(0, "\rExiting via SigInt!");
+		}
+		private static void ConsoleListener() {
 			while (true) {
-				Program.Write("\rInsert the Command --> ");
 				string? command = Console.ReadLine();
 				if (command == null)
 					continue;
@@ -178,10 +176,10 @@ namespace core {
 						Program._ChariotSanzzo = Program.LaunchModule("ChariotSanzzo", Program._ExecArgs);
 					break;
 					case("stop"):
-						Program.Exit(0, "\rExiting via SigInt!");
+						Program.Exit(0, "\rExiting via ConsoleListener!");
 					break;
 					default:
-						Program.Write("Command Not Recognized, try again...");
+						Program.WriteLine("Command Not Recognized, try again...");
 					break;
 				}
 			}

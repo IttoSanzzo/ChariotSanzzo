@@ -23,10 +23,6 @@ namespace ChariotSanzzo.Commands.Slash {
 			string	username = ctx.Member.Nickname;
 			if (string.IsNullOrEmpty(username))
 				username = ctx.User.Username;
-			if (sfxLink.Contains("https://") == false) {
-				await ChariotSanzzoSocket.GjallarhornPost(SFXCommands.BuildPostBody(ctx, "Message", DiscordColor.Red, "Invalid SFX Link!"));
-				return ;
-			}
 			if (sfxLink.Contains("youtube.com/playlist?") == true
 				|| sfxLink.Contains("spotify.com/playlist") == true
 				|| (sfxLink.Contains("soundcloud.com/") == true && sfxLink.Contains("/sets") == true)) {
@@ -51,14 +47,14 @@ namespace ChariotSanzzo.Commands.Slash {
 			await ChariotSanzzoSocket.GjallarhornPost(SFXCommands.BuildPostBody(ctx, "Stop", DiscordColor.Black));
 		}
 		[SlashCommand("index", "Plays the track in the given index position from the current server Music Queue.")]
-		public async Task Play(InteractionContext ctx, [Option("index", "The index for the track")] long index) {
+		public async Task Index(InteractionContext ctx, [Option("index", "The index for the track")] long index) {
 			await ctx.DeferAsync();
 			await ctx.DeleteResponseAsync();
 			if (await SFXCommands.CheckGajPresence(ctx.Channel) == false)
 				return ;
 
 		// 0. Check and Run
-		string	username = ctx.Member.Nickname;
+			string	username = ctx.Member.Nickname;
 			if (string.IsNullOrEmpty(username))
 				username = ctx.User.Username;
 			if (ctx.Member.VoiceState == null) {
@@ -78,15 +74,31 @@ namespace ChariotSanzzo.Commands.Slash {
 			string sfxLink = track.Uri.AbsoluteUri;
 			await ChariotSanzzoSocket.GjallarhornPost(SFXCommands.BuildPostBody(ctx, "Play", DiscordColor.Aquamarine, null, sfxLink));
 		}
+		[SlashCommand("loop", "Swiches the loop state of the SFX player.")]
+		public async Task Loop(InteractionContext ctx) {
+			await ctx.DeferAsync();
+			await ctx.DeleteResponseAsync();
+			if (await SFXCommands.CheckGajPresence(ctx.Channel) == false)
+				return ;
+			await ChariotSanzzoSocket.GjallarhornPost(SFXCommands.BuildPostBody(ctx, "Loop", DiscordColor.Aquamarine, null, null));
+		}
+		[SlashCommand("ControlPanel", "Returns your SFX ControlPanel link for this Channel.")]
+		public async Task ControlPanel(InteractionContext ctx) {
+			await ctx.DeferAsync();
+			await ctx.DeleteResponseAsync();
+			if (await SFXCommands.CheckGajPresence(ctx.Channel) == false)
+				return ;
+			await ChariotSanzzoSocket.GjallarhornPost(SFXCommands.BuildPostBody(ctx, "ControlPanel", DiscordColor.DarkBlue, null, null));
+		}
 
 	// 1. Gjallarhorn Miscs
-		private static bool						CheckGjallarhornInChannel(DiscordMember[] members) {
+		private static bool				CheckGjallarhornInChannel(DiscordMember[] members) {
 			for (int i = 0; i < members.Length; i++)
 				if (members[i].Id == SFXCommands.GjallarhornId)
 					return (true);
 			return (false);
 		}
-		private static async Task<bool>			CheckGajPresence(DiscordChannel channel) {
+		private static async Task<bool>	CheckGajPresence(DiscordChannel channel) {
 			if (channel.Guild.Members.ContainsKey(SFXCommands.GjallarhornId) == false || SFXCommands.CheckGjallarhornInChannel(channel.Users.ToArray()) == false) {
 				Program.WriteLine("GjarNULL");
 				var embedNoGaj = new DiscordEmbedBuilder();
@@ -100,12 +112,12 @@ namespace ChariotSanzzo.Commands.Slash {
 			}
 			return (true);
 		}
-		private static async Task				DelMssTimerAsync(int seconds, DiscordMessage message) /* Deletes the given discord message past the given seconds */ {
+		private static async Task		DelMssTimerAsync(int seconds, DiscordMessage message) /* Deletes the given discord message past the given seconds */ {
 			await Task.Delay(1000 * seconds);
 			await message.DeleteAsync();
 			return ;
 		}
-		private static string		BuildPostBody(InteractionContext ctx, string command, DiscordColor color, string? message = null, string? link = null) {
+		private static string			BuildPostBody(InteractionContext ctx, string command, DiscordColor color, string? message = null, string? link = null) {
 			string body = "";
 			body += $"<|Command|><|Value|>{command}\n";
 			body += $"<|Color|><|Value|>{color}\n";
@@ -116,6 +128,7 @@ namespace ChariotSanzzo.Commands.Slash {
 			body += $"<|ChatChannelId|><|Value|>{ctx.Channel.Id}\n";
 			if (ctx.Member.VoiceState != null)
 				body += $"<|VoiceChannelId|><|Value|>{ctx.Member.VoiceState.Channel.Id}\n";
+			body += $"<|UserId|><|Value|>{ctx.User.Id}\n";
 			body += $"<|Username|><|Value|>{ctx.User.Username}\n";
 			body += $"<|Usericon|><|Value|>{ctx.User.AvatarUrl}";
 			return (body);

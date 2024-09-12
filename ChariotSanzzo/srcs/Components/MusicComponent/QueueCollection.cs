@@ -4,8 +4,8 @@ using DSharpPlus.Lavalink;
 namespace ChariotSanzzo.Components.MusicComponent {
 	public class QueueCollection {
 	// M. Member Variables
-		private int				Length	{get; set;} = 0;
-		private TrackQueue[]	Queues	{get; set;} = new TrackQueue[0];
+		internal int			Length	{get; set;} = 0;
+		internal TrackQueue[]	Queues	{get; set;} = new TrackQueue[0];
 
 	// C. Constructors
 		public QueueCollection() {
@@ -13,14 +13,14 @@ namespace ChariotSanzzo.Components.MusicComponent {
 		}
 
 	// 0. Core
-		public void			CreateQueue(ulong serverId, LavalinkGuildConnection conn, DiscordChannel? chat) {
+		public void			CreateQueue(ulong serverId, DiscordMember owner, LavalinkGuildConnection conn, DiscordChannel? chat) {
 			if (QueueExist(serverId) == true)
 				return ;
 			TrackQueue[] temp = new TrackQueue[this.Length + 1];
 			int	i = -1;
 			while (++i < this.Length)
 				temp[i] = this.Queues[i];
-			temp[i] = new TrackQueue(serverId, conn, chat, this);
+			temp[i] = new TrackQueue(serverId, owner, conn, chat, this);
 			this.Queues = temp;
 			this.Length += 1;
 		}
@@ -35,11 +35,11 @@ namespace ChariotSanzzo.Components.MusicComponent {
 			this.Queues = temp;
 			this.Length -= 1;
 		}
-		public TrackQueue	GetQueue(ulong serverId, LavalinkGuildConnection conn, DiscordChannel? chat) {
+		public TrackQueue	GetQueue(ulong serverId, DiscordMember owner, LavalinkGuildConnection conn, DiscordChannel? chat) {
 			for (int i = 0; i < this.Length; i++)
 				if (this.Queues[i].ServerId == serverId)
 					return (this.Queues[i]);
-			this.CreateQueue(serverId, conn, chat);
+			this.CreateQueue(serverId, owner, conn, chat);
 			return (this.Queues[this.Length - 1]);
 		}
 		public TrackQueue?	GetQueueUnsafe(ulong serverId) {
@@ -48,9 +48,9 @@ namespace ChariotSanzzo.Components.MusicComponent {
 					return (this.Queues[i]);
 			return (null);
 		}
-
+		
 	// U. Utils
-		public bool QueueExist(ulong serverId) {
+		public bool			QueueExist(ulong serverId) {
 			for (int i = 0; i < this.Length; i++)
 				if (this.Queues[i].ServerId == serverId)
 					return (true);

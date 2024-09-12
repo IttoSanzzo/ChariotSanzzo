@@ -37,7 +37,10 @@ namespace ChariotSanzzo.Components.SoundcloudApi {
 			string? jsonFetch = await this.FetchWebApiAsync(trackUri.AbsolutePath);
 			if (jsonFetch == null)
 				return (null);
-			string? subStr = jsonFetch.Substring(jsonFetch.IndexOf("https://i1.sndcdn.com/artworks-"));
+			var sndcdnIndex = jsonFetch.IndexOf("https://i1.sndcdn.com/artworks-");
+			if (sndcdnIndex == -1)
+				return (null);
+			string? subStr = jsonFetch.Substring(sndcdnIndex);
 			if (subStr == null)
 				return (null);
 			int len = subStr.IndexOf(".jpg") + 4;

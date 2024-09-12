@@ -1,4 +1,5 @@
 using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
 using DSharpPlus.SlashCommands;
 
 namespace ChariotSanzzo.Components.MusicComponent {
@@ -6,12 +7,15 @@ namespace ChariotSanzzo.Components.MusicComponent {
 	// -1. Extras
 		public class GTXInfo {
 		// M. Member Variables
-			public bool		Priority	{get; set;} = false;
-			public string	Query		{get; set;} = "NULL";
-			public int		Plataform	{get; set;} = 0;
-			public int		PauseType	{get; set;} = 2;
-			public int		LoopType	{get; set;} = 3;
-			public int 		SkipCount	{get; set;} = 1;
+			public bool		Priority		{get; set;} = false;
+			public string	Query			{get; set;} = "NULL";
+			public int		Plataform		{get; set;} = 0;
+			public int		PauseType		{get; set;} = 2;
+			public int		LoopType		{get; set;} = 3;
+			public int 		SkipCount		{get; set;} = 1;
+			public int		MiscValue		{get; set;} = 0;
+			public bool		VipCall			{get; set;} = false;
+			public bool		WithResponse	{get; set;} = true;
 
 		// C. Constructor
 			public GTXInfo() {
@@ -45,15 +49,19 @@ namespace ChariotSanzzo.Components.MusicComponent {
 				temp = this.GetDataFromMember().Result;
 			this.Data.Query = this.TrackLink;
 		}
-		public GjallarhornContext(string command, InteractionContext? ictx, DiscordChannel chatChannel, DiscordMember member, DiscordColor? color = null, string? message = null, string link = "") {
+		public GjallarhornContext(string command, DiscordChannel chatChannel, InteractionContext? ictx = null, DiscordMember? member = null, DiscordColor? color = null, string? message = null, string link = "") {
 			this.Command = command;
 			this.ChatChannel = chatChannel;
 			this.ChatChannelId = this.ChatChannel.Id;
 			this.Guild = this.ChatChannel.Guild;
-			this.Username = member.Username;
-			this.UserIcon = member.AvatarUrl;
-			this.UserId = member.Id;
+			this.Ictx = ictx;
 			this.Member = member;
+			if (this.Member != null) {
+				this.Username = this.Member.Username;
+				this.UserIcon = this.Member.AvatarUrl;
+				this.UserId = this.Member.Id;
+			}
+			var trash = this.GetDataFromMember().Result;
 			if (color != null)
 				this.Color = (DiscordColor)color;
 			else
@@ -62,15 +70,16 @@ namespace ChariotSanzzo.Components.MusicComponent {
 			this.Message = message;
 			this.Data.Query = this.TrackLink;
 		}
-		public GjallarhornContext(InteractionContext ctx , string command, DiscordColor? color = null, string? message = null, string link = "") {
+		public GjallarhornContext(InteractionContext ctx , string command = "Default", DiscordColor? color = null, string? message = null, string link = "") {
 			this.Command = command;
 			this.ChatChannel = ctx.Channel;
 			this.ChatChannelId = this.ChatChannel.Id;
 			this.Guild = this.ChatChannel.Guild;
-			this.Username = ctx.Member.Username;
-			this.UserIcon = ctx.Member.AvatarUrl;
-			this.UserId = ctx.Member.Id;
+			this.Ictx = ctx;
 			this.Member = ctx.Member;
+			this.Username = this.Member.Username;
+			this.UserIcon = this.Member.AvatarUrl;
+			this.UserId = this.Member.Id;
 			if (color != null)
 				this.Color = (DiscordColor)color;
 			else
@@ -79,8 +88,29 @@ namespace ChariotSanzzo.Components.MusicComponent {
 			this.Message = message;
 			this.Data.Query = this.TrackLink;
 		}
+		public GjallarhornContext(ComponentInteractionCreateEventArgs ctx , string command = "Default", DiscordColor? color = null, string? message = null, string link = "") {
+			this.Command = command;
+			this.ChatChannel = ctx.Channel;
+			this.ChatChannelId = this.ChatChannel.Id;
+			this.Guild = this.ChatChannel.Guild;
+			this.Ictx = null;
+			this.UserId = ctx.User.Id;
+			if (color != null)
+				this.Color = (DiscordColor)color;
+			else
+				this.Color = DiscordColor.White;
+			this.TrackLink = link;
+			this.Message = message;
+			this.Data.Query = this.TrackLink;
+			var temp = this.GetDataFromMember().Result;
+		}
 
 	// 0. Core
+		public async Task<string>					TryCallingAsync() {
+			return (await ChariotMusicCalls.TryCallAsync(this));
+		}
+
+	// E1. Miscs
 		private async Task<bool>					SetParameter(string argLine) {
 		// Checks and Sets
 			if (argLine == null)
@@ -147,6 +177,54 @@ namespace ChariotSanzzo.Components.MusicComponent {
 			if (Program.Client == null)
 				return (null);
 			return (await Program.Client.GetChannelAsync(channelId));
+		}
+		
+	// E2. Message Handlers
+		public async Task							GTXEmbedTimerAsync(int seconds, DiscordEmbed embed) {
+			var message = await this.GTXEmbedSendAsync(embed);
+			if (message == null)
+				return ;
+			Thread thread = new Thread(() => WaitForCleaning(seconds, message));
+			thread.Start();
+		}
+		public async Task							GTXEmbedTimerAsync(int seconds, DiscordMessageBuilder messageBuilder) {
+			var message = await this.GTXEmbedSendAsync(messageBuilder);
+			if (message == null)
+				return ;
+			Thread thread = new Thread(() => WaitForCleaning(seconds, message));
+			thread.Start();
+		}
+		public async Task<DiscordMessage?>			GTXEmbedSendAsync(DiscordEmbed embed) {
+			if (this.Ictx != null) {
+				if (this.Data.WithResponse == false) {
+					await this.Ictx.DeleteResponseAsync();
+					return (null);
+				}
+				return (await this.Ictx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed)));
+			} else if (this.ChatChannel != null) {
+				if (this.Data.WithResponse == false)
+					return (null);
+				return (await this.ChatChannel.SendMessageAsync(embed));
+			}
+			return (null);
+		}
+		public async Task<DiscordMessage?>			GTXEmbedSendAsync(DiscordMessageBuilder messageBuilder) {
+			if (this.Ictx != null) {
+				if (this.Data.WithResponse == false) {
+					await this.Ictx.DeleteResponseAsync();
+					return (null);
+				}
+				return (await this.Ictx.EditResponseAsync(new DiscordWebhookBuilder(messageBuilder)));
+			} else if (this.ChatChannel != null) {
+				if (this.Data.WithResponse == false)
+					return (null);
+				return (await this.ChatChannel.SendMessageAsync(messageBuilder));
+			}
+			return (null);
+		}
+		private static async void					WaitForCleaning(int seconds, DiscordMessage message) {
+			await Task.Delay(1000 * seconds);
+			await message.DeleteAsync();
 		}
 	}
 }

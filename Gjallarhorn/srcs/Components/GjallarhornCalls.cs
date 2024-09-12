@@ -2,6 +2,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.Lavalink;
 using DSharpPlus.Lavalink.Entities;
 using DSharpPlus.Lavalink.EventArgs;
+using STPlib;
 
 namespace Gjallarhorn.Components {
 	public static class GjallarhorCalls {
@@ -55,7 +56,11 @@ namespace Gjallarhorn.Components {
 			var embed = new DiscordEmbedBuilder();
 			embed.WithFooter(ctx._username, ctx._userIcon);
 		// 0. Find Track
-			LavalinkLoadResult searchQuery = await tools.node.Rest.GetTracksAsync(ctx._trackLink, LavalinkSearchType.Plain);
+			LavalinkLoadResult searchQuery;
+			if (ctx._trackLink.Contains("https://") == true || ctx._trackLink.Contains("http://") == true)
+				searchQuery = await tools.node.Rest.GetTracksAsync(ctx._trackLink, LavalinkSearchType.Plain);
+			else
+				searchQuery = await tools.node.Rest.GetTracksAsync(ctx._trackLink, LavalinkSearchType.Youtube);
 			if (searchQuery.LoadResultType == LavalinkLoadResultType.NoMatches || searchQuery.LoadResultType == LavalinkLoadResultType.LoadFailed) {
 				embed.WithColor(DiscordColor.Red);
 				embed.WithDescription("Failed to find proper music using the given query.");
@@ -63,7 +68,17 @@ namespace Gjallarhorn.Components {
 					await GjallarhorCalls.DelMssTimerAsync(20, await ctx._chatChannel.SendMessageAsync(embed.Build()));
 				return ;
 			}
-			LavalinkTrack track = searchQuery.Tracks.First();
+			LavalinkTrack track;
+			/*
+			if (ctx._trackLink.Contains("youtube.com/watch?") && ctx._trackLink.Contains("&index="))
+			{
+				Program.WriteLine("Here we goo");
+				Program.WriteLine($"{ctx._trackLink.Substring(ctx._trackLink.IndexOf("&index=") + 7).StoI() - 1}");
+				track = searchQuery.Tracks.ElementAt(ctx._trackLink.Substring(ctx._trackLink.IndexOf("&index=") + 7).StoI() - 1);
+			}
+			else
+			*/
+			track = searchQuery.Tracks.First();
 			await tools.conn.PlayAsync(track);
 			var playerState = GjallarhorCalls.GetGuildPlayerState(ctx._guild.Id, tools.conn);
 			playerState._pauseState = false;
@@ -151,6 +166,24 @@ namespace Gjallarhorn.Components {
 			if (ctx._chatChannel != null)
 				await GjallarhorCalls.DelMssTimerAsync(20, await ctx._chatChannel.SendMessageAsync(embed.Build()));
 		}
+		public static async Task	ControlPanelAsync(GjallarhornContext ctx) {
+			if (ctx._chatChannel == null)
+				return ;
+			try {
+            	string publicIp = await Program.HttpCli.GetStringAsync("https://api.ipify.org");
+				var embed = new DiscordEmbedBuilder();
+				embed.WithColor(DiscordColor.DarkBlue);
+				embed.WithTitle("SFX ControlPanel Link");
+				embed.WithDescription($"[Here is your link for this Channel's ControlPanel](http://{publicIp}:11760/ControlPanel.html?targetBot=Gjallarhorn&userId={ctx._userId}&channelId={ctx._chatChannel.Id})");
+				embed.WithFooter($"For: {ctx._username}", ctx._userIcon);
+				var temp = await ctx._chatChannel.SendMessageAsync(embed);
+				await Task.Delay(1000 * 15);
+				await temp.DeleteAsync();
+            } catch (Exception ex) {
+                Program.WriteException(ex);
+            }
+		}
+	
 	// E. Miscs
 		private static async Task<(bool, t_tools)>	GetLavalinkTools(DiscordChannel channel, int type) {
 			t_tools	tools = new t_tools();

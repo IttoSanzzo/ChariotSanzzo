@@ -12,7 +12,7 @@ namespace ChariotSanzzo.Events {
 		public static void EventsInitRun(this DiscordClient client) {
 			client.Ready += ClientReady;
 			client.MessageCreated += Events.STPDiceRoller.DiceRoller;
-			client.ComponentInteractionCreated += Events.Music.MusicInterectionButton;
+			client.ComponentInteractionCreated += Events.CharitoMusicEvents.MusicInterectionButton;
 		}
 
 	// 2. CommdsNextExtension Events Events

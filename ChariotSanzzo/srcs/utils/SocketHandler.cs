@@ -83,6 +83,7 @@ namespace ChariotSanzzo {
 		private static async void	FunctionsSwitch(string src) {
 			try {
 				var gCtx = new GjallarhornContext(src);
+				gCtx.Data.WithResponse = false;
 				gCtx.Data.Priority = true;
 				await ChariotMusicCalls.TryCallAsync(gCtx);
 			} catch(Exception ex) {

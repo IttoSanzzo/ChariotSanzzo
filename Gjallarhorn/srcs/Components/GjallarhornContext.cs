@@ -15,7 +15,7 @@ namespace Gjallarhorn.Components {
 		public DiscordChannel?	_voiceChannel	{get; set;} = null;
 		private ulong			_chatChannelId	{get; set;}
 		private ulong?			_voiceChannelId	{get; set;} = null;
-		private ulong?			_userId			{get; set;} = null;
+		public ulong?			_userId			{get; set;} = null;
 
 	// 1. Constructor
 		public GjallarhornContext(string gString) {

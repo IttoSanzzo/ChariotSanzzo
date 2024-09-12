@@ -8,10 +8,12 @@ using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
 using ChariotSanzzo.Components.SpotifyApi;
 using ChariotSanzzo.Components.SoundcloudApi;
+using DSharpPlus.Entities;
 
 namespace ChariotSanzzo {
 	internal class Program {
 	// M. Program Variables
+		public static HttpClient				HttpCli			{get; set;} = new HttpClient();
 		public static DiscordClient?			Client			{get; set;}
 		public static CommandsNextExtension?	Commands		{get; set;}
 		public static SpotifyConn				SpotifyConn		{get; set;} = new SpotifyConn();
@@ -21,6 +23,7 @@ namespace ChariotSanzzo {
 
 	// 0. Main
 		static async Task Main(string[] args) {
+			await Program.DotEnvLoadAsync();
 		// -1. Unreasonable
 			var DBConfigHolder = new DBConfig();
 			if (args.Length < 3 || args[1] != "SafeStart") {
@@ -69,6 +72,12 @@ namespace ChariotSanzzo {
 			Client.LavalinkConnectAsync();
 			ChariotSanzzoSocket.OpenChariotControlSocket();
 			Program.ColorWriteLine(ConsoleColor.Blue, $"{config.Name} is up!");
+			await Task.Delay(500);
+			Program.ColorWriteLine(ConsoleColor.Magenta, $"| Active Guilds |");
+			var guilds = Client.Guilds.ToArray();
+			for (int i = 0; i < guilds.Length; i++)
+				Program.WriteLine($"{guilds[i].Value}");
+			Program.Write("\n");
 			await Task.Delay(-1);
 		}
 		public static void	ColorWriteLine(ConsoleColor color, string text) {
@@ -92,6 +101,22 @@ namespace ChariotSanzzo {
 		}
 		public static void	WriteException(Exception ex) {
 			Program.ColorWriteLine(ConsoleColor.Yellow ,ex.ToString());
+		}
+		private static async Task	DotEnvLoadAsync() {
+			try {
+				if (File.Exists(".env") == false)
+					return ;
+				string[] lines = await File.ReadAllLinesAsync(".env");
+				foreach (string line in lines) {
+					if (string.IsNullOrWhiteSpace(line) == false && line.Contains('=')) {
+						string[] keyValue = line.Split('=');
+						if (keyValue.Length == 2)
+							Environment.SetEnvironmentVariable(keyValue[0], keyValue[1]);
+					}
+				}
+			} catch (Exception ex) {
+				Program.WriteException(ex);
+			}
 		}
 	}
 }
