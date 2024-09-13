@@ -21,6 +21,7 @@ namespace ChariotSanzzo.Events {
 			else
 				gCtx = new GjallarhornContext("Next", queue.Chat, null, queue.Owner);
 			gCtx.Data.VipCall = true;
+			gCtx.Data.WithResponse = false;
 			gCtx.Data.MiscValue = 1;
 			await gCtx.TryCallingAsync();
 		}

@@ -9,6 +9,7 @@ using DSharpPlus.SlashCommands;
 using ChariotSanzzo.Components.SpotifyApi;
 using ChariotSanzzo.Components.SoundcloudApi;
 using DSharpPlus.Entities;
+using ChariotSanzzo.Components.GuildSettings;
 
 namespace ChariotSanzzo {
 	internal class Program {

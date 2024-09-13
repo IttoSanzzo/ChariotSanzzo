@@ -85,9 +85,14 @@ namespace ChariotSanzzo.Commands.Prefix {
 		}
 		[Command("restartthechariot")]
 		[Aliases("restart")]
-		public async Task Restart(CommandContext ctx) {
-			if (ctx.User.Username == "ittosanzzo" || ctx.User.Username == "nasasanzzo")
-				await ctx.Message.RespondAsync("Restarting the Chariot!");
+		public async Task Restart(CommandContext ctx, [RemainingText]string botName = "") {
+			if ((ctx.User.Username == "ittosanzzo" || ctx.User.Username == "nasasanzzo") && (botName == "chariot" || botName == "gjallarhorn" || botName == "")) {
+				if (botName == "")
+					botName = "All The Bots";
+				await ctx.Message.RespondAsync($"Restarting the {botName}!");
+			}
+			else
+				return ;
 			// 0. Setting Up
 				string		hostName		= Dns.GetHostName();
 				IPHostEntry	localhost		= await Dns.GetHostEntryAsync(hostName);
@@ -101,7 +106,7 @@ namespace ChariotSanzzo.Commands.Prefix {
 
 			// 2. Running
 				while (true) {
-					await client.SendAsync(Encoding.UTF8.GetBytes("Restart ChariotSanzzo<|EOM|>"), SocketFlags.None);
+					await client.SendAsync(Encoding.UTF8.GetBytes($"Restart {botName}<|EOM|>"), SocketFlags.None);
 					client.Shutdown(SocketShutdown.Both);
 					break;
 				}

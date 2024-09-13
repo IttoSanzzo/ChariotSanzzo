@@ -140,11 +140,19 @@ namespace core {
 					case ("Stop ChariotSanzzo"):
 						Program.Exit(0, "\rExiting via Stop Command!");
 					break;
-					case ("Restart ChariotSanzzo"):
+					case ("Restart All The Bots"):
 						Program._Gjallarhorn.Kill(true);
 						Program._Gjallarhorn = Program.LaunchModule("Gjallarhorn", Program._ExecArgs);
 						Program._ChariotSanzzo.Kill(true);
 						Program._ChariotSanzzo = Program.LaunchModule("ChariotSanzzo", Program._ExecArgs);
+					break;
+					case ("Restart chariot"):
+						Program._ChariotSanzzo.Kill(true);
+						Program._ChariotSanzzo = Program.LaunchModule("ChariotSanzzo", Program._ExecArgs);
+					break;
+					case ("Restart gjallarhorn"):
+						Program._Gjallarhorn.Kill(true);
+						Program._Gjallarhorn = Program.LaunchModule("Gjallarhorn", Program._ExecArgs);
 					break;
 				}
 			}

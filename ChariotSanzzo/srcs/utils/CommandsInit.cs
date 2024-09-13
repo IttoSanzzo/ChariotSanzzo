@@ -18,6 +18,7 @@ namespace ChariotSanzzo.Commands {
 			commands.RegisterCommands<Slash.MusicCommands>();
 			commands.RegisterCommands<Slash.PlaylistCommands>();
 			commands.RegisterCommands<Slash.SFXCommands>();
+			commands.RegisterCommands<Slash.GuildSettingsCommands>();
 		}
 	}
 }
