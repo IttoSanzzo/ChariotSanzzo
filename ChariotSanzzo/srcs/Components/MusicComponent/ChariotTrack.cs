@@ -60,6 +60,8 @@ namespace ChariotSanzzo.Components.MusicComponent {
 			if (index != null)
 				description += $"\t\t**Index:** ` {index + 1} `";
 			description += "\n";
+			if (((DiscordMember)(this.User)).VoiceState != null)
+				description += ("**At:** " + ((DiscordMember)(this.User)).VoiceState.Channel.Name) + "\n";
 			embed.WithDescription(description);
 			return (embed.Build());
 		}

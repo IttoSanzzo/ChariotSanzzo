@@ -94,16 +94,16 @@ namespace ChariotSanzzo.Commands.Slash {
 	// 1. Gjallarhorn Miscs
 		private static bool				CheckGjallarhornInChannel(DiscordMember[] members) {
 			for (int i = 0; i < members.Length; i++)
-				if (members[i].Id == SFXCommands.GjallarhornId)
+				if (members[i].Id == 1273070668451418122)
 					return (true);
 			return (false);
 		}
 		private static async Task<bool>	CheckGajPresence(DiscordChannel channel) {
-			if (channel.Guild.Members.ContainsKey(SFXCommands.GjallarhornId) == false || SFXCommands.CheckGjallarhornInChannel(channel.Users.ToArray()) == false) {
+			if (channel.Guild.Members.ContainsKey(1273070668451418122) == false || SFXCommands.CheckGjallarhornInChannel(channel.Users.ToArray()) == false) {
 				Program.WriteLine("GjarNULL");
 				var embedNoGaj = new DiscordEmbedBuilder();
 				embedNoGaj.WithColor(DiscordColor.Red);
-				if (channel.Guild.Members.ContainsKey(SFXCommands.GjallarhornId) == false)
+				if (channel.Guild.Members.ContainsKey(1273070668451418122) == false)
 					embedNoGaj.WithDescription("Gjallarhorn is not in the server, but you can add it througth this [Invite Link](https://discord.com/oauth2/authorize?client_id=1273070668451418122&permissions=3149056&integration_type=0&scope=bot).");
 				else if (SFXCommands.CheckGjallarhornInChannel(channel.Users.ToArray()) == false)
 					embedNoGaj.WithDescription("Gjallarhorn does not meet the requirements to be in this channel.");
