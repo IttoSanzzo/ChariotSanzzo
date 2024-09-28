@@ -13,8 +13,6 @@ plugins:
         # Clients are queried in the order they are given (so the first client is queried first and so on...)
         clients:
             - MUSIC
-            - ANDROID_TESTSUITE
-            - WEB
             - TVHTML5EMBEDDED
     lavasrc:
         providers:
@@ -48,7 +46,7 @@ lavalink:
     plugins:
         - dependency: "com.github.TopiSenpai.LavaSrc:lavasrc-plugin:3.2.10"
           repository: "https://maven.topi.wtf/releases"
-        - dependency: "dev.lavalink.youtube:youtube-plugin:1.5.2"
+        - dependency: "dev.lavalink.youtube:youtube-plugin:1.8.3"
           repository: "https://maven.lavalink.dev/releases" # use https://maven.lavalink.dev/snapshots if you want to use a snapshot version.
     server:
         password: "ChariotIsSoooCute"

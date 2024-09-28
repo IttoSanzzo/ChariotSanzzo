@@ -29,7 +29,7 @@ namespace ChariotSanzzo.Commands.Slash {
 
 	// 0. Main
 		[SlashCommand("play", "Enters the voice channel and starts to play a song!")]
-		public async Task Play(InteractionContext ctx, [Option("SearchQuery", "Name or link of the desired music.")] string query, [Choice("True", 1)][Choice("False", 0)][Option("Priority", "If the track should be played immediately. (Defaults to false)")] long priority = 0, [Choice("Youtube", 0)][Choice("Soundcloud", 1)][Choice("Plain", 2)][Option("PLataform", "Which plataform should be used as search engine. (Defaults to Youtube)")] long plataform = 0) {
+		public async Task Play(InteractionContext ctx, [Option("SearchQuery", "Name or link of the desired music.")] string query, [Choice("True", 1)][Choice("False", 0)][Option("Priority", "If the track should be played immediately. (Defaults to false)")] long priority = 0, [Choice("Youtube", 0)][Choice("Soundcloud", 1)][Choice("Plain", 2)][Option("Plataform", "Which plataform should be used as search engine. (Defaults to Youtube)")] long plataform = 0) {
 			await ctx.DeferAsync();
 			var	gCtx = new GjallarhornContext(ctx, "Play", null, null, query);
 			gCtx.Data.Plataform = (int)plataform;
