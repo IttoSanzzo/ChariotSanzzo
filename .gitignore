@@ -2,6 +2,7 @@
 .env
 **/bin
 **/obj
+/Lavalink/application.yml
 /Lavalink/Lavalink.jar
 /Lavalink/plugins
 /Lavalink/logs
