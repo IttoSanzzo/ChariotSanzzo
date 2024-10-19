@@ -9,7 +9,7 @@ namespace ChariotSanzzo.Commands.Slash {
 	public class ChannelCommands : ApplicationCommandModule {
 
 	// M. Member Variables
-		private const int	midMessageTime = 750;
+		private const int	midMessageTime = 800;
 
 	// 0. Core
 		[SlashCommand("Clean", "Cleans the chat by the given ammount of messages.")]
@@ -108,8 +108,6 @@ namespace ChariotSanzzo.Commands.Slash {
 
 		// 2. Search
 			var mssList = await ctx.Channel.GetMessagesBeforeAsync(ctxResponse.Id, (int)count);
-			retMss.Content = $"Then be it. Copying... `(0/{mssList.Count}`)";
-			await ctx.EditResponseAsync(retMss);
 
 		// 3. Core
 			Thread thread = new Thread(() => CopyMessagesThread(ctx, targetChannel, mssList));
@@ -119,6 +117,8 @@ namespace ChariotSanzzo.Commands.Slash {
 	// 1. Threads
 		private static async void	CopyMessagesThread(InteractionContext ctx, DiscordChannel targetChannel, IReadOnlyList<DiscordMessage> mssList){
 		// 0. Variables
+			await ctx.DeleteResponseAsync();
+			DiscordMessage updateLine = await ctx.Channel.SendMessageAsync($"Then be it. Copying... `(0/{mssList.Count}`)");
 			DiscordWebhookBuilder	retMss = new();
 			DiscordMember			lastMember = (DiscordMember)mssList[mssList.Count - 1].Author;
 			DiscordEmbed			headerEmbed = ChannelCommands.GetNewHeader(mssList[mssList.Count - 1]);
@@ -164,27 +164,57 @@ namespace ChariotSanzzo.Commands.Slash {
 							ChannelCommands.SendText(sendingMessage, targetChannel);
 							await Task.Delay(ChannelCommands.midMessageTime);
 							sendingMessage = "";
-							foreach(DiscordAttachment element in mssList[i].Attachments)
+							foreach(DiscordAttachment element in mssList[i].Attachments) {
 								ChannelCommands.SendText(element.Url, targetChannel);
 								await Task.Delay(ChannelCommands.midMessageTime);
+							}
+							if (mssList[i].Embeds.Count != 0) {
+								DiscordMessageBuilder tempBuilder = new();
+								tempBuilder.AddEmbeds(mssList[i].Embeds);
+								await targetChannel.SendMessageAsync(tempBuilder);
+								await Task.Delay(ChannelCommands.midMessageTime);
+							}
 							continue ;
 						}
 					} catch(Exception ex) {
 						Program.WriteException(ex);
 					}
-					await ChannelCommands.UpdateCopyCounterAsync(ctx, retMss, timeCount, mssList.Count);
+					if (i % 250 == 0) {
+						await updateLine.DeleteAsync();
+						updateLine = await ctx.Channel.SendMessageAsync($"Then be it. Copying... `({timeCount}/{mssList.Count})` (...)");
+					}
+					await ChannelCommands.UpdateCopyCounterAsync(updateLine, retMss, timeCount, mssList.Count);
 				}
-				await targetChannel.SendMessageAsync(sendingMessage);
+				try {
+					if (sendingMessage != "") {
+						await targetChannel.SendMessageAsync(sendingMessage);
+						await Task.Delay(ChannelCommands.midMessageTime);
+					}
+					if (mssList[0].Embeds.Count != 0 || mssList[0].Attachments.Count != 0) {
+						if (!(mssList[0].Attachments.Count != 0 && mssList[0].Attachments[0].Url.Substring(18) == "https://tenor.com/")) {
+							foreach(DiscordAttachment element in mssList[0].Attachments) {
+								ChannelCommands.SendText(element.Url, targetChannel);
+								await Task.Delay(ChannelCommands.midMessageTime);
+							}
+							if (mssList[0].Embeds.Count != 0) {
+								DiscordMessageBuilder tempBuilder = new();
+								tempBuilder.AddEmbeds(mssList[0].Embeds);
+								await targetChannel.SendMessageAsync(tempBuilder);
+								await Task.Delay(ChannelCommands.midMessageTime);
+							}
+						}
+					}
+				} catch(Exception ex) {
+					Program.WriteException(ex);
+				}
+			// 3. Closing
+				await updateLine.ModifyAsync("Copied Succesfully!");
 			} catch(Exception ex) {
 				Program.WriteException(ex);
 			}
-
-		// 3. Closing
-			retMss.Content = $"Copied Succesfully!";
-			await ctx.EditResponseAsync(retMss);
 		}
 	// E. Miscs
-		private static async Task	UpdateCopyCounterAsync(InteractionContext ctx, DiscordWebhookBuilder retMss, int index, int count) {
+		private static async Task	UpdateCopyCounterAsync(DiscordMessage message, DiscordWebhookBuilder retMss, int index, int count) {
 			try {
 				if (index % 10 == 0) {
 					double remainingSeconds = (count - index) * 1.15;
@@ -195,8 +225,7 @@ namespace ChariotSanzzo.Commands.Slash {
 					if (timesp.Minutes > 1)
 						content += $"{timesp.Minutes} Minutes and ";
 					content += $"{timesp.Seconds} Seconds)";
-					retMss.Content = content;
-					await ctx.EditResponseAsync(retMss);
+					await message.ModifyAsync(content);
 				}
 			} catch(Exception ex) {
 				Program.WriteException(ex);
