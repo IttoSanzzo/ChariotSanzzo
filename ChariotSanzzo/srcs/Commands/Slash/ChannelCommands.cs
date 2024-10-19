@@ -8,6 +8,9 @@ namespace ChariotSanzzo.Commands.Slash {
 	[SlashCommandGroup("Channel", "Channel Commands")]
 	public class ChannelCommands : ApplicationCommandModule {
 
+	// M. Member Variables
+		private const int	midMessageTime = 750;
+
 	// 0. Core
 		[SlashCommand("Clean", "Cleans the chat by the given ammount of messages.")]
 		public static async Task Clean(InteractionContext ctx, [Option("Count", "How many messages should be clean")] long count) {
@@ -87,7 +90,7 @@ namespace ChariotSanzzo.Commands.Slash {
 				return ;
 			}
 
-		// 1. Core
+		// 1. Question
 			retMss.Content = $"Are you sure you want to copy up to `{count}` messages from `{ctx.Channel.Name}` to `{targetChannel.Name}`? (Yes/No)";
 			var ctxResponse = await ctx.EditResponseAsync(retMss);
 			var response = await ctx.Channel.GetNextMessageAsync(ctx.User);
@@ -108,74 +111,95 @@ namespace ChariotSanzzo.Commands.Slash {
 			retMss.Content = $"Then be it. Copying... `(0/{mssList.Count}`)";
 			await ctx.EditResponseAsync(retMss);
 
-			DiscordMember		lastMember = (DiscordMember)mssList[mssList.Count - 1].Author;
-			DiscordEmbed		headerEmbed = ChannelCommands.GetNewHeader(mssList[mssList.Count - 1]);
-			string				sendingMessage = "";
-			int					timeCount = 0;
+		// 3. Core
+			Thread thread = new Thread(() => CopyMessagesThread(ctx, targetChannel, mssList));
+			thread.Start();
+		}
 
+	// 1. Threads
+		private static async void	CopyMessagesThread(InteractionContext ctx, DiscordChannel targetChannel, IReadOnlyList<DiscordMessage> mssList){
+		// 0. Variables
+			DiscordWebhookBuilder	retMss = new();
+			DiscordMember			lastMember = (DiscordMember)mssList[mssList.Count - 1].Author;
+			DiscordEmbed			headerEmbed = ChannelCommands.GetNewHeader(mssList[mssList.Count - 1]);
+			string					sendingMessage = "";
+			int						timeCount = 0;
+
+		// 1. Core
 			await targetChannel.SendMessageAsync(headerEmbed);
-			for (int i = mssList.Count - 1; i >= 0; i--) {
-				timeCount++;
-				try {
-					if (mssList[i].Content == "" && mssList[i].Embeds.Count == 0 && mssList[i].Attachments.Count == 0)
-						continue ;
-					else if (lastMember != mssList[i].Author) {
-						await targetChannel.SendMessageAsync(sendingMessage);
-						sendingMessage = "";
-						await Task.Delay(700);
-						lastMember = (DiscordMember)mssList[i].Author;
-						await targetChannel.SendMessageAsync(ChannelCommands.GetNewHeader(mssList[i]));
-						await Task.Delay(700);
-					}
-					if (mssList[i].Content != "") {
-						if (sendingMessage.Length + mssList[i].Content.Length > 1950) {
-							await targetChannel.SendMessageAsync(sendingMessage);
-							sendingMessage = "";
-							await Task.Delay(700);
-						}
-						else
-							sendingMessage += "\n";
-						sendingMessage += mssList[i].Content;
-					}
-					if (mssList[i].Embeds.Count != 0 || mssList[i].Attachments.Count != 0) {
-						if (mssList[i].Attachments[0].Url.Substring(18) == "https://tenor.com/")
+			try {
+				for (int i = mssList.Count - 1; i >= 0; i--) {
+					timeCount++;
+					try {
+						if (mssList[i].Content == "" && mssList[i].Embeds.Count == 0 && mssList[i].Attachments.Count == 0)
 							continue ;
-						if (sendingMessage != "") {
-							await targetChannel.SendMessageAsync(sendingMessage);
+						else if (lastMember != mssList[i].Author) {
+							ChannelCommands.SendText(sendingMessage, targetChannel);
+							await Task.Delay(ChannelCommands.midMessageTime);
 							sendingMessage = "";
-							await Task.Delay(700);
+							lastMember = (DiscordMember)mssList[i].Author;
+							await targetChannel.SendMessageAsync(ChannelCommands.GetNewHeader(mssList[i]));
+							await Task.Delay(ChannelCommands.midMessageTime);
 						}
-						foreach(DiscordAttachment element in mssList[i].Attachments) {
-							DiscordMessageBuilder tempMssBuilder = new();
-							tempMssBuilder.Content = element.Url;
-							await targetChannel.SendMessageAsync(tempMssBuilder);
-							await Task.Delay(700);
+						if (mssList[i].Content != "") {
+							if (mssList[i].Content.Length > 25 && ((mssList[i].Content.Substring(18) == "https://tenor.com/") || (mssList[i].Content.Substring(14) == "https://images"))) {
+								ChannelCommands.SendText(sendingMessage, targetChannel);
+								await Task.Delay(ChannelCommands.midMessageTime);
+								sendingMessage = "";
+								await targetChannel.SendMessageAsync(mssList[i].Content);
+								await Task.Delay(ChannelCommands.midMessageTime);
+							}
+							else if (sendingMessage.Length + mssList[i].Content.Length > 1950) {
+								ChannelCommands.SendText(sendingMessage, targetChannel);
+								await Task.Delay(ChannelCommands.midMessageTime);
+								sendingMessage = "";
+							}
+							else
+								sendingMessage += "\n";
+							sendingMessage += mssList[i].Content;
 						}
-						continue ;
+						if (mssList[i].Embeds.Count != 0 || mssList[i].Attachments.Count != 0) {
+							if (mssList[i].Attachments.Count != 0 && mssList[i].Attachments[0].Url.Substring(18) == "https://tenor.com/")
+								continue ;
+							ChannelCommands.SendText(sendingMessage, targetChannel);
+							await Task.Delay(ChannelCommands.midMessageTime);
+							sendingMessage = "";
+							foreach(DiscordAttachment element in mssList[i].Attachments)
+								ChannelCommands.SendText(element.Url, targetChannel);
+								await Task.Delay(ChannelCommands.midMessageTime);
+							continue ;
+						}
+					} catch(Exception ex) {
+						Program.WriteException(ex);
 					}
-				} catch(Exception ex) {
-					Program.WriteException(ex);
+					await ChannelCommands.UpdateCopyCounterAsync(ctx, retMss, timeCount, mssList.Count);
 				}
-				await ChannelCommands.UpdateCopyCounterAsync(ctx, retMss, timeCount, mssList.Count);
+				await targetChannel.SendMessageAsync(sendingMessage);
+			} catch(Exception ex) {
+				Program.WriteException(ex);
 			}
-			await targetChannel.SendMessageAsync(sendingMessage);
 
 		// 3. Closing
 			retMss.Content = $"Copied Succesfully!";
 			await ctx.EditResponseAsync(retMss);
 		}
+	// E. Miscs
 		private static async Task	UpdateCopyCounterAsync(InteractionContext ctx, DiscordWebhookBuilder retMss, int index, int count) {
-			if (index % 10 == 0) {
-				double remainingSeconds = (count - index) * 1.2;
-				var timesp = TimeSpan.FromSeconds(remainingSeconds);
-				string content = $"Then be it. Copying... `({index}/{count})` (About ";
-				if (timesp.Hours > 0)
-					content += $"{timesp.Hours} Hours, ";
-				if (timesp.Minutes > 1)
-					content += $"{timesp.Minutes} Minutes and ";
-				content += $"{timesp.Seconds} Seconds)";
-				retMss.Content = content;
-				await ctx.EditResponseAsync(retMss);
+			try {
+				if (index % 10 == 0) {
+					double remainingSeconds = (count - index) * 1.15;
+					var timesp = TimeSpan.FromSeconds(remainingSeconds);
+					string content = $"Then be it. Copying... `({index}/{count})` (About ";
+					if (timesp.Hours > 0)
+						content += $"{timesp.Hours} Hours, ";
+					if (timesp.Minutes > 1)
+						content += $"{timesp.Minutes} Minutes and ";
+					content += $"{timesp.Seconds} Seconds)";
+					retMss.Content = content;
+					await ctx.EditResponseAsync(retMss);
+				}
+			} catch(Exception ex) {
+				Program.WriteException(ex);
 			}
 		}
 		private static DiscordEmbed	GetNewHeader(DiscordMessage message) {
@@ -183,6 +207,10 @@ namespace ChariotSanzzo.Commands.Slash {
 			embed.WithColor(((DiscordMember)message.Author).Color);
 			embed.WithFooter($"{message.Author.Username} - {message.Timestamp}", message.Author.AvatarUrl);
 			return (embed);
+		}
+		private static async void	SendText(string message, DiscordChannel targetChannel) {
+			if (message != "")
+				await targetChannel.SendMessageAsync(message);
 		}
 	}
 }
