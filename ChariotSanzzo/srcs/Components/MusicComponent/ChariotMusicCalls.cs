@@ -116,6 +116,7 @@ namespace ChariotSanzzo.Components.MusicComponent {
 			LavalinkTrack[]	musicTracks;
 			if (ctx.Data.Query.Contains("youtube.com/playlist?") == true
 				|| ctx.Data.Query.Contains("spotify.com/playlist") == true
+				|| (ctx.Data.Query.Contains("spotify.com/") == true && ctx.Data.Query.Contains("/album/") == true)
 				|| (ctx.Data.Query.Contains("soundcloud.com/") == true && ctx.Data.Query.Contains("/sets") == true)) {
 				musicTracks = searchQuery.Tracks.ToArray();
 				for (int i = 0; i < musicTracks.Length; i++)

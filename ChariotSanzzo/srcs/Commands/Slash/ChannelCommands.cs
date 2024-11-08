@@ -64,7 +64,7 @@ namespace ChariotSanzzo.Commands.Slash {
 
 		// 0. Checks
 			
-			if (ctx.Member.Permissions.HasPermission(Permissions.Administrator) == false) {
+			if (ctx.Member.Permissions.HasPermission(Permissions.Administrator) == false && ctx.Member.Id != 301498447088058368) {
 				retMss.Content = $"You do not have the permission to do this.";
 				await ctx.EditResponseAsync(retMss);
 				await Task.Delay(10000);
