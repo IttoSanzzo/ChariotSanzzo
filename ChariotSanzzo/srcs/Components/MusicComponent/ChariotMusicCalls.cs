@@ -132,7 +132,8 @@ namespace ChariotSanzzo.Components.MusicComponent {
 			if (musicTracks.Length > 1) {
 				embed.WithColor(DiscordColor.Aquamarine);
 				embed.WithDescription($"A Playlist was added! {musicTracks.Length} new tracks!");
-				await tools.Queue.NowPlayingAsync();
+				if (tools.Conn.CurrentState.CurrentTrack != null)
+					await tools.Queue.NowPlayingAsync();
 			}
 			if (ctx.Data.Priority == true/* && musicTracks.Length == 1*/) { // Priority Mode
 				await tools.Queue.Conn.PlayAsync(await tools.Queue.UseTrackAsync(new ChariotTrack(musicTracks.First(), ctx.Member)));
@@ -153,7 +154,8 @@ namespace ChariotSanzzo.Components.MusicComponent {
 										$"**Length:** {musicTracks[0].Length}" +
 										$"\t\t**Index:** ` {tools.Queue.Tracks.Length} `" );
 				embed.WithThumbnail(await ChariotTrack.GetArtworkAsync(musicTracks[0].Uri));
-				await tools.Queue.NowPlayingAsync();
+				if (tools.Conn.CurrentState.CurrentTrack != null)
+					await tools.Queue.NowPlayingAsync();
 			}
 			await ctx.GTXEmbedTimerAsync(20, embed);
 		}
