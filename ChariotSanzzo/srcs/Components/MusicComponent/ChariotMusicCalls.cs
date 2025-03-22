@@ -122,20 +122,19 @@ namespace ChariotSanzzo.Components.MusicComponent {
 				for (int i = 0; i < musicTracks.Length; i++)
 					tools.Queue.AddTrackToQueue(new ChariotTrack(musicTracks[i], ctx.Member));
 			} else {
-				/*
 				if (ctx.Data.Query.Contains("youtube.com/watch?") && ctx.Data.Query.Contains("&index="))
 					musicTracks = new LavalinkTrack[1] {searchQuery.Tracks.ElementAt(ctx.Data.Query.Substring(ctx.Data.Query.IndexOf("&index=") + 7).StoI() - 1)};
 				else
-					*/
-				musicTracks = new LavalinkTrack[1] {searchQuery.Tracks.First()};
+					musicTracks = new LavalinkTrack[1] {searchQuery.Tracks.First()};
 				tools.Queue.AddTrackToQueue(new ChariotTrack(musicTracks[0], ctx.Member));
 			}
 		// 3. Playing It!
 			if (musicTracks.Length > 1) {
 				embed.WithColor(DiscordColor.Aquamarine);
 				embed.WithDescription($"A Playlist was added! {musicTracks.Length} new tracks!");
+				await tools.Queue.NowPlayingAsync();
 			}
-			if (ctx.Data.Priority == true && musicTracks.Length == 1) { // Priority Mode
+			if (ctx.Data.Priority == true/* && musicTracks.Length == 1*/) { // Priority Mode
 				await tools.Queue.Conn.PlayAsync(await tools.Queue.UseTrackAsync(new ChariotTrack(musicTracks.First(), ctx.Member)));
 				if (musicTracks.Length <= 1 && ctx.Ictx != null)
 					await ctx.Ictx.DeleteResponseAsync();
@@ -143,9 +142,10 @@ namespace ChariotSanzzo.Components.MusicComponent {
 			}
 			else if (tools.Conn.CurrentState.CurrentTrack == null) { // Play if there is nothing playing
 				await tools.Queue.Conn.PlayAsync(await tools.Queue.UseNextTrackAsync());
-				if (musicTracks.Length <= 1 && ctx.Ictx != null)
+				if (musicTracks.Length <= 1 && ctx.Ictx != null) {
 					await ctx.Ictx.DeleteResponseAsync();
-				return ;
+					return ;
+				}
 			}
 			else if (musicTracks.Length == 1) {
 				embed.WithDescription($"_**Added to Queue:**_ [{musicTracks[0].Title}]({musicTracks[0].Uri})\n" +
@@ -153,6 +153,7 @@ namespace ChariotSanzzo.Components.MusicComponent {
 										$"**Length:** {musicTracks[0].Length}" +
 										$"\t\t**Index:** ` {tools.Queue.Tracks.Length} `" );
 				embed.WithThumbnail(await ChariotTrack.GetArtworkAsync(musicTracks[0].Uri));
+				await tools.Queue.NowPlayingAsync();
 			}
 			await ctx.GTXEmbedTimerAsync(20, embed);
 		}
