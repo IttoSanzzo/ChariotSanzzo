@@ -174,7 +174,7 @@ namespace Gjallarhorn.Components {
 				var embed = new DiscordEmbedBuilder();
 				embed.WithColor(DiscordColor.DarkBlue);
 				embed.WithTitle("SFX ControlPanel Link");
-				embed.WithDescription($"[Here is your link for this Channel's ControlPanel](http://{publicIp}:11760/ControlPanel.html?targetBot=Gjallarhorn&userId={ctx._userId}&channelId={ctx._chatChannel.Id})");
+				embed.WithDescription($"[Here is your link for this Channel's ControlPanel](http://{publicIp}:11760/Gjallarhorn/control-panel?userId={ctx._userId}&channelId={ctx._chatChannel.Id})");
 				embed.WithFooter($"For: {ctx._username}", ctx._userIcon);
 				var temp = await ctx._chatChannel.SendMessageAsync(embed);
 				await Task.Delay(1000 * 15);
