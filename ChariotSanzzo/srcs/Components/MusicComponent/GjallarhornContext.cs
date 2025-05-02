@@ -1,3 +1,4 @@
+using ChariotSanzzo.HttpServer;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.SlashCommands;
@@ -23,23 +24,38 @@ namespace ChariotSanzzo.Components.MusicComponent {
 		}
 	
 	// M. Member Variables
-		public DiscordColor			Color			{get; set;} = DiscordColor.Black;
-		public string				Command			{get; set;} = "Missing";
-		public string				Username		{get; set;} = "Missing";
-		public string				UserIcon		{get; set;} = "Missing";
-		public string?				Message			{get; set;} = null;
-		public string				TrackLink		{get; set;} = "Missing";
-		public DiscordGuild?		Guild			{get; set;} = null;
-		public DiscordChannel?		ChatChannel		{get; set;} = null;
-		public DiscordChannel?		VoiceChannel	{get; set;} = null;
-		public DiscordMember?		Member			{get; set;} = null;
-		private ulong				ChatChannelId	{get; set;}
-		private ulong?				VoiceChannelId	{get; set;} = null;
-		private ulong?				UserId			{get; set;} = null;
-		public InteractionContext?	Ictx			{get; set;} = null;
-		public GTXInfo				Data			{get; set;} = new GTXInfo();
+		public DiscordColor					Color						{get; set;} = DiscordColor.Black;
+		public string								Command					{get; set;} = "Missing";
+		public string								Username				{get; set;} = "Missing";
+		public string								UserIcon				{get; set;} = "Missing";
+		public string?							Message					{get; set;} = null;
+		public string								TrackLink				{get; set;} = "Missing";
+		public DiscordGuild?				Guild						{get; set;} = null;
+		public DiscordChannel?			ChatChannel			{get; set;} = null;
+		public DiscordChannel?			VoiceChannel		{get; set;} = null;
+		public DiscordMember?				Member					{get; set;} = null;
+		private ulong								ChatChannelId		{get; set;}
+		private ulong?							VoiceChannelId	{get; set;} = null;
+		private ulong?							UserId					{get; set;} = null;
+		public InteractionContext?	Ictx						{get; set;} = null;
+		public GTXInfo							Data						{get; set;} = new GTXInfo();
 
 	// C. Constructor
+		public GjallarhornContext(PlayerGenericCommand genericCommand) {
+			this.Command = genericCommand.Command;
+			if (!string.IsNullOrEmpty(genericCommand.ChannelId)) {
+				this.ChatChannelId = ulong.Parse(genericCommand.ChannelId);
+				this.ChatChannel = GjallarhornContext.SetChannelAsync((ulong)this.ChatChannelId).Result;
+				if (ChatChannel != null)
+					this.Guild = this.ChatChannel.Guild;
+			}
+			if (!string.IsNullOrEmpty(genericCommand.TrackUrl)) {
+				this.TrackLink = genericCommand.TrackUrl;
+			}
+			this.UserId = ulong.Parse(genericCommand.UserId);
+			var temp = this.GetDataFromMember().Result;
+			this.Data.Query = this.TrackLink;
+		}
 		public GjallarhornContext(string gString) {
 			string[] args = gString.Split('\n');
 			bool temp;
@@ -159,7 +175,7 @@ namespace ChariotSanzzo.Components.MusicComponent {
 			}
 			return (true);
 		}
-		private async Task<bool>					GetDataFromMember() {
+		private async Task<bool>										GetDataFromMember() {
 			if (Program.Client == null || this.Guild == null || this.UserId == null)
 				return (false);
 			DiscordMember member = await this.Guild.GetMemberAsync((ulong)this.UserId);
@@ -176,25 +192,29 @@ namespace ChariotSanzzo.Components.MusicComponent {
 		private static async Task<DiscordChannel?>	SetChannelAsync(ulong channelId) {
 			if (Program.Client == null)
 				return (null);
-			return (await Program.Client.GetChannelAsync(channelId));
+			try {
+				return (await Program.Client.GetChannelAsync(channelId));
+			} catch {
+				return (null);
+			}
 		}
 		
 	// E2. Message Handlers
-		public async Task							GTXEmbedTimerAsync(int seconds, DiscordEmbed embed) {
+		public async Task										GTXEmbedTimerAsync(int seconds, DiscordEmbed embed) {
 			var message = await this.GTXEmbedSendAsync(embed);
 			if (message == null)
 				return ;
 			Thread thread = new Thread(() => WaitForCleaning(seconds, message));
 			thread.Start();
 		}
-		public async Task							GTXEmbedTimerAsync(int seconds, DiscordMessageBuilder messageBuilder) {
+		public async Task										GTXEmbedTimerAsync(int seconds, DiscordMessageBuilder messageBuilder) {
 			var message = await this.GTXEmbedSendAsync(messageBuilder);
 			if (message == null)
 				return ;
 			Thread thread = new Thread(() => WaitForCleaning(seconds, message));
 			thread.Start();
 		}
-		public async Task<DiscordMessage?>			GTXEmbedSendAsync(DiscordEmbed embed) {
+		public async Task<DiscordMessage?>	GTXEmbedSendAsync(DiscordEmbed embed) {
 			if (this.Ictx != null) {
 				if (this.Data.WithResponse == false) {
 					await this.Ictx.DeleteResponseAsync();
@@ -208,7 +228,7 @@ namespace ChariotSanzzo.Components.MusicComponent {
 			}
 			return (null);
 		}
-		public async Task<DiscordMessage?>			GTXEmbedSendAsync(DiscordMessageBuilder messageBuilder) {
+		public async Task<DiscordMessage?>	GTXEmbedSendAsync(DiscordMessageBuilder messageBuilder) {
 			if (this.Ictx != null) {
 				if (this.Data.WithResponse == false) {
 					await this.Ictx.DeleteResponseAsync();
@@ -222,7 +242,7 @@ namespace ChariotSanzzo.Components.MusicComponent {
 			}
 			return (null);
 		}
-		private static async void					WaitForCleaning(int seconds, DiscordMessage message) {
+		private static async void						WaitForCleaning(int seconds, DiscordMessage message) {
 			await Task.Delay(1000 * seconds);
 			await message.DeleteAsync();
 		}

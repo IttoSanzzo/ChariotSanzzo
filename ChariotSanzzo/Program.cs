@@ -10,6 +10,7 @@ using ChariotSanzzo.Components.SpotifyApi;
 using ChariotSanzzo.Components.SoundcloudApi;
 using DSharpPlus.Entities;
 using ChariotSanzzo.Components.GuildSettings;
+using ChariotSanzzo.HttpServer;
 
 namespace ChariotSanzzo {
 	internal class Program {
@@ -71,7 +72,7 @@ namespace ChariotSanzzo {
 		// 5. Finishing, Connecting and Looping
 			await Client.ConnectAsync();
 			Client.LavalinkConnectAsync();
-			ChariotSanzzoSocket.OpenChariotControlSocket();
+			ChariotSanzzoHttpServer.OpenChariotHttpServer();
 			Program.ColorWriteLine(ConsoleColor.Blue, $"{config.Name} is up!");
 			await Task.Delay(500);
 			Program.ColorWriteLine(ConsoleColor.Magenta, $"| Active Guilds |");

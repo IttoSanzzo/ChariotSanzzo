@@ -1,4 +1,5 @@
 using ChariotSanzzo.Components.MusicComponent;
+using ChariotSanzzo.HttpServer;
 using DSharpPlus.Entities;
 using DSharpPlus.Lavalink;
 using DSharpPlus.SlashCommands;
@@ -26,14 +27,14 @@ namespace ChariotSanzzo.Commands.Slash {
 			if (sfxLink.Contains("youtube.com/playlist?") == true
 				|| sfxLink.Contains("spotify.com/playlist") == true
 				|| (sfxLink.Contains("soundcloud.com/") == true && sfxLink.Contains("/sets") == true)) {
-				await ChariotSanzzoSocket.GjallarhornPost(SFXCommands.BuildPostBody(ctx, "Message", DiscordColor.Red, "Playlists are forbidden in SFX!"));
+				await ChariotSanzzoHttpServer.GjallarhornGenericCommandPost(SFXCommands.BuildPostBody(ctx, "Message", DiscordColor.Red, "Playlists are forbidden in SFX!"));
 				return ;
 			}
 			else if (ctx.Member.VoiceState == null) {
-				await ChariotSanzzoSocket.GjallarhornPost(SFXCommands.BuildPostBody(ctx, "Message", DiscordColor.Red, "First, enter a Voice Channel!"));
+				await ChariotSanzzoHttpServer.GjallarhornGenericCommandPost(SFXCommands.BuildPostBody(ctx, "Message", DiscordColor.Red, "First, enter a Voice Channel!"));
 				return ;
 			}
-			await ChariotSanzzoSocket.GjallarhornPost(SFXCommands.BuildPostBody(ctx, "Play", DiscordColor.Aquamarine, null, sfxLink));
+			await ChariotSanzzoHttpServer.GjallarhornGenericCommandPost(SFXCommands.BuildPostBody(ctx, "Play", DiscordColor.Aquamarine, null, sfxLink));
 		}
 		[SlashCommand("stop", "Plays the given track link as SFX.")]
 		public async Task Stop(InteractionContext ctx) {
@@ -44,7 +45,7 @@ namespace ChariotSanzzo.Commands.Slash {
 			string	username = ctx.Member.Nickname;
 			if (string.IsNullOrEmpty(username))
 				username = ctx.User.Username;
-			await ChariotSanzzoSocket.GjallarhornPost(SFXCommands.BuildPostBody(ctx, "Stop", DiscordColor.Black));
+			await ChariotSanzzoHttpServer.GjallarhornGenericCommandPost(SFXCommands.BuildPostBody(ctx, "Stop", DiscordColor.Black));
 		}
 		[SlashCommand("index", "Plays the track in the given index position from the current server Music Queue.")]
 		public async Task Index(InteractionContext ctx, [Option("index", "The index for the track")] long index) {
@@ -58,21 +59,21 @@ namespace ChariotSanzzo.Commands.Slash {
 			if (string.IsNullOrEmpty(username))
 				username = ctx.User.Username;
 			if (ctx.Member.VoiceState == null) {
-				await ChariotSanzzoSocket.GjallarhornPost(SFXCommands.BuildPostBody(ctx, "Message", DiscordColor.Red, "First, enter a Voice Channel!"));
+				await ChariotSanzzoHttpServer.GjallarhornGenericCommandPost(SFXCommands.BuildPostBody(ctx, "Message", DiscordColor.Red, "First, enter a Voice Channel!"));
 				return ;
 			}
 			var queue = ChariotMusicCalls.QColle.GetQueueUnsafe(ctx.Guild.Id);
 			if (queue == null) {
-				await ChariotSanzzoSocket.GjallarhornPost(SFXCommands.BuildPostBody(ctx, "Message", DiscordColor.Red, "There is no queue currently in your server!"));
+				await ChariotSanzzoHttpServer.GjallarhornGenericCommandPost(SFXCommands.BuildPostBody(ctx, "Message", DiscordColor.Red, "There is no queue currently in your server!"));
 				return ;
 			}
 			LavalinkTrack? track = queue.GetIndexTrack((int)(index - 1));
 			if (track == null) {
-				await ChariotSanzzoSocket.GjallarhornPost(SFXCommands.BuildPostBody(ctx, "Message", DiscordColor.Red, "Queue does not have that index!"));
+				await ChariotSanzzoHttpServer.GjallarhornGenericCommandPost(SFXCommands.BuildPostBody(ctx, "Message", DiscordColor.Red, "Queue does not have that index!"));
 				return ;
 			}
 			string sfxLink = track.Uri.AbsoluteUri;
-			await ChariotSanzzoSocket.GjallarhornPost(SFXCommands.BuildPostBody(ctx, "Play", DiscordColor.Aquamarine, null, sfxLink));
+			await ChariotSanzzoHttpServer.GjallarhornGenericCommandPost(SFXCommands.BuildPostBody(ctx, "Play", DiscordColor.Aquamarine, null, sfxLink));
 		}
 		[SlashCommand("loop", "Swiches the loop state of the SFX player.")]
 		public async Task Loop(InteractionContext ctx) {
@@ -80,7 +81,7 @@ namespace ChariotSanzzo.Commands.Slash {
 			await ctx.DeleteResponseAsync();
 			if (await SFXCommands.CheckGajPresence(ctx.Channel) == false)
 				return ;
-			await ChariotSanzzoSocket.GjallarhornPost(SFXCommands.BuildPostBody(ctx, "Loop", DiscordColor.Aquamarine, null, null));
+			await ChariotSanzzoHttpServer.GjallarhornGenericCommandPost(SFXCommands.BuildPostBody(ctx, "Loop", DiscordColor.Aquamarine, null, null));
 		}
 		[SlashCommand("ControlPanel", "Returns your SFX ControlPanel link for this Channel.")]
 		public async Task ControlPanel(InteractionContext ctx) {
@@ -88,7 +89,7 @@ namespace ChariotSanzzo.Commands.Slash {
 			await ctx.DeleteResponseAsync();
 			if (await SFXCommands.CheckGajPresence(ctx.Channel) == false)
 				return ;
-			await ChariotSanzzoSocket.GjallarhornPost(SFXCommands.BuildPostBody(ctx, "ControlPanel", DiscordColor.DarkBlue, null, null));
+			await ChariotSanzzoHttpServer.GjallarhornGenericCommandPost(SFXCommands.BuildPostBody(ctx, "ControlPanel", DiscordColor.DarkBlue, null, null));
 		}
 
 	// 1. Gjallarhorn Miscs
