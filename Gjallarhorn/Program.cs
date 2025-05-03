@@ -6,7 +6,7 @@ using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
 using Gjallarhorn.Config;
 using Gjallarhorn.Events;
-using Gjallarhorn.Utils;
+using Gjallarhorn.HttpServer;
 
 namespace Gjallarhorn {
 	internal class Program {
@@ -65,8 +65,7 @@ namespace Gjallarhorn {
 		// 5. Finishing, Connecting and Looping
 			await Client.ConnectAsync();
 			Client.LavalinkConnectAsync();
-			// Program.SocketThread = GjallarhornSocket.OpenGjallarhornSocket();
-			GjallarhornSocket.OpenGjallarhornSocket();
+			GjallarhornHttpServer.OpenGjallarhornHttpServer();
 			Program.ColorWriteLine(ConsoleColor.DarkYellow, $"{config._name} is up!");
 			await Task.Delay(-1);
 		}

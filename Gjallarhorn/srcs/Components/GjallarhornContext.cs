@@ -1,23 +1,57 @@
-using System.Data.Common;
 using DSharpPlus.Entities;
+using Gjallarhorn.HttpServer;
 
 namespace Gjallarhorn.Components {
 	public class GjallarhornContext {
 	// 0. Member Variables
-		public DiscordColor		_color			{get; set;} = DiscordColor.Black;
-		public string			_command		{get; set;} = "Missing";
-		public string			_username		{get; set;} = "Missing";
-		public string			_userIcon		{get; set;} = "Missing";
-		public string?			_message		{get; set;} = null;
-		public string			_trackLink		{get; set;} = "Missing";
-		public DiscordGuild?	_guild			{get; set;} = null;
-		public DiscordChannel?	_chatChannel	{get; set;} = null;
-		public DiscordChannel?	_voiceChannel	{get; set;} = null;
-		private ulong			_chatChannelId	{get; set;}
-		private ulong?			_voiceChannelId	{get; set;} = null;
-		public ulong?			_userId			{get; set;} = null;
+		public DiscordColor			_color					{get; set;} = DiscordColor.Black;
+		public string						_command				{get; set;} = "Missing";
+		public string						_username				{get; set;} = "Missing";
+		public string						_userIcon				{get; set;} = "Missing";
+		public string?					_message				{get; set;} = null;
+		public string						_trackLink			{get; set;} = "Missing";
+		public DiscordGuild?		_guild					{get; set;} = null;
+		public DiscordChannel?	_chatChannel		{get; set;} = null;
+		public DiscordChannel?	_voiceChannel		{get; set;} = null;
+		private ulong						_chatChannelId	{get; set;}
+		private ulong?					_voiceChannelId	{get; set;} = null;
+		public ulong?						_userId					{get; set;} = null;
 
 	// 1. Constructor
+
+		public GjallarhornContext(PlayerGenericCommand genericCommand) {
+			this._command = genericCommand.Command;
+			if (!string.IsNullOrEmpty(genericCommand.ChannelId)) {
+				this._chatChannelId = ulong.Parse(genericCommand.ChannelId);
+				this._chatChannel = GjallarhornContext.SetChannelAsync((ulong)this._chatChannelId).Result;
+				if (_chatChannel != null)
+					this._guild = this._chatChannel.Guild;
+			}
+			if (!string.IsNullOrEmpty(genericCommand.TrackUrl)) {
+				this._trackLink = genericCommand.TrackUrl;
+			}
+			this._userId = ulong.Parse(genericCommand.UserId);
+			bool temp;
+			if (this._userId != null)
+				temp = this.GetDataFromMember().Result;
+		}
+		public GjallarhornContext(GjallarhornPostBody body) {
+			this._color = new DiscordColor(body.Color);
+			this._command = body.Command;
+			this._message = body.Message;
+			if (!string.IsNullOrEmpty(body.TrackUrl))
+				this._trackLink = body.TrackUrl;
+			if (!string.IsNullOrEmpty(body.ChannelId)) {
+				this._chatChannelId = ulong.Parse(body.ChannelId);
+				this._chatChannel = GjallarhornContext.SetChannelAsync((ulong)this._chatChannelId).Result;
+				if (_chatChannel != null)
+					this._guild = this._chatChannel.Guild;
+			}
+			this._userId = ulong.Parse(body.UserId);
+			bool temp;
+			if (this._userId != null)
+				temp = this.GetDataFromMember().Result;
+		}
 		public GjallarhornContext(string gString) {
 			string[] args = gString.Split('\n');
 			bool temp;
@@ -92,7 +126,11 @@ namespace Gjallarhorn.Components {
 		private static async Task<DiscordChannel?>	SetChannelAsync(ulong channelId) {
 			if (Program.Client == null)
 				return (null);
-			return (await Program.Client.GetChannelAsync(channelId));
+			try {
+				return (await Program.Client.GetChannelAsync(channelId));
+			} catch {
+				return (null);
+			}
 		}
 	}
 }
