@@ -93,13 +93,13 @@ namespace ChariotSanzzo.Commands.Slash {
 		}
 
 	// 1. Gjallarhorn Miscs
-		private static bool				CheckGjallarhornInChannel(DiscordMember[] members) {
+		private static bool									CheckGjallarhornInChannel(DiscordMember[] members) {
 			for (int i = 0; i < members.Length; i++)
 				if (members[i].Id == 1273070668451418122)
 					return (true);
 			return (false);
 		}
-		private static async Task<bool>	CheckGajPresence(DiscordChannel channel) {
+		private static async Task<bool>			CheckGajPresence(DiscordChannel channel) {
 			if (channel.Guild.Members.ContainsKey(1273070668451418122) == false || SFXCommands.CheckGjallarhornInChannel(channel.Users.ToArray()) == false) {
 				Program.WriteLine("GjarNULL");
 				var embedNoGaj = new DiscordEmbedBuilder();
@@ -113,25 +113,20 @@ namespace ChariotSanzzo.Commands.Slash {
 			}
 			return (true);
 		}
-		private static async Task		DelMssTimerAsync(int seconds, DiscordMessage message) /* Deletes the given discord message past the given seconds */ {
+		private static async Task						DelMssTimerAsync(int seconds, DiscordMessage message) {
 			await Task.Delay(1000 * seconds);
 			await message.DeleteAsync();
 			return ;
 		}
-		private static string			BuildPostBody(InteractionContext ctx, string command, DiscordColor color, string? message = null, string? link = null) {
-			string body = "";
-			body += $"<|Command|><|Value|>{command}\n";
-			body += $"<|Color|><|Value|>{color}\n";
-			if (string.IsNullOrEmpty(message) == false)
-				body += $"<|Message|><|Value|>{message}\n";
-			if (string.IsNullOrEmpty(link) == false)
-				body += $"<|Link|><|Value|>{link}\n";
-			body += $"<|ChatChannelId|><|Value|>{ctx.Channel.Id}\n";
-			if (ctx.Member.VoiceState != null)
-				body += $"<|VoiceChannelId|><|Value|>{ctx.Member.VoiceState.Channel.Id}\n";
-			body += $"<|UserId|><|Value|>{ctx.User.Id}\n";
-			body += $"<|Username|><|Value|>{ctx.User.Username}\n";
-			body += $"<|Usericon|><|Value|>{ctx.User.AvatarUrl}";
+		private static GjallarhornPostBody	BuildPostBody(InteractionContext ctx, string command, DiscordColor color, string? message = null, string? link = null) {
+			GjallarhornPostBody body = new() {
+				Command = command,
+				Color = color.ToString(),
+				Message = message,
+				TrackUrl = link,
+				ChannelId = ctx.Channel.Id.ToString(),
+				UserId = ctx.User.Id.ToString(),
+			};
 			return (body);
 		}
 	}

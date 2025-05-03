@@ -8,14 +8,14 @@ namespace ChariotSanzzo.Components.MusicComponent {
 	// -1. Extras
 		public class GTXInfo {
 		// M. Member Variables
-			public bool		Priority		{get; set;} = false;
-			public string	Query			{get; set;} = "NULL";
-			public int		Plataform		{get; set;} = 0;
-			public int		PauseType		{get; set;} = 2;
-			public int		LoopType		{get; set;} = 3;
-			public int 		SkipCount		{get; set;} = 1;
-			public int		MiscValue		{get; set;} = 0;
-			public bool		VipCall			{get; set;} = false;
+			public bool		Priority			{get; set;} = false;
+			public string	Query					{get; set;} = "NULL";
+			public int		Plataform			{get; set;} = 0;
+			public int		PauseType			{get; set;} = 2;
+			public int		LoopType			{get; set;} = 3;
+			public int 		SkipCount			{get; set;} = 1;
+			public int		MiscValue			{get; set;} = 0;
+			public bool		VipCall				{get; set;} = false;
 			public bool		WithResponse	{get; set;} = true;
 
 		// C. Constructor
