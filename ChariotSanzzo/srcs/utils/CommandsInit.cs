@@ -20,6 +20,7 @@ namespace ChariotSanzzo.Commands {
 			commands.RegisterCommands<Slash.SFXCommands>();
 			commands.RegisterCommands<Slash.GuildSettingsCommands>();
 			commands.RegisterCommands<Slash.ChannelCommands>();
+			commands.RegisterCommands<Slash.AlbinaInfoCommands>();
 		}
 	}
 }

@@ -5,16 +5,16 @@ namespace ChariotSanzzo.Components.MusicComponent {
 	public class ChariotTrack {
 	// M. Member Variables
 		private static HttpClient	HttpClient	{get; set;} = new HttpClient(new SocketsHttpHandler {PooledConnectionLifetime = TimeSpan.FromMinutes(1)});
-		public LavalinkTrack		LlTrack	{get; set;}
-		public DiscordUser			User		{get; set;}
-		public Uri					Uri		{get; set;}
-		public string				Title		{get; set;}
-		public string				Host		{get; set;}
-		public string				Author		{get; set;}
-		public TimeSpan				Length		{get; set;}
-		public DiscordColor			Color		{get; set;}
-		public string				Favicon	{get; set;}
-		private string?				Artwork	{get; set;} = null;
+		public LavalinkTrack			LlTrack			{get; set;}
+		public DiscordUser				User				{get; set;}
+		public Uri								Uri					{get; set;}
+		public string							Title				{get; set;}
+		public string							Host				{get; set;}
+		public string							Author			{get; set;}
+		public TimeSpan						Length			{get; set;}
+		public DiscordColor				Color				{get; set;}
+		public string							Favicon			{get; set;}
+		private string?						Artwork			{get; set;} = null;
 
 	// C. Constructor
 		public ChariotTrack(LavalinkTrack llTrack, DiscordUser user) {
@@ -66,7 +66,7 @@ namespace ChariotSanzzo.Components.MusicComponent {
 			return (embed.Build());
 		}
 	// E. Miscs
-		public async Task<string>			GetArtworkAsync() {
+		public async Task<string>					GetArtworkAsync() {
 			if (this.Artwork != null)
 				return (this.Artwork);
 			this.Artwork = await ChariotTrack.GetArtworkAsync(this.Uri);

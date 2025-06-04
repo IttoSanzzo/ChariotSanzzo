@@ -127,7 +127,7 @@ namespace ChariotSanzzo.Components.MusicComponent {
 		}
 
 	// E1. Miscs
-		private async Task<bool>					SetParameter(string argLine) {
+		private async Task<bool>										SetParameter(string argLine) {
 		// Checks and Sets
 			if (argLine == null)
 				return false;

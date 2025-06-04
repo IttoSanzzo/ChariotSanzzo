@@ -11,15 +11,18 @@ using ChariotSanzzo.Components.SoundcloudApi;
 using DSharpPlus.Entities;
 using ChariotSanzzo.Components.GuildSettings;
 using ChariotSanzzo.HttpServer;
+using ChariotSanzzo.Components.AlbinaApi;
+using System.Text.Json;
 
 namespace ChariotSanzzo {
 	internal class Program {
 	// M. Program Variables
-		public static HttpClient				HttpCli			{get; set;} = new HttpClient();
-		public static DiscordClient?			Client			{get; set;}
-		public static CommandsNextExtension?	Commands		{get; set;}
-		public static SpotifyConn				SpotifyConn		{get; set;} = new SpotifyConn();
-		public static SoundcloudConn			SoundcloudConn	{get; set;} = new SoundcloudConn();
+		public static HttpClient							HttpCli					{get; set;} = new HttpClient();
+		public static DiscordClient?					Client					{get; set;}
+		public static CommandsNextExtension?	Commands				{get; set;}
+		public static SpotifyConn							SpotifyConn			{get; set;} = new SpotifyConn();
+		public static SoundcloudConn					SoundcloudConn	{get; set;} = new SoundcloudConn();
+		public static AlbinaConn							AlbinaConn			{get; set;} = new AlbinaConn();
 	// M.1. Config Program Variables
 		public static bool 						LocalLavalink	{get; set;} = false;
 

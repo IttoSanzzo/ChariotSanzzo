@@ -5,21 +5,21 @@ using DSharpPlus.Lavalink;
 namespace ChariotSanzzo.Components.MusicComponent {
 	public class TrackQueue {
 	// M. Member Variables
-		private QueueCollection			QColle			{get; set;}
-		public DiscordMember			Owner			{get; set;}
-		private static Random			Random			{get; set;} = new Random();
-		public LavalinkGuildConnection	Conn			{get; private set;}
-		public DiscordChannel?			Chat			{get; private set;} = null;
-		public ulong					ServerId		{get; private set;}
-		public bool						PauseState		{get; private set;} = false;
-		public int						Length			{get; private set;} = 0;
-		public int						Loop			{get; private set;} = 0;
-		public int						CurrentIndex	{get; private set;} = -1;
-		public ChariotTrack[]			Tracks			{get; set;} = new ChariotTrack[0];
-		private bool					CleanConfig		{get; set;} = true;
-		private bool					AdvanConfig		{get; set;} = true;
-		public DiscordMessage?			PauseMss		{get; private set;} = null;
-		public DiscordMessage?			ActivePlayerMss	{get; private set;} = null;
+		private QueueCollection					QColle					{get; set;}
+		public DiscordMember						Owner						{get; set;}
+		private static Random						Random					{get; set;} = new Random();
+		public LavalinkGuildConnection	Conn						{get; private set;}
+		public DiscordChannel?					Chat						{get; private set;} = null;
+		public ulong										ServerId				{get; private set;}
+		public bool											PauseState			{get; private set;} = false;
+		public int											Length					{get; private set;} = 0;
+		public int											Loop						{get; private set;} = 0;
+		public int											CurrentIndex		{get; private set;} = -1;
+		public ChariotTrack[]						Tracks					{get; set;} = new ChariotTrack[0];
+		private bool										CleanConfig			{get; set;} = true;
+		private bool										AdvanConfig			{get; set;} = true;
+		public DiscordMessage?					PauseMss				{get; private set;} = null;
+		public DiscordMessage?					ActivePlayerMss	{get; private set;} = null;
 
 	// C. Constructors
 		~TrackQueue() {

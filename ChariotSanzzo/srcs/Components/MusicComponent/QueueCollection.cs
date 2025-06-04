@@ -4,7 +4,7 @@ using DSharpPlus.Lavalink;
 namespace ChariotSanzzo.Components.MusicComponent {
 	public class QueueCollection {
 	// M. Member Variables
-		internal int			Length	{get; set;} = 0;
+		internal int					Length	{get; set;} = 0;
 		internal TrackQueue[]	Queues	{get; set;} = new TrackQueue[0];
 
 	// C. Constructors
@@ -13,7 +13,7 @@ namespace ChariotSanzzo.Components.MusicComponent {
 		}
 
 	// 0. Core
-		public void			CreateQueue(ulong serverId, DiscordMember owner, LavalinkGuildConnection conn, DiscordChannel? chat) {
+		public void					CreateQueue(ulong serverId, DiscordMember owner, LavalinkGuildConnection conn, DiscordChannel? chat) {
 			if (QueueExist(serverId) == true)
 				return ;
 			TrackQueue[] temp = new TrackQueue[this.Length + 1];
@@ -24,7 +24,7 @@ namespace ChariotSanzzo.Components.MusicComponent {
 			this.Queues = temp;
 			this.Length += 1;
 		}
-		public void			DropQueue(ulong serverId) {
+		public void					DropQueue(ulong serverId) {
 			if (QueueExist(serverId) == false)
 				return ;
 			TrackQueue[] temp = new TrackQueue[this.Length - 1];
@@ -35,7 +35,7 @@ namespace ChariotSanzzo.Components.MusicComponent {
 			this.Queues = temp;
 			this.Length -= 1;
 		}
-		public TrackQueue	GetQueue(ulong serverId, DiscordMember owner, LavalinkGuildConnection conn, DiscordChannel? chat) {
+		public TrackQueue		GetQueue(ulong serverId, DiscordMember owner, LavalinkGuildConnection conn, DiscordChannel? chat) {
 			for (int i = 0; i < this.Length; i++)
 				if (this.Queues[i].ServerId == serverId)
 					return (this.Queues[i]);
@@ -50,7 +50,7 @@ namespace ChariotSanzzo.Components.MusicComponent {
 		}
 		
 	// U. Utils
-		public bool			QueueExist(ulong serverId) {
+		public bool					QueueExist(ulong serverId) {
 			for (int i = 0; i < this.Length; i++)
 				if (this.Queues[i].ServerId == serverId)
 					return (true);
