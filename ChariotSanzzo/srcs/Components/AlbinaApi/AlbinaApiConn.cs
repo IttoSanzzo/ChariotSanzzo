@@ -76,6 +76,24 @@ namespace ChariotSanzzo.Components.AlbinaApi {
     		return [];
 			}
 		}
+		public async Task<TraitDto>			GetTraitAsync(string slug) {
+			try {
+				var json = await this.GetAsync($"traits/{slug}");
+				return AlbinaConn.Deserialize<TraitDto>(json) ?? new TraitDto();
+			} catch  (JsonException ex) {
+				Program.WriteLine("JsonError: " + ex.Message);
+    		return new TraitDto();
+			}
+		}
+		public async Task<TraitDto[]>		GetAllTraitsAsync() {
+			try {
+				var json = await this.GetAsync($"traits");
+				return AlbinaConn.Deserialize<TraitDto[]>(json) ?? [];
+			} catch  (JsonException ex) {
+				Program.WriteLine("JsonError: " + ex.Message);
+    		return [];
+			}
+		}
 	
 		private static T?								Deserialize<T>(string? json) {
 			return JsonSerializer.Deserialize<T>(json ?? "", AlbinaConn.JsonSerializerOptions);

@@ -27,10 +27,10 @@ namespace ChariotSanzzo.Utils {
 			return $"-> {title} ->\n{content}";
 		}
 		private static string	GetSmartQuote(ReadOnlySpan<char> quote) {
-			return $"\n> {quote}";
+			return $"\n {quote}";
 		}
 		private static string	GetSmartBullet(ReadOnlySpan<char> item) {
-			return $"\n- {item}";
+			return $"\n {item}";
 		}
 		private static string	GetSmartColor(ReadOnlySpan<char> smartSlice) {
 			if (smartSlice.Length == 0 || smartSlice[0] != '[')

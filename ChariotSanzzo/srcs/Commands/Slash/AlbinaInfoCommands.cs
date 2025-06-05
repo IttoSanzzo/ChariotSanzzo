@@ -10,7 +10,7 @@ namespace ChariotSanzzo.Commands.Slash {
 	[SlashCommandGroup("AlbinaInfo", "Commands for fetching Albina related info.")]
 	public class AlbinaInfoCommands : ApplicationCommandModule {
 		[SlashCommand("Mastery", "Fetchs the info from a given mastery.")]
-		public static async Task	FetchMastery(InteractionContext ctx, [Option("Mastery", "The mastery to fetch")] [Autocomplete(typeof(MasteryAutoCompleteProvider))] string masterySlug) {
+		public static async Task	FetchMastery(InteractionContext ctx, [Option("Name", "The mastery to fetch")] [Autocomplete(typeof(MasteryAutoCompleteProvider))] string masterySlug) {
 			await ctx.DeferAsync();
 			var embed = new DiscordEmbedBuilder();
 			MasteryDto mastery = await Program.AlbinaConn.GetMasteryAsync(masterySlug);
@@ -29,7 +29,7 @@ namespace ChariotSanzzo.Commands.Slash {
 			await ctx.RespondWithEmbedAsync(60, embed);
 		}
 		[SlashCommand("Item", "Fetchs the info from a given item.")]
-		public static async Task	FetchItem(InteractionContext ctx, [Option("Item", "The item to fetch")] [Autocomplete(typeof(ItemAutoCompleteProvider))] string itemSlug) {
+		public static async Task	FetchItem(InteractionContext ctx, [Option("Name", "The item to fetch")] [Autocomplete(typeof(ItemAutoCompleteProvider))] string itemSlug) {
 			await ctx.DeferAsync();
 			var embed = new DiscordEmbedBuilder();
 			ItemDto item = await Program.AlbinaConn.GetItemAsync(itemSlug);
@@ -49,7 +49,7 @@ namespace ChariotSanzzo.Commands.Slash {
 			await ctx.RespondWithEmbedAsync(60, embed);
 		}
 		[SlashCommand("Skill", "Fetchs the info from a given skill.")]
-		public static async Task	FetchSkill(InteractionContext ctx, [Option("Skill", "The skill to fetch")] [Autocomplete(typeof(SkillAutoCompleteProvider))] string skillSlug) {
+		public static async Task	FetchSkill(InteractionContext ctx, [Option("Name", "The skill to fetch")] [Autocomplete(typeof(SkillAutoCompleteProvider))] string skillSlug) {
 			await ctx.DeferAsync();
 			var embed = new DiscordEmbedBuilder();
 			SkillDto skill = await Program.AlbinaConn.GetSkillAsync(skillSlug);
@@ -64,6 +64,26 @@ namespace ChariotSanzzo.Commands.Slash {
 				descriptionBuilder.AppendGenericInfoDescription(skill.Info);
 				descriptionBuilder.AppendSkillPropertiesDescription(skill.Properties);
 				descriptionBuilder.AppendEffectsDescription(skill.Effects);
+				embed.WithDescription(descriptionBuilder.GetString());
+			}
+			await ctx.RespondWithEmbedAsync(60, embed);
+		}
+		[SlashCommand("Trait", "Fetchs the info from a given skill.")]
+		public static async Task	FetchTrait(InteractionContext ctx, [Option("Name", "The trait to fetch")] [Autocomplete(typeof(TraitAutoCompleteProvider))] string traitSlug) {
+			await ctx.DeferAsync();
+			var embed = new DiscordEmbedBuilder();
+			TraitDto trait = await Program.AlbinaConn.GetTraitAsync(traitSlug);
+
+			if (trait.Id == Guid.Empty) {
+				embed.WithDescription("Skill not found.");
+			} else {
+				embed.WithThumbnail(trait.IconUrl);
+				embed.WithFooter($"{trait.Type} - {trait.SubType}");
+				var descriptionBuilder = new AlbinaInfoDescriptionBuilder();
+				descriptionBuilder.AppendName(trait.Name, trait.Slug, "traits");
+				descriptionBuilder.AppendGenericInfoDescription(trait.Info);
+				descriptionBuilder.AppendTraitRequirementsDescription(trait.Info.Requirements);
+				descriptionBuilder.AppendEffectsDescription(trait.Effects);
 				embed.WithDescription(descriptionBuilder.GetString());
 			}
 			await ctx.RespondWithEmbedAsync(60, embed);
@@ -139,6 +159,15 @@ namespace ChariotSanzzo.Commands.Slash {
 					DescriptionBuilder.AppendLine("### 📌 Extras");
 					foreach (var extra in properties.Extras) {
 						DescriptionBuilder.AppendLine($"> ⦇`{extra.Key}`⦈ ⪩ {extra.Value}");
+					}
+					DescriptionBuilder.AppendLine();
+				}
+			}
+			public void		AppendTraitRequirementsDescription(string[] requirements) {
+				if (requirements.Length > 0) {
+					DescriptionBuilder.AppendLine("### 🔒 Requerimentos");
+					foreach (var requirement in requirements) {
+						DescriptionBuilder.AppendLine($"- {requirement}");
 					}
 					DescriptionBuilder.AppendLine();
 				}
