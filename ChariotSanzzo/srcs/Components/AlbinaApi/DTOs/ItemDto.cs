@@ -39,7 +39,7 @@ namespace ChariotSanzzo.Components.AlbinaApi.DTOs {
 		Relic
 	};
 
-	public class ItemEffectDto {
+	public class ItemEffectDto : IEffectDto {
 		public Guid							Id						{get; set;}
 		public string						Role					{get; set;} = null!;
 		public string						Name					{get; set;} = null!;
@@ -51,7 +51,7 @@ namespace ChariotSanzzo.Components.AlbinaApi.DTOs {
 		public int							Order					{get; set;} = 0;
 	}
 
-	public class ItemInfo {
+	public class ItemInfo : IGenericInfo {
 		public string[]	Summary				{get; set;} = [];
 		public string[]	Description		{get; set;} = [];
 		public string[]	Miscellaneous	{get; set;} = [];

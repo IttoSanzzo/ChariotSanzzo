@@ -32,7 +32,7 @@ namespace ChariotSanzzo.Components.AlbinaApi.DTOs {
 		Tool
 	}
 
-public class MasteryEffectDto {
+public class MasteryEffectDto : IEffectDto {
 		public Guid							Id						{get; set;} = Guid.Empty;
 		public string						Role					{get; set;} = null!;
 		public string						Name					{get; set;} = null!;
@@ -44,7 +44,7 @@ public class MasteryEffectDto {
 		public int							Order					{get; set;} = 0;
 	}
 
-	public class MasteryInfo {
+	public class MasteryInfo : IGenericInfo {
 		public string[]	Summary				{get; set;} = [];
 		public string[]	Description		{get; set;} = [];
 		public string[]	Miscellaneous	{get; set;} = [];

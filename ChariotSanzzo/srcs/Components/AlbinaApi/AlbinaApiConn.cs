@@ -13,10 +13,6 @@ namespace ChariotSanzzo.Components.AlbinaApi {
 			}
 		};
 
-		public string										GetHostAddress() {
-			return AlbinaConn.HostAddress;
-		}
-
 		public async Task<string?>			GetAsync(string endpoint) {
 			try {
 				return await AlbinaConn.HttpClient.GetStringAsync($"{AlbinaConn.HostAddress}/{endpoint}");
@@ -25,10 +21,11 @@ namespace ChariotSanzzo.Components.AlbinaApi {
 				return null;
 			}
 		}
+
 		public async Task<MasteryDto>		GetMasteryAsync(string slug) {
 			try {
 				var json = await this.GetAsync($"masteries/{slug}");
-				return JsonSerializer.Deserialize<MasteryDto>(json ?? "", AlbinaConn.JsonSerializerOptions) ?? new MasteryDto();
+				return AlbinaConn.Deserialize<MasteryDto>(json) ?? new MasteryDto();
 			} catch  (JsonException ex) {
 				Program.WriteLine("JsonError: " + ex.Message);
     		return new MasteryDto();
@@ -37,7 +34,7 @@ namespace ChariotSanzzo.Components.AlbinaApi {
 		public async Task<MasteryDto[]>	GetAllMasteriesAsync() {
 			try {
 				var json = await this.GetAsync($"masteries");
-				return JsonSerializer.Deserialize<MasteryDto[]>(json ?? "", AlbinaConn.JsonSerializerOptions) ?? [];
+				return AlbinaConn.Deserialize<MasteryDto[]>(json) ?? [];
 			} catch  (JsonException ex) {
 				Program.WriteLine("JsonError: " + ex.Message);
     		return [];
@@ -46,7 +43,7 @@ namespace ChariotSanzzo.Components.AlbinaApi {
 		public async Task<ItemDto>			GetItemAsync(string slug) {
 			try {
 				var json = await this.GetAsync($"items/{slug}");
-				return JsonSerializer.Deserialize<ItemDto>(json ?? "", AlbinaConn.JsonSerializerOptions) ?? new ItemDto();
+				return AlbinaConn.Deserialize<ItemDto>(json) ?? new ItemDto();
 			} catch  (JsonException ex) {
 				Program.WriteLine("JsonError: " + ex.Message);
     		return new ItemDto();
@@ -55,11 +52,33 @@ namespace ChariotSanzzo.Components.AlbinaApi {
 		public async Task<ItemDto[]>		GetAllItemsAsync() {
 			try {
 				var json = await this.GetAsync($"items");
-				return JsonSerializer.Deserialize<ItemDto[]>(json ?? "", AlbinaConn.JsonSerializerOptions) ?? [];
+				return AlbinaConn.Deserialize<ItemDto[]>(json) ?? [];
 			} catch  (JsonException ex) {
 				Program.WriteLine("JsonError: " + ex.Message);
     		return [];
 			}
+		}
+		public async Task<SkillDto>			GetSkillAsync(string slug) {
+			try {
+				var json = await this.GetAsync($"skills/{slug}");
+				return AlbinaConn.Deserialize<SkillDto>(json) ?? new SkillDto();
+			} catch  (JsonException ex) {
+				Program.WriteLine("JsonError: " + ex.Message);
+    		return new SkillDto();
+			}
+		}
+		public async Task<SkillDto[]>		GetAllSkillsAsync() {
+			try {
+				var json = await this.GetAsync($"skills");
+				return AlbinaConn.Deserialize<SkillDto[]>(json) ?? [];
+			} catch  (JsonException ex) {
+				Program.WriteLine("JsonError: " + ex.Message);
+    		return [];
+			}
+		}
+	
+		private static T?								Deserialize<T>(string? json) {
+			return JsonSerializer.Deserialize<T>(json ?? "", AlbinaConn.JsonSerializerOptions);
 		}
 	}
 }
