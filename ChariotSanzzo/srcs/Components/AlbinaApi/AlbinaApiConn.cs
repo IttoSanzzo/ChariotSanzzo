@@ -94,6 +94,24 @@ namespace ChariotSanzzo.Components.AlbinaApi {
     		return [];
 			}
 		}
+		public async Task<RaceDto>			GetRaceAsync(string slug) {
+			try {
+				var json = await this.GetAsync($"races/{slug}");
+				return AlbinaConn.Deserialize<RaceDto>(json) ?? new RaceDto();
+			} catch  (JsonException ex) {
+				Program.WriteLine("JsonError: " + ex.Message);
+    		return new RaceDto();
+			}
+		}
+		public async Task<RaceDto[]>		GetAllRacesAsync() {
+			try {
+				var json = await this.GetAsync($"races");
+				return AlbinaConn.Deserialize<RaceDto[]>(json) ?? [];
+			} catch  (JsonException ex) {
+				Program.WriteLine("JsonError: " + ex.Message);
+    		return [];
+			}
+		}
 	
 		private static T?								Deserialize<T>(string? json) {
 			return JsonSerializer.Deserialize<T>(json ?? "", AlbinaConn.JsonSerializerOptions);

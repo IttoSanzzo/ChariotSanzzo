@@ -88,7 +88,27 @@ namespace ChariotSanzzo.Commands.Slash {
 			}
 			await ctx.RespondWithEmbedAsync(60, embed);
 		}
-		
+		[SlashCommand("Race", "Fetchs the info from a given race.")]
+		public static async Task	FetchRace(InteractionContext ctx, [Option("Name", "The race to fetch")] [Autocomplete(typeof(RaceAutoCompleteProvider))] string raceSlug) {
+			await ctx.DeferAsync();
+			var embed = new DiscordEmbedBuilder();
+			RaceDto race = await Program.AlbinaConn.GetRaceAsync(raceSlug);
+
+			if (race.Id == Guid.Empty) {
+				embed.WithDescription("Race not found.");
+			} else {
+				embed.WithThumbnail(race.IconUrl);
+				embed.WithFooter($"{race.Type} - {race.SubType}");
+				var descriptionBuilder = new AlbinaInfoDescriptionBuilder();
+				descriptionBuilder.AppendName(race.Name, race.Slug, "racas");
+				descriptionBuilder.AppendRaceInfoDescription(race.Info);
+				descriptionBuilder.AppendRaceParameters(race.Parameters);
+				descriptionBuilder.AppendRaceGenerals(race.Generals);
+				embed.WithDescription(descriptionBuilder.GetString());
+			}
+			await ctx.RespondWithEmbedAsync(60, embed);
+		}
+
 		private class AlbinaInfoDescriptionBuilder {
 			private static string	AlbinaOnlineAddress	{get; set;} = Environment.GetEnvironmentVariable("ALBINA_ONLINE") ?? throw new InvalidOperationException("ALBINA_ONLINE not set");
 			private StringBuilder	DescriptionBuilder	{get; set;} = new();
@@ -110,6 +130,35 @@ namespace ChariotSanzzo.Commands.Slash {
 						DescriptionBuilder.AppendLine($"- {line}");
 				}
 				DescriptionBuilder.AppendLine();
+			}
+			public void		AppendRaceInfoDescription(RaceInfo info) {
+				if (info.Introduction.Length > 0) {
+					DescriptionBuilder.AppendLine($"{info.Introduction[0]}");
+				}
+				if (info.Description.Length > 0) {
+					DescriptionBuilder.AppendLine("### Descrição Visual:");
+					foreach(var line in info.Description)
+						DescriptionBuilder.AppendLine($"- {line}");
+				}
+				DescriptionBuilder.AppendLine();
+			}
+			public void		AppendRaceParameters(RaceParameters parameters) {
+				DescriptionBuilder.AppendLine("```ansi\n");
+				DescriptionBuilder.AppendLine($"[0;34mVitalidade:[0m {parameters.Vitality}");
+				DescriptionBuilder.AppendLine($"[0;36mVigor:[0m {parameters.Vigor}");
+				DescriptionBuilder.AppendLine($"[0;33mManapool:[0m {parameters.Manapool}");
+				DescriptionBuilder.AppendLine($"[0;34mPoder Físico:[0m {parameters.PhysicalPower}");
+				DescriptionBuilder.AppendLine($"[0;36mPoder Mágico:[0m {parameters.MagicalPower}");
+				DescriptionBuilder.AppendLine("```");
+			}
+			public void		AppendRaceGenerals(RaceGenerals generals) {
+				DescriptionBuilder.AppendLine("```ansi\n");
+				DescriptionBuilder.AppendLine($"[0;34mAltura:[0m {generals.Height}");
+				DescriptionBuilder.AppendLine($"[0;36mPeso:[0m {generals.Weight}");
+				DescriptionBuilder.AppendLine($"[0;33mLongevidade:[0m {generals.Longevity}");
+				DescriptionBuilder.AppendLine($"[0;34mVelocidade:[0m {generals.Speed}");
+				DescriptionBuilder.AppendLine($"[0;36mLíngua:[0m {generals.Language}");
+				DescriptionBuilder.AppendLine("```");
 			}
 			public void		AppendItemPropertiesDescription(ItemProperties properties) {
 				DescriptionBuilder.AppendLine("```ansi\n");
