@@ -26,7 +26,7 @@ namespace ChariotSanzzo.Commands.Slash {
 				descriptionBuilder.AppendEffectsDescription(mastery.Effects);
 				embed.WithDescription(descriptionBuilder.GetString());
 			}
-			await ctx.RespondWithEmbedAsync(60, embed);
+			await ctx.RespondWithEmbedAsync(120, embed);
 		}
 		[SlashCommand("Item", "Fetchs the info from a given item.")]
 		public static async Task	FetchItem(InteractionContext ctx, [Option("Name", "The item to fetch")] [Autocomplete(typeof(ItemAutoCompleteProvider))] string itemSlug) {
@@ -46,7 +46,7 @@ namespace ChariotSanzzo.Commands.Slash {
 				descriptionBuilder.AppendEffectsDescription(item.Effects);
 				embed.WithDescription(descriptionBuilder.GetString());
 			}
-			await ctx.RespondWithEmbedAsync(60, embed);
+			await ctx.RespondWithEmbedAsync(120, embed);
 		}
 		[SlashCommand("Skill", "Fetchs the info from a given skill.")]
 		public static async Task	FetchSkill(InteractionContext ctx, [Option("Name", "The skill to fetch")] [Autocomplete(typeof(SkillAutoCompleteProvider))] string skillSlug) {
@@ -66,7 +66,27 @@ namespace ChariotSanzzo.Commands.Slash {
 				descriptionBuilder.AppendEffectsDescription(skill.Effects);
 				embed.WithDescription(descriptionBuilder.GetString());
 			}
-			await ctx.RespondWithEmbedAsync(60, embed);
+			await ctx.RespondWithEmbedAsync(120, embed);
+		}
+		[SlashCommand("Spell", "Fetchs the info from a given spell.")]
+		public static async Task	FetchSpell(InteractionContext ctx, [Option("Name", "The spell to fetch")] [Autocomplete(typeof(SpellAutoCompleteProvider))] string spellSlug) {
+			await ctx.DeferAsync();
+			var embed = new DiscordEmbedBuilder();
+			SpellDto spell = await Program.AlbinaConn.GetSpellAsync(spellSlug);
+
+			if (spell.Id == Guid.Empty) {
+				embed.WithDescription("Spell not found.");
+			} else {
+				embed.WithThumbnail(spell.IconUrl);
+				embed.WithFooter($"{spell.Type} - {spell.SubType}");
+				var descriptionBuilder = new AlbinaInfoDescriptionBuilder();
+				descriptionBuilder.AppendName(spell.Name, spell.Slug, "spells");
+				descriptionBuilder.AppendGenericInfoDescription(spell.Info);
+				descriptionBuilder.AppendSpellPropertiesDescription(spell.Properties);
+				descriptionBuilder.AppendEffectsDescription(spell.Effects);
+				embed.WithDescription(descriptionBuilder.GetString());
+			}
+			await ctx.RespondWithEmbedAsync(120, embed);
 		}
 		[SlashCommand("Trait", "Fetchs the info from a given skill.")]
 		public static async Task	FetchTrait(InteractionContext ctx, [Option("Name", "The trait to fetch")] [Autocomplete(typeof(TraitAutoCompleteProvider))] string traitSlug) {
@@ -86,7 +106,7 @@ namespace ChariotSanzzo.Commands.Slash {
 				descriptionBuilder.AppendEffectsDescription(trait.Effects);
 				embed.WithDescription(descriptionBuilder.GetString());
 			}
-			await ctx.RespondWithEmbedAsync(60, embed);
+			await ctx.RespondWithEmbedAsync(120, embed);
 		}
 		[SlashCommand("Race", "Fetchs the info from a given race.")]
 		public static async Task	FetchRace(InteractionContext ctx, [Option("Name", "The race to fetch")] [Autocomplete(typeof(RaceAutoCompleteProvider))] string raceSlug) {
@@ -106,7 +126,7 @@ namespace ChariotSanzzo.Commands.Slash {
 				descriptionBuilder.AppendRaceGenerals(race.Generals);
 				embed.WithDescription(descriptionBuilder.GetString());
 			}
-			await ctx.RespondWithEmbedAsync(60, embed);
+			await ctx.RespondWithEmbedAsync(120, embed);
 		}
 
 		private class AlbinaInfoDescriptionBuilder {
@@ -208,6 +228,39 @@ namespace ChariotSanzzo.Commands.Slash {
 					DescriptionBuilder.AppendLine("### 📌 Extras");
 					foreach (var extra in properties.Extras) {
 						DescriptionBuilder.AppendLine($"> ⦇`{extra.Key}`⦈ ⪩ {extra.Value}");
+					}
+					DescriptionBuilder.AppendLine();
+				}
+			}
+			public void		AppendSpellPropertiesDescription(SpellProperties properties) {
+				DescriptionBuilder.AppendLine("```ansi\n");
+				if (properties.Components.Mana != "")
+					DescriptionBuilder.AppendLine($"[0;34mMana:[0m {properties.Components.Mana}");
+				if (properties.Components.Stamina != "")
+					DescriptionBuilder.AppendLine($"[0;36mEstamina:[0m {properties.Components.Stamina}");
+				if (properties.Components.Time != "")
+					DescriptionBuilder.AppendLine($"[0;33mTempo:[0m {properties.Components.Time}");
+				if (properties.Components.Duration != "")
+					DescriptionBuilder.AppendLine($"[0;34mDuração:[0m {properties.Components.Duration}");
+				if (properties.Components.Form != "")
+					DescriptionBuilder.AppendLine($"[0;36mForma:[0m {properties.Components.Form}");
+				if (properties.Components.Range != "")
+					DescriptionBuilder.AppendLine($"[0;31mAlcance:[0m {properties.Components.Range}");
+				if (properties.Components.Area != "")
+					DescriptionBuilder.AppendLine($"[0;31mÁrea:[0m {properties.Components.Area}");
+				DescriptionBuilder.AppendLine("```");
+
+				if (properties.Extras.Length > 0) {
+					DescriptionBuilder.AppendLine("### 📌 Extras");
+					foreach (var extra in properties.Extras) {
+						DescriptionBuilder.AppendLine($"> ⦇`{extra.Key}`⦈ ⪩ {extra.Value}");
+					}
+					DescriptionBuilder.AppendLine();
+				}
+				if (properties.Extras.Length > 0) {
+					DescriptionBuilder.AppendLine("### 🎼 Cantos");
+					foreach (var chantLine in properties.Chants) {
+						DescriptionBuilder.AppendLine($"⪩ {chantLine}");
 					}
 					DescriptionBuilder.AppendLine();
 				}
