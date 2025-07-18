@@ -9,6 +9,16 @@ using DSharpPlus.SlashCommands;
 namespace ChariotSanzzo.Commands.Slash {
 	[SlashCommandGroup("AlbinaInfo", "Commands for fetching Albina related info.")]
 	public class AlbinaInfoCommands : ApplicationCommandModule {
+		[SlashCommand("Home", "Gives you the Albina Site link.")]
+		public static async Task	FetchHomeLink(InteractionContext ctx) {
+			await ctx.DeferAsync();
+			var embed = new DiscordEmbedBuilder();
+
+			embed.WithTitle("AlbinaOnline");
+			embed.WithDescription($"# **[Link para sua home]({LinkData.GetAlbinaOnlineFullAdress()}/home)**");
+
+			await ctx.RespondWithEmbedAsync(120, embed);
+		}
 		[SlashCommand("Mastery", "Fetchs the info from a given mastery.")]
 		public static async Task	FetchMastery(InteractionContext ctx, [Option("Name", "The mastery to fetch")] [Autocomplete(typeof(MasteryAutoCompleteProvider))] string masterySlug) {
 			await ctx.DeferAsync();
@@ -130,8 +140,7 @@ namespace ChariotSanzzo.Commands.Slash {
 		}
 
 		private class AlbinaInfoDescriptionBuilder {
-			private static string	AlbinaOnlineAddress	{get; set;} = Environment.GetEnvironmentVariable("ALBINA_ONLINE") ?? throw new InvalidOperationException("ALBINA_ONLINE not set");
-			private StringBuilder	DescriptionBuilder	{get; set;} = new();
+			private StringBuilder	DescriptionBuilder			{get; set;} = new();
 
 			public string	GetString() {
 				return SmartText.Deserialize(DescriptionBuilder.ToString().Trim());
@@ -293,7 +302,7 @@ namespace ChariotSanzzo.Commands.Slash {
 				}
 			}
 			public void		AppendName(string name, string slug, string endpoint) {
-				DescriptionBuilder.AppendLine($"# **[{name}]({AlbinaInfoDescriptionBuilder.AlbinaOnlineAddress}/{endpoint}/{slug})**\n");
+				DescriptionBuilder.AppendLine($"# **[{name}]({LinkData.GetAlbinaOnlineFullAdress()}/{endpoint}/{slug})**\n");
 			}
 		}
 	}

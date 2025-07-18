@@ -8,11 +8,8 @@ using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
 using ChariotSanzzo.Components.SpotifyApi;
 using ChariotSanzzo.Components.SoundcloudApi;
-using DSharpPlus.Entities;
-using ChariotSanzzo.Components.GuildSettings;
 using ChariotSanzzo.HttpServer;
 using ChariotSanzzo.Components.AlbinaApi;
-using System.Text.Json;
 using ChariotSanzzo.Utils;
 
 namespace ChariotSanzzo {
@@ -42,6 +39,7 @@ namespace ChariotSanzzo {
 
 		// 1. Importing Json configs and starting
 			var config = new ConfigReader();
+			await LinkData.SetAll();
 			Program.ColorWriteLine(ConsoleColor.Blue, $"Ohayou... {config.Name} is waking up!");
 
 		// 2. Setting Discord Client
