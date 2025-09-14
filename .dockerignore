@@ -1,0 +1,8 @@
+bin/
+obj/
+.vscode/
+.env
+README.md
+LICENSE
+terms-of-service
+privacy-policy
