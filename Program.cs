@@ -22,19 +22,16 @@ namespace ChariotSanzzo {
 		public static SoundcloudConn					SoundcloudConn	{get; set;} = new SoundcloudConn();
 		public static AlbinaConn							AlbinaConn			{get; set;} = new AlbinaConn();
 	// M.1. Config Program Variables
-		public static bool 						LocalLavalink	{get; set;} = false;
+		public static bool				 						LocalLavalink	{get; set;} = true;
 
 	// 0. Main
 		static async Task Main(string[] args) {
 			await Program.DotEnvLoadAsync();
-		// -1. Unreasonable
-			var DBConfigHolder = new DBConfig();
-			if (args.Length < 3 || args[1] != "SafeStart") {
+			var SafeStartToken = Environment.GetEnvironmentVariable("SAFE_START_TOKEN") ?? throw new Exception("No safe start token received");
+			if (SafeStartToken != "SafeStart") {
 				Program.ColorWriteLine(ConsoleColor.Red, "Not initalized by Core, aborting...");
 				return ;
 			}
-			if (args[2] == "true")
-				Program.LocalLavalink = true;
 		// 0. TESTING GROUNDS
 
 		// 1. Importing Json configs and starting
