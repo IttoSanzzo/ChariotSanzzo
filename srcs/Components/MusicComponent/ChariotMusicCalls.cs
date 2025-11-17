@@ -1,3 +1,4 @@
+using ChariotSanzzo.Utils;
 using DSharpPlus.Entities;
 using DSharpPlus.Lavalink;
 using DSharpPlus.Lavalink.EventArgs;
@@ -392,11 +393,10 @@ namespace ChariotSanzzo.Components.MusicComponent {
 				|| ctx.ChatChannel == null)
 				return ;
 			try {
-            	string publicIp = await Program.HttpCli.GetStringAsync("https://api.ipify.org");
 				var embed = new DiscordEmbedBuilder();
 				embed.WithColor(DiscordColor.DarkBlue);
 				embed.WithTitle("Music ControlPanel Link");
-				embed.WithDescription($"[Here is your link for this Channel's ControlPanel](http://{publicIp}:11769/ChariotSanzzo/control-panel?&userId={ctx.Member.Id}&channelId={ctx.ChatChannel.Id})");
+				embed.WithDescription($"[Here is your link for this Channel's ControlPanel]({LinkData.GetGjallarhornControlFullAdress()}/ChariotSanzzo/control-panel?&userId={ctx.Member.Id}&channelId={ctx.ChatChannel.Id})");
 				embed.WithFooter($"For: {ctx.Username}", ctx.UserIcon);
 				await ctx.Ictx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
 				await Task.Delay(1000 * 15);

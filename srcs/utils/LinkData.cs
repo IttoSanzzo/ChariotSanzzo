@@ -1,49 +1,47 @@
 namespace ChariotSanzzo.Utils {
 	public static class LinkData {
-		private static string	Host										{get; set;} = null!;
-		private static string	AlbinaApiPort						{get; set;} = Environment.GetEnvironmentVariable("ALBINA_API_PORT") ?? throw new InvalidOperationException("ALBINA_API_PORT not set");
-		private static string	AlbinaOnlinePort				{get; set;} = Environment.GetEnvironmentVariable("ALBINA_ONLINE_PORT") ?? throw new InvalidOperationException("ALBINA_ONLINE_PORT not set");
-		private static string	AlbinaApiBaseAddress		{get; set;} = null!;
-		private static string	ApiFullAddress					{get; set;} = null!;
-		private static string	AlbinaOnlineBaseAddress	{get; set;} = null!;
-		private static string	AlbinaOnlineFullAddress	{get; set;} = null!;
+		private static string	CurrentPublicIp								{get; set;} = null!;
+		private static string	AlbinaApiFullAddress					{get; set;} = Environment.GetEnvironmentVariable("ALBINA_API_ADDRESS") ?? throw new InvalidOperationException("ALBINA_API_ADDRESS not set");
+		private static string	AlbinaApiPort									{get; set;} = Environment.GetEnvironmentVariable("ALBINA_API_PORT") ?? throw new InvalidOperationException("ALBINA_API_PORT not set");
+		private static string	AlbinaSiteFullAddress					{get; set;} = Environment.GetEnvironmentVariable("ALBINA_SITE_ADDRESS") ?? throw new InvalidOperationException("ALBINA_SITE_ADDRESS not set");
+		private static string	AlbinaSitePort								{get; set;} = Environment.GetEnvironmentVariable("ALBINA_SITE_PORT") ?? throw new InvalidOperationException("ALBINA_SITE_PORT not set");
+		private static string	GjallarhornControlFullAddress	{get; set;} = Environment.GetEnvironmentVariable("GJALLARHORNCONTROL_ADDRESS") ?? throw new InvalidOperationException("ALBINA_SITE_ADDRESS not set");
+		private static string	GjallarhornControlPort				{get; set;} = Environment.GetEnvironmentVariable("GJALLARHORNCONTROL_PORT") ?? throw new InvalidOperationException("ALBINA_SITE_PORT not set");
 
 		public static async Task	SetAll() {
 			try {
 				using var httpClient = new HttpClient();
-				LinkData.Host = await httpClient.GetStringAsync("https://api.ipify.org");
-				LinkData.AlbinaApiBaseAddress = Host + ":" + AlbinaApiPort;
-				LinkData.ApiFullAddress = "http://" + AlbinaApiBaseAddress;
-				LinkData.AlbinaOnlineBaseAddress = Host + ":" + AlbinaOnlinePort;
-				LinkData.AlbinaOnlineFullAddress = "http://" + AlbinaOnlineBaseAddress;
+				LinkData.CurrentPublicIp = await httpClient.GetStringAsync("https://api.ipify.org");
 			} catch {
-				Console.WriteLine("!!! Error while setting Base Addresses (using localhost)!");
-				LinkData.AlbinaApiBaseAddress = "localhost:" + AlbinaApiPort;
-				LinkData.ApiFullAddress = "http://localhost:" + AlbinaApiPort;
-				LinkData.AlbinaOnlineBaseAddress = "localhost:" + AlbinaOnlinePort;
-				LinkData.AlbinaOnlineFullAddress = "http://localhost:" + AlbinaOnlinePort;
+				Console.WriteLine("!!! Error while setting CurrentPublicIp!");
 			}
 		}
-		public static string	GetHost() {
-			return Host;
+		public static string	GetCurrentPublicIp() {
+			return CurrentPublicIp;
 		}
-		public static string	GetApiPort() {
+		public static string	GetAlbinaApiPort() {
 			return AlbinaApiPort;
 		}
-		public static string	GetApiBaseAdress() {
-			return AlbinaApiBaseAddress;
+		public static string	GetAlbinaApiFullAdress(string? endpoint = null) {
+			if (endpoint != null)
+				return AlbinaApiFullAddress + endpoint;
+			return AlbinaApiFullAddress;
 		}
-		public static string	GetApiFullAdress() {
-			return ApiFullAddress;
+		public static string	GetAlbinaSitePort() {
+			return AlbinaSitePort;
 		}
-		public static string	GetAlbinaOnlinePort() {
-			return AlbinaOnlinePort;
+		public static string	GetAlbinaSiteFullAdress(string? endpoint = null) {
+			if (endpoint != null)
+				return AlbinaSiteFullAddress + endpoint;
+			return AlbinaSiteFullAddress;
 		}
-		public static string	GetAlbinaOnlineBaseAdress() {
-			return AlbinaOnlineBaseAddress;
+		public static string	GetGjallarhornControlPort() {
+			return GjallarhornControlPort;
 		}
-		public static string	GetAlbinaOnlineFullAdress() {
-			return AlbinaOnlineFullAddress;
+		public static string	GetGjallarhornControlFullAdress(string? endpoint = null) {
+			if (endpoint != null)
+				return GjallarhornControlFullAddress + endpoint;
+			return GjallarhornControlFullAddress;
 		}
 	}
 }

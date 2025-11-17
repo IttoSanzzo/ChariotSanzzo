@@ -15,7 +15,7 @@ namespace ChariotSanzzo.Commands.Slash {
 			var embed = new DiscordEmbedBuilder();
 
 			embed.WithTitle("AlbinaOnline");
-			embed.WithDescription($"# **[Link para sua home]({LinkData.GetAlbinaOnlineFullAdress()}/home)**");
+			embed.WithDescription($"# **[Link para sua home]({LinkData.GetAlbinaSiteFullAdress()}/home)**");
 
 			await ctx.RespondWithEmbedAsync(120, embed);
 		}
@@ -123,6 +123,7 @@ namespace ChariotSanzzo.Commands.Slash {
 			await ctx.DeferAsync();
 			var embed = new DiscordEmbedBuilder();
 			RaceDto race = await Program.AlbinaConn.GetRaceAsync(raceSlug);
+
 
 			if (race.Id == Guid.Empty) {
 				embed.WithDescription("Race not found.");
@@ -302,7 +303,7 @@ namespace ChariotSanzzo.Commands.Slash {
 				}
 			}
 			public void		AppendName(string name, string slug, string endpoint) {
-				DescriptionBuilder.AppendLine($"# **[{name}]({LinkData.GetAlbinaOnlineFullAdress()}/{endpoint}/{slug})**\n");
+				DescriptionBuilder.AppendLine($"# **[{name}]({LinkData.GetAlbinaSiteFullAdress()}/{endpoint}/{slug})**\n");
 			}
 		}
 	}

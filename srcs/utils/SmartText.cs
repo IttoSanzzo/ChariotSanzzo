@@ -1,8 +1,8 @@
+using System;
 using System.Text;
 
 namespace ChariotSanzzo.Utils {
 	static public class SmartText {
-		private static string						AlbinaOnlineAddress	{get; set;} = Environment.GetEnvironmentVariable("ALBINA_ONLINE") ?? throw new InvalidOperationException("ALBINA_ONLINE not set");
 		private static readonly string	SmartMarkers = "@QBTC";
 
 		private static string	GetSmartLink(ReadOnlySpan<char> smartSlice) {
@@ -14,7 +14,7 @@ namespace ChariotSanzzo.Utils {
 			var title = smartSlice[1..titleEnd].Trim();
 			var href = $"/{smartSlice[(titleEnd + 1)..]}";
 
-			return $"[{title}]({AlbinaOnlineAddress}{href})";
+			return $"[{title}]({LinkData.GetAlbinaSiteFullAdress()}{href})";
 		}
 		private static string	GetSmartToggle(ReadOnlySpan<char> smartSlice) {
 		if (smartSlice.Length == 0 || smartSlice[0] != '[')

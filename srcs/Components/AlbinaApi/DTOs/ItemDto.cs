@@ -10,8 +10,10 @@ namespace ChariotSanzzo.Components.AlbinaApi.DTOs {
 		Wearable,
 		Accessory,
 		Consumable,
-		Special,
+		Tool,
 		Miscellaneous,
+		Special,
+		Random
 	};
 	public enum ItemSubType {
 		Unknown,
@@ -36,7 +38,22 @@ namespace ChariotSanzzo.Components.AlbinaApi.DTOs {
 		LightFrame,
 		MediumFrame,
 		HeavyFrame,
-		Relic
+		Relic,
+		Potion,
+		Container,
+		Material,
+		ThrownWeapon,
+		Charm,
+		Catalyst,
+		Codex,
+		Ring,
+		Amulet,
+		Scroll,
+		Food,
+		Tool,
+		Key,
+		Toy,
+		Random,
 	};
 
 	public class ItemEffectDto : IEffectDto {

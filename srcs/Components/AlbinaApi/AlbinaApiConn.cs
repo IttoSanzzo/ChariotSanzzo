@@ -1,11 +1,11 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using ChariotSanzzo.Components.AlbinaApi.DTOs;
+using ChariotSanzzo.Utils;
 
 namespace ChariotSanzzo.Components.AlbinaApi {
 	public class AlbinaConn {
 		private static HttpClient							HttpClient							{get; set;} = new HttpClient(new SocketsHttpHandler {PooledConnectionLifetime = TimeSpan.FromMinutes(1)});
-		private static string									HostAddress							{get; set;} = Environment.GetEnvironmentVariable("ALBINA_API") ?? throw new InvalidOperationException("ALBINA_API not set");
 		private static JsonSerializerOptions	JsonSerializerOptions		{get; set;} = new JsonSerializerOptions() {
 			PropertyNameCaseInsensitive = true,
 			Converters = {
@@ -15,7 +15,7 @@ namespace ChariotSanzzo.Components.AlbinaApi {
 
 		public async Task<string?>			GetAsync(string endpoint) {
 			try {
-				return await AlbinaConn.HttpClient.GetStringAsync($"{AlbinaConn.HostAddress}/{endpoint}");
+				return await AlbinaConn.HttpClient.GetStringAsync(LinkData.GetAlbinaApiFullAdress(endpoint));
 			} catch(HttpRequestException ex) {
 				Program.WriteLine("HttpError: " + ex.Message);
 				return null;
@@ -24,7 +24,7 @@ namespace ChariotSanzzo.Components.AlbinaApi {
 
 		public async Task<MasteryDto>		GetMasteryAsync(string slug) {
 			try {
-				var json = await this.GetAsync($"masteries/{slug}");
+				var json = await this.GetAsync($"/masteries/{slug}");
 				return AlbinaConn.Deserialize<MasteryDto>(json) ?? new MasteryDto();
 			} catch  (JsonException ex) {
 				Program.WriteLine("JsonError: " + ex.Message);
@@ -33,7 +33,7 @@ namespace ChariotSanzzo.Components.AlbinaApi {
 		}
 		public async Task<MasteryDto[]>	GetAllMasteriesAsync() {
 			try {
-				var json = await this.GetAsync($"masteries");
+				var json = await this.GetAsync($"/masteries");
 				return AlbinaConn.Deserialize<MasteryDto[]>(json) ?? [];
 			} catch  (JsonException ex) {
 				Program.WriteLine("JsonError: " + ex.Message);
@@ -42,7 +42,7 @@ namespace ChariotSanzzo.Components.AlbinaApi {
 		}
 		public async Task<ItemDto>			GetItemAsync(string slug) {
 			try {
-				var json = await this.GetAsync($"items/{slug}");
+				var json = await this.GetAsync($"/items/{slug}");
 				return AlbinaConn.Deserialize<ItemDto>(json) ?? new ItemDto();
 			} catch  (JsonException ex) {
 				Program.WriteLine("JsonError: " + ex.Message);
@@ -51,7 +51,7 @@ namespace ChariotSanzzo.Components.AlbinaApi {
 		}
 		public async Task<ItemDto[]>		GetAllItemsAsync() {
 			try {
-				var json = await this.GetAsync($"items");
+				var json = await this.GetAsync($"/items");
 				return AlbinaConn.Deserialize<ItemDto[]>(json) ?? [];
 			} catch  (JsonException ex) {
 				Program.WriteLine("JsonError: " + ex.Message);
@@ -60,7 +60,7 @@ namespace ChariotSanzzo.Components.AlbinaApi {
 		}
 		public async Task<SkillDto>			GetSkillAsync(string slug) {
 			try {
-				var json = await this.GetAsync($"skills/{slug}");
+				var json = await this.GetAsync($"/skills/{slug}");
 				return AlbinaConn.Deserialize<SkillDto>(json) ?? new SkillDto();
 			} catch  (JsonException ex) {
 				Program.WriteLine("JsonError: " + ex.Message);
@@ -69,7 +69,7 @@ namespace ChariotSanzzo.Components.AlbinaApi {
 		}
 		public async Task<SkillDto[]>		GetAllSkillsAsync() {
 			try {
-				var json = await this.GetAsync($"skills");
+				var json = await this.GetAsync($"/skills");
 				return AlbinaConn.Deserialize<SkillDto[]>(json) ?? [];
 			} catch  (JsonException ex) {
 				Program.WriteLine("JsonError: " + ex.Message);
@@ -78,7 +78,7 @@ namespace ChariotSanzzo.Components.AlbinaApi {
 		}
 		public async Task<SpellDto>			GetSpellAsync(string slug) {
 			try {
-				var json = await this.GetAsync($"spells/{slug}");
+				var json = await this.GetAsync($"/spells/{slug}");
 				return AlbinaConn.Deserialize<SpellDto>(json) ?? new SpellDto();
 			} catch  (JsonException ex) {
 				Program.WriteLine("JsonError: " + ex.Message);
@@ -87,7 +87,7 @@ namespace ChariotSanzzo.Components.AlbinaApi {
 		}
 		public async Task<SpellDto[]>		GetAllSpellsAsync() {
 			try {
-				var json = await this.GetAsync($"spells");
+				var json = await this.GetAsync($"/spells");
 				return AlbinaConn.Deserialize<SpellDto[]>(json) ?? [];
 			} catch  (JsonException ex) {
 				Program.WriteLine("JsonError: " + ex.Message);
@@ -96,7 +96,7 @@ namespace ChariotSanzzo.Components.AlbinaApi {
 		}
 		public async Task<TraitDto>			GetTraitAsync(string slug) {
 			try {
-				var json = await this.GetAsync($"traits/{slug}");
+				var json = await this.GetAsync($"/traits/{slug}");
 				return AlbinaConn.Deserialize<TraitDto>(json) ?? new TraitDto();
 			} catch  (JsonException ex) {
 				Program.WriteLine("JsonError: " + ex.Message);
@@ -105,7 +105,7 @@ namespace ChariotSanzzo.Components.AlbinaApi {
 		}
 		public async Task<TraitDto[]>		GetAllTraitsAsync() {
 			try {
-				var json = await this.GetAsync($"traits");
+				var json = await this.GetAsync($"/traits");
 				return AlbinaConn.Deserialize<TraitDto[]>(json) ?? [];
 			} catch  (JsonException ex) {
 				Program.WriteLine("JsonError: " + ex.Message);
@@ -114,7 +114,7 @@ namespace ChariotSanzzo.Components.AlbinaApi {
 		}
 		public async Task<RaceDto>			GetRaceAsync(string slug) {
 			try {
-				var json = await this.GetAsync($"races/{slug}");
+				var json = await this.GetAsync($"/races/{slug}");
 				return AlbinaConn.Deserialize<RaceDto>(json) ?? new RaceDto();
 			} catch  (JsonException ex) {
 				Program.WriteLine("JsonError: " + ex.Message);
@@ -123,7 +123,7 @@ namespace ChariotSanzzo.Components.AlbinaApi {
 		}
 		public async Task<RaceDto[]>		GetAllRacesAsync() {
 			try {
-				var json = await this.GetAsync($"races");
+				var json = await this.GetAsync($"/races");
 				return AlbinaConn.Deserialize<RaceDto[]>(json) ?? [];
 			} catch  (JsonException ex) {
 				Program.WriteLine("JsonError: " + ex.Message);
