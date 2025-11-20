@@ -1,6 +1,6 @@
 using ChariotSanzzo.Components.MusicComponent;
 
-namespace ChariotSanzzo.HttpServer {
+namespace ChariotSanzzo.Components.HttpServer {
 	public class PlayerGenericCommand {
 		public string?	TrackUrl	{get;set;} = null;
 		public string		Command		{get;set;} = "";
@@ -40,12 +40,15 @@ namespace ChariotSanzzo.HttpServer {
 				return builder.Build();
 			});
 
-			app.MapPost("/player", (Delegate)PostGenericCommandAsync);
-
+			app.MapRoutes();
 			Program.WriteLine("Http Server Ready...");
 			app.Run();
 		}
-		static public async Task<IResult> PostGenericCommandAsync(HttpContext context) {
+		private static void MapRoutes(this WebApplication app) {
+			app.MapPost("/player", (Delegate)PostGenericCommandAsync);
+			app.MapGet("/presence/{userId}/voice", (Delegate)UserVoicePresenceRouteHandler);
+		}
+		static public async Task<IResult>	PostGenericCommandAsync(HttpContext context) {
 			var payload = await context.Request.ReadFromJsonAsync<PlayerGenericCommand>();
 			if (payload is null)
 				return Results.BadRequest("Payload was null.");
@@ -56,18 +59,29 @@ namespace ChariotSanzzo.HttpServer {
 				return Results.BadRequest($"Exception: {ex.Message}");
 			}
 		}
-		public static async Task	GjallarhornGenericCommandPost(GjallarhornPostBody body) {
+		public static async Task					GjallarhornGenericCommandPost(GjallarhornPostBody body) {
 			try {
 				var response = await _httpClient.PostAsJsonAsync($"http://{GjallarhornHost}:{GjallarhornPort}/player/full", body);
 			} catch (Exception ex) {
 				Console.WriteLine(ex);
 			}
 		}
-		private static async void	FunctionsSwitch(PlayerGenericCommand genericCommand) {
+		private static async void					FunctionsSwitch(PlayerGenericCommand genericCommand) {
 			var gCtx = new GjallarhornContext(genericCommand);
 			gCtx.Data.WithResponse = false;
 			gCtx.Data.Priority = true;
 			await ChariotMusicCalls.TryCallAsync(gCtx);
+		}
+		static public async Task<IResult>	UserVoicePresenceRouteHandler(HttpContext context, ulong userId) {
+			var state = Program.PresenceSentinel.Registry.GetOrCreate(userId);
+			if (state.Get<ulong?>("voice.channelId") == null)
+				await Program.PresenceSentinel.ForceResolveVoiceAsync(userId);
+			return Results.Ok(new {
+				UserId = state.UserId,
+				GuildId = state.Get<ulong>("voice.guildId"),
+				ChannelId = state.Get<ulong>("voice.channelId"),
+				UpdatedAt = state.UpdatedAt
+			});
 		}
 	}
 }

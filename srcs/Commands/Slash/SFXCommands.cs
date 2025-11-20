@@ -1,5 +1,5 @@
 using ChariotSanzzo.Components.MusicComponent;
-using ChariotSanzzo.HttpServer;
+using ChariotSanzzo.Components.HttpServer;
 using DSharpPlus.Entities;
 using DSharpPlus.Lavalink;
 using DSharpPlus.SlashCommands;

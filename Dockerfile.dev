@@ -1,4 +1,5 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS dev
+# USER app
 WORKDIR /app
 
 
@@ -6,9 +7,12 @@ WORKDIR /app
 # RUN export DOTNET_NUGET_XMLDOC_MODE=skip
 # RUN dotnet restore
 
-EXPOSE 11768
+# COPY --chown=app:app . /app
+COPY . /app
+RUN dotnet restore
 
 ENV DOTNET_WATCH_HOT_RELOAD_ENABLED=true
 ENV DOTNET_WATCH_RESTART_ON_RUDE_EDIT=1
+EXPOSE 11768
 
 ENTRYPOINT ["dotnet", "watch", "run", "--urls=http://0.0.0.0:11768"]

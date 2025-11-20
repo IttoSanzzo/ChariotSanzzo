@@ -1,4 +1,4 @@
-using ChariotSanzzo.HttpServer;
+using ChariotSanzzo.Components.HttpServer;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.SlashCommands;

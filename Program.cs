@@ -8,19 +8,21 @@ using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
 using ChariotSanzzo.Components.SpotifyApi;
 using ChariotSanzzo.Components.SoundcloudApi;
-using ChariotSanzzo.HttpServer;
+using ChariotSanzzo.Components.HttpServer;
 using ChariotSanzzo.Components.AlbinaApi;
 using ChariotSanzzo.Utils;
+using ChariotSanzzo.Components.PresenceSentinel;
 
 namespace ChariotSanzzo {
 	internal class Program {
 	// M. Program Variables
-		public static HttpClient							HttpCli					{get; set;} = new HttpClient();
-		public static DiscordClient?					Client					{get; set;}
-		public static CommandsNextExtension?	Commands				{get; set;}
-		public static SpotifyConn							SpotifyConn			{get; set;} = new SpotifyConn();
-		public static SoundcloudConn					SoundcloudConn	{get; set;} = new SoundcloudConn();
-		public static AlbinaConn							AlbinaConn			{get; set;} = new AlbinaConn();
+		public static HttpClient							HttpCli						{get; set;} = new HttpClient();
+		public static DiscordClient?					Client						{get; set;}
+		public static CommandsNextExtension?	Commands					{get; set;}
+		public static PresenceSentinel				PresenceSentinel	{get; set;} = new PresenceSentinel();
+		public static SpotifyConn							SpotifyConn				{get; set;} = new SpotifyConn();
+		public static SoundcloudConn					SoundcloudConn		{get; set;} = new SoundcloudConn();
+		public static AlbinaConn							AlbinaConn				{get; set;} = new AlbinaConn();
 	// M.1. Config Program Variables
 		public static bool				 						LocalLavalink	{get; set;} = true;
 
@@ -50,11 +52,11 @@ namespace ChariotSanzzo {
 			Client.UseInteractivity(new InteractivityConfiguration() {
 				Timeout = TimeSpan.FromMinutes(2)
 			});
-			Client.EventsInitRun();
+			await Client.EventsInitRun();
 
 		// 3. Setting Commands
 			var commandsConfig = new CommandsNextConfiguration() {
-				StringPrefixes = new string[] {config.GetPrefix()},
+				StringPrefixes = [config.GetPrefix()],
 				EnableMentionPrefix = true,
 				EnableDms = true,
 				EnableDefaultHelp = false
