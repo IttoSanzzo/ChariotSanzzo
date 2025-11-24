@@ -10,7 +10,6 @@ namespace ChariotSanzzo.Events {
 		// 0. Eventual Events
 		#pragma warning disable CS1998
 		public static async Task	TrackStartedEvent(LavalinkGuildConnection conn, TrackStartEventArgs ctx) {
-			// Console.WriteLine("STARTED");
 			// var	queue = ChariotMusicCalls.QColle.GetQueueUnsafe(ctx.Player.Guild.Id);
 			// if (queue == null)
 			// 	return ;
@@ -35,11 +34,11 @@ namespace ChariotSanzzo.Events {
 		public static Task			Disconnected(DiscordClient sender, VoiceStateUpdateEventArgs ctx) {
 			if (ctx.User.Id == 1070103829934260344 && ctx.After.Member.VoiceState == null)
 				ChariotMusicCalls.QColle.DropQueue(ctx.Before.Channel.Guild.Id);
-			Program.ColorWriteLine(ConsoleColor.DarkGreen, "[DISCONNECTED!]");
+			Program.ColorWriteLine(ConsoleColor.DarkGreen, $"[DISCONNECTED!] {ctx.Before.Channel.Guild.Id}");
 			return Task.CompletedTask;
 		}
 		public static Task			NewConn(LavalinkGuildConnection conn, GuildConnectionCreatedEventArgs ctx) {
-			Program.ColorWriteLine(ConsoleColor.Green, "[CONNECTED!]");
+			Program.ColorWriteLine(ConsoleColor.Green, $"[CONNECTED!] {conn.Guild.Id}");
 			conn.StopAsync();
 			ChariotMusicCalls.QColle.DropQueue(conn.Guild.Id);
 			return Task.CompletedTask;

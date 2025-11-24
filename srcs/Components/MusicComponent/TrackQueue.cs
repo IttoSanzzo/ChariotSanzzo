@@ -100,21 +100,22 @@ namespace ChariotSanzzo.Components.MusicComponent {
 			this.PauseState = state;
 			return (state);
 		}
-		public DiscordChannel SetChatChannel(DiscordChannel chatChannel) {
+		public async Task<DiscordChannel> SetChatChannel(DiscordChannel chatChannel) {
 			this.Chat = chatChannel;
+			await this.NowPlayingAsync();
 			return this.Chat;
 		}
 
 	// G. Gets
-		public QueueCollection				GetQueueCollection() {
+		public QueueCollection						GetQueueCollection() {
 			return (this.QColle);
 		}
-		public LavalinkTrack?				GetIndexTrack(int index) {
+		public LavalinkTrack?							GetIndexTrack(int index) {
 			if (index < 0 || index > this.Tracks.Length - 1)
 				return (null);
 			return (this.Tracks[index].LlTrack);
 		}
-		public int							GetTrackIndex(ChariotTrack track) {
+		public int												GetTrackIndex(ChariotTrack track) {
 			for (int i = 0; i < this.Length; i++)
 				if (this.Tracks[i].Uri.AbsoluteUri == track.Uri.AbsoluteUri)
 					return (i);
@@ -148,6 +149,8 @@ namespace ChariotSanzzo.Components.MusicComponent {
 			return (this.Tracks[this.CurrentIndex].LlTrack);
 		}
 		public async Task<LavalinkTrack?>	UseCurrentTrackAsync() {
+			if (this.CurrentIndex == -1)
+				return null;
 			await this.NowPlayingAsync();
 			this.PauseState = false;
 			return (this.Tracks[this.CurrentIndex].LlTrack);
@@ -160,7 +163,7 @@ namespace ChariotSanzzo.Components.MusicComponent {
 			this.PauseState = false;
 			return (this.Tracks[this.CurrentIndex].LlTrack);
 		}
-		public DiscordEmbed[]				GetQueueEmbed() {
+		public DiscordEmbed[]							GetQueueEmbed() {
 			Program.WriteLine("GET EMBED QUEUE ENTER");
 		// 0. Base Check
 			if (this.Tracks.Length == 0) {
@@ -204,7 +207,7 @@ namespace ChariotSanzzo.Components.MusicComponent {
 					return (true);
 			return (false);
 		}
-		public async Task							NowPlayingAsync() {
+		public async Task						NowPlayingAsync() {
 			if (this.CleanConfig == true && this.ActivePlayerMss != null)
 				await this.ActivePlayerMss.DeleteAsync();
 			if (this.Chat != null){
@@ -214,6 +217,8 @@ namespace ChariotSanzzo.Components.MusicComponent {
 			}
 		}
 		public async Task<DiscordMessageBuilder?>	GenNowPlayingAsync() {
+			if (this.CurrentIndex == -1)
+				return null;
 		// 0. Message Construction
 			var message = new DiscordMessageBuilder();
 			message.AddEmbed(await this.Tracks[this.CurrentIndex].GetEmbed(this.CurrentIndex));

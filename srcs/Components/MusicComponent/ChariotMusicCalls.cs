@@ -36,8 +36,9 @@ namespace ChariotSanzzo.Components.MusicComponent {
 				if (obj.Item1 == false)
 					return (successMessage);
 				Tools tools = obj.Item2;
-				// if (tools.Queue.Chat == null && ctx.ChatChannel != null)
-					// tools.Queue.SetChatChannel(ctx.ChatChannel);
+
+				if (tools.Queue.Chat == null && ctx.ChatChannel != null)
+					await tools.Queue.SetChatChannel(ctx.ChatChannel);
 
 				ctx.Result.WasSuccess = ctx.Command switch {
 					("Play") => await ChariotMusicCalls.PlayAsync(ctx, tools),
@@ -173,11 +174,17 @@ namespace ChariotSanzzo.Components.MusicComponent {
 			return true;
 		}
 		private static async Task<bool>	PauseAsync(GjallarhornContext ctx, Tools tools) {
-			if (ctx.Guild == null ||
-				ctx.VoiceChannel == null)
+			if (ctx.Guild == null
+				|| tools.Conn.CurrentState.CurrentTrack == null) {
+				if (ctx.Ictx != null) {
+					var noTrackEmbed = new DiscordEmbedBuilder();
+						noTrackEmbed.WithFooter($"By: {ctx.Username}", ctx.UserIcon);
+						noTrackEmbed.WithColor(DiscordColor.DarkGray);
+						noTrackEmbed.WithDescription($"No track playing to be paused.");
+					await ctx.GTXEmbedTimerAsync(20, noTrackEmbed);
+				}
 				return false;
-			if (tools.Conn.CurrentState.CurrentTrack == null)
-				return false;
+			}
 		// 0. Preparing Embed
 			var embed = new DiscordEmbedBuilder();
 			embed.WithFooter($"By: {ctx.Username}", ctx.UserIcon);
