@@ -5,21 +5,23 @@ using DSharpPlus.Lavalink;
 namespace ChariotSanzzo.Components.MusicComponent {
 	public class TrackQueue {
 	// M. Member Variables
-		private QueueCollection					QColle					{get; set;}
-		public DiscordMember						Owner						{get; set;}
-		private static Random						Random					{get; set;} = new Random();
-		public LavalinkGuildConnection	Conn						{get; private set;}
-		public DiscordChannel?					Chat						{get; private set;} = null;
-		public ulong										ServerId				{get; private set;}
-		public bool											PauseState			{get; private set;} = false;
-		public int											Length					{get; private set;} = 0;
-		public int											Loop						{get; private set;} = 0;
-		public int											CurrentIndex		{get; private set;} = -1;
-		public ChariotTrack[]						Tracks					{get; set;} = new ChariotTrack[0];
-		private bool										CleanConfig			{get; set;} = true;
-		private bool										AdvanConfig			{get; set;} = true;
-		public DiscordMessage?					PauseMss				{get; private set;} = null;
-		public DiscordMessage?					ActivePlayerMss	{get; private set;} = null;
+		private QueueCollection					QColle									{get; set;}
+		public DiscordMember						Owner										{get; set;}
+		private static Random						Random									{get; set;} = new Random();
+		public LavalinkGuildConnection	Conn										{get; private set;}
+		public DiscordChannel?					Chat										{get; private set;} = null;
+		public ulong										ServerId								{get; private set;}
+		public bool											PauseState							{get; private set;} = false;
+		public int											Length									{get; private set;} = 0;
+		public int											Loop										{get; private set;} = 0;
+		public int											CurrentIndex						{get; private set;} = -1;
+		public ChariotTrack[]						Tracks									{get; set;} = [];
+		private bool										CleanConfig							{get; set;} = true;
+		private bool										AdvanConfig							{get; set;} = true;
+		public bool											IsFinished							{get; set;} = true;
+		public DiscordMessage?					PauseMss								{get; private set;} = null;
+		public DiscordMessage?					ActivePlayerMss					{get; private set;} = null;
+		public GjallarhornContext?			LastGjallarhornContext	{get; set;} = null;
 
 	// C. Constructors
 		~TrackQueue() {
@@ -36,6 +38,7 @@ namespace ChariotSanzzo.Components.MusicComponent {
 			if (this.Conn.CurrentState.CurrentTrack != null)
 				this.Conn.StopAsync();
 			this.Conn.PlaybackFinished += CharitoMusicEvents.TrackEndedEvent;
+			this.Conn.PlaybackStarted += CharitoMusicEvents.TrackStartedEvent;
 			Program.WriteLine($"Queue Constructed! Guild: {this.ServerId}");
 		}
 
@@ -97,7 +100,11 @@ namespace ChariotSanzzo.Components.MusicComponent {
 			this.PauseState = state;
 			return (state);
 		}
-	
+		public DiscordChannel SetChatChannel(DiscordChannel chatChannel) {
+			this.Chat = chatChannel;
+			return this.Chat;
+		}
+
 	// G. Gets
 		public QueueCollection				GetQueueCollection() {
 			return (this.QColle);
@@ -160,7 +167,7 @@ namespace ChariotSanzzo.Components.MusicComponent {
 				var	errembed = new DiscordEmbedBuilder();
 				errembed.WithColor(DiscordColor.Gray);
 				errembed.WithDescription("The queue is empty...");
-				return (new DiscordEmbed[1] {errembed.Build()});
+				return new DiscordEmbed[1] {errembed.Build()};
 			}
 		// 1. Core
 			var retEmbedArr = new DiscordEmbed[0];
@@ -275,9 +282,7 @@ namespace ChariotSanzzo.Components.MusicComponent {
 			int n = tracks.Length;
 			while (n > 1) {
 				int k = TrackQueue.Random.Next(n--);
-				ChariotTrack temp = tracks[n];
-				tracks[n] = tracks[k];
-				tracks[k] = temp;
+				(tracks[k], tracks[n]) = (tracks[n], tracks[k]);
 			}
 		}
 	}

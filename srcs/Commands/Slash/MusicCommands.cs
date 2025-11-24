@@ -103,7 +103,7 @@ namespace ChariotSanzzo.Commands.Slash {
 			await ChariotMusicCalls.TryCallAsync(gCtx);
 		}
 		[SlashCommand("skip", "Skips the currently playing track!")]
-		public async Task Skip(InteractionContext ctx, [Option("count", "How many tracks should bem skipped. (Defatults to 1)")] long count = 1) {
+		public async Task Skip(InteractionContext ctx, [Option("count", "How many tracks should bem skipped. (Defaults to 1)")] long count = 1) {
 			await ctx.DeferAsync();
 			var	gCtx = new GjallarhornContext(ctx, "Next");
 			gCtx.Data.SkipCount = (int)count;
@@ -119,6 +119,13 @@ namespace ChariotSanzzo.Commands.Slash {
 		public async Task Replay(InteractionContext ctx) {
 			await ctx.DeferAsync();
 			var	gCtx = new GjallarhornContext(ctx, "Replay");
+			await ChariotMusicCalls.TryCallAsync(gCtx);
+		}
+		[SlashCommand("seek", "Seeks the music to the given second.")]
+		public async Task Seek(InteractionContext ctx, [Option("second", "Second to seek to (Defaults to 0)")] long second = 0) {
+			await ctx.DeferAsync();
+			var	gCtx = new GjallarhornContext(ctx, "Seek");
+			gCtx.Data.Position = second;
 			await ChariotMusicCalls.TryCallAsync(gCtx);
 		}
 		[SlashCommand("index", "Plays the track at the given index position!")]

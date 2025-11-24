@@ -16,7 +16,7 @@ using ChariotSanzzo.Components.PresenceSentinel;
 namespace ChariotSanzzo {
 	internal class Program {
 	// M. Program Variables
-		public static HttpClient							HttpCli						{get; set;} = new HttpClient();
+		public static HttpClient							HttpClient				{get; set;} = new HttpClient();
 		public static DiscordClient?					Client						{get; set;}
 		public static CommandsNextExtension?	Commands					{get; set;}
 		public static PresenceSentinel				PresenceSentinel	{get; set;} = new PresenceSentinel();

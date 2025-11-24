@@ -129,3 +129,29 @@ public static class ToX {
 		return (ret * sign);
 	}
 }
+
+public static class DictionaryExtensions {
+		public static Dictionary<string, object?> ToNestedJson(this Dictionary<string, object> flat) {
+			return ToNestedJsonNullable((Dictionary<string, object?>)flat!);
+		}
+		public static Dictionary<string, object?> ToNestedJsonNullable(this Dictionary<string, object?> flat) {
+			var result = new Dictionary<string, object?>();
+			foreach (var (key, value) in flat) {
+				var parts = key.Split('.');
+				var cursor = result;
+				for (int i = 0; i < parts.Length; i++) {
+					var part = parts[i];
+					if (i == parts.Length - 1) {
+						cursor[part] = value;
+						break;
+					}
+					if (!cursor.TryGetValue(part, out var child) || child is not Dictionary<string, object?> nested) {
+						nested = [];
+						cursor[part] = nested;
+					}
+					cursor = nested;
+				}
+			}
+			return result;
+		}
+	}

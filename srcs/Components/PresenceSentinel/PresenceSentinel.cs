@@ -1,4 +1,7 @@
+using System.Text;
+using System.Text.Json;
 using DSharpPlus;
+using STPlib;
 
 namespace ChariotSanzzo.Components.PresenceSentinel {
 	public class UserPresenceState(ulong userId) {
@@ -30,19 +33,43 @@ namespace ChariotSanzzo.Components.PresenceSentinel {
 	}
 
 	public class PresenceSentinel {
+		private static readonly string ChariotApiFullAddress	= Environment.GetEnvironmentVariable("CHARIOT_API_FULL_ADDRESS") ?? throw new InvalidOperationException("CHARIOT_API_FULL_ADDRESS not set");
+		public readonly JsonSerializerOptions	SerializerOptions = new() {WriteIndented= false};
 		public PresenceRegistry	Registry	{get; set;} = new();
 		private readonly List<IPresenceTracker>	Trackers = [];
 		private VoicePresenceResolver	VoiceResolver = null!;
 
-		public void AddTracker(IPresenceTracker tracker) {
+		public void				AddTracker(IPresenceTracker tracker) {
 			Trackers.Add(tracker);
 		}
-		public async Task InitializeAsync(DiscordClient client) {
+		public async Task	InitializeAsync(DiscordClient client) {
 			this.VoiceResolver = new(Registry, client);
 			foreach (var tracker in Trackers)
 				await tracker.InitializeAsync(Registry);
 		}
-		public Task<UserPresenceState?> ForceResolveVoiceAsync(ulong userId) {
+		public void			 	ForceStalkEverythingForUserAsync(ulong userId) {
+			this.ForceResolveVoiceAsync(userId);
+		}
+		public string			GetUserPresenceJsonStringAsync(ulong userId) {
+			var state = this.Registry.GetOrCreate(userId);
+			var nested  = state.Attributes.ToNestedJson();
+			return JsonSerializer.Serialize(nested, this.SerializerOptions);
+		}
+		public string			GetForceStalkeUserJsonStringAsync(ulong userId) {
+			this.ForceStalkEverythingForUserAsync(userId);
+			return GetUserPresenceJsonStringAsync(userId);
+		}
+		public async Task	PostPresenceUpdate(ulong userId) {
+			await Program.HttpClient.PostAsync(
+				$"{ChariotApiFullAddress}/live/users/{userId}/presence-sentinel-socket",
+				new StringContent(
+					this.GetUserPresenceJsonStringAsync(userId),
+					Encoding.UTF8,
+					"application/json"
+				)
+			);
+		}
+		public UserPresenceState? ForceResolveVoiceAsync(ulong userId) {
 			return VoiceResolver.ForceResolveUserVoiceStateAsync(userId);
 		}
 	}

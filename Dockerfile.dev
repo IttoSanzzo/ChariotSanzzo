@@ -1,13 +1,6 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS dev
-# USER app
 WORKDIR /app
 
-
-# COPY . ./
-# RUN export DOTNET_NUGET_XMLDOC_MODE=skip
-# RUN dotnet restore
-
-# COPY --chown=app:app . /app
 COPY . /app
 RUN dotnet restore
 

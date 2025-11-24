@@ -2,10 +2,13 @@ using ChariotSanzzo.Components.MusicComponent;
 
 namespace ChariotSanzzo.Components.HttpServer {
 	public class PlayerGenericCommand {
-		public string?	TrackUrl	{get;set;} = null;
 		public string		Command		{get;set;} = "";
+		public string		TargetBot	{get; set;} = "";
 		public string		UserId		{get;set;} = "";
+		public string		GuildId		{get; set;} = "";
+		public string?	TrackUrl	{get;set;} = null;
 		public string?	ChannelId	{get;set;} = null;
+		public long?		Position	{get;set;} = null;
 	}
 	public class GjallarhornPostBody {
 		public string?	TrackUrl				{get;set;} = null;
@@ -45,14 +48,17 @@ namespace ChariotSanzzo.Components.HttpServer {
 			app.Run();
 		}
 		private static void MapRoutes(this WebApplication app) {
-			app.MapPost("/player", (Delegate)PostGenericCommandAsync);
+			app.MapPost("/{guildId}/player", (Delegate)PostGenericCommandAsync);
 			app.MapGet("/presence/{userId}/voice", (Delegate)UserVoicePresenceRouteHandler);
+			app.MapGet("/presence/{userId}/stalk", (Delegate)UserStalkPresenceRouteHandler);
 		}
-		static public async Task<IResult>	PostGenericCommandAsync(HttpContext context) {
+		static public async Task<IResult>	PostGenericCommandAsync(string guildId, HttpContext context) {
 			var payload = await context.Request.ReadFromJsonAsync<PlayerGenericCommand>();
 			if (payload is null)
 				return Results.BadRequest("Payload was null.");
 			try {
+				payload.GuildId = guildId;
+				payload.TargetBot = "ChariotSanzzo";
 				ChariotSanzzoHttpServer.FunctionsSwitch(payload);
 				return Results.Ok();
 			} catch (Exception ex) {
@@ -67,21 +73,25 @@ namespace ChariotSanzzo.Components.HttpServer {
 			}
 		}
 		private static async void					FunctionsSwitch(PlayerGenericCommand genericCommand) {
-			var gCtx = new GjallarhornContext(genericCommand);
+			var gCtx = new GjallarhornContext();
+			await gCtx.GjallarhornContextAsync(genericCommand);
 			gCtx.Data.WithResponse = false;
 			gCtx.Data.Priority = true;
 			await ChariotMusicCalls.TryCallAsync(gCtx);
 		}
-		static public async Task<IResult>	UserVoicePresenceRouteHandler(HttpContext context, ulong userId) {
+		static public IResult							UserVoicePresenceRouteHandler(HttpContext context, ulong userId) {
 			var state = Program.PresenceSentinel.Registry.GetOrCreate(userId);
-			if (state.Get<ulong?>("voice.channelId") == null)
-				await Program.PresenceSentinel.ForceResolveVoiceAsync(userId);
+			if (state.Get<string?>("voice.channelId") == null)
+				Program.PresenceSentinel.ForceResolveVoiceAsync(userId);
 			return Results.Ok(new {
 				UserId = state.UserId,
-				GuildId = state.Get<ulong>("voice.guildId"),
-				ChannelId = state.Get<ulong>("voice.channelId"),
+				GuildId = state.Get<string>("voice.guildId"),
+				ChannelId = state.Get<string>("voice.channelId"),
 				UpdatedAt = state.UpdatedAt
 			});
+		}
+		static public IResult							UserStalkPresenceRouteHandler(HttpContext context, ulong userId) {
+			return Results.Text(Program.PresenceSentinel.GetForceStalkeUserJsonStringAsync(userId), "text/plain");
 		}
 	}
 }

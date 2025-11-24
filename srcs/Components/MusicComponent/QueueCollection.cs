@@ -48,6 +48,11 @@ namespace ChariotSanzzo.Components.MusicComponent {
 					return (this.Queues[i]);
 			return (null);
 		}
+		public TrackQueue?	GetQueueUnsafe(ulong serverId, out TrackQueue? output) {
+			TrackQueue? queue = GetQueueUnsafe(serverId);
+			output = queue;
+			return queue;
+		}
 		
 	// U. Utils
 		public bool					QueueExist(ulong serverId) {
