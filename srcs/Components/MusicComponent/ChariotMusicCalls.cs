@@ -54,7 +54,8 @@ namespace ChariotSanzzo.Components.MusicComponent {
 					_ => throw new Exception("Invalid Command")
 				};
 				UpdateFinishedState(ctx, tools);
-				await SendSocketUpdate(ctx, tools);
+				await SendStationSocketUpdate(tools);
+				await SendQueueSocketUpdate(tools);
 				tools.Queue.LastGjallarhornContext = ctx;
 				return (successMessage);
 			} catch(Exception ex) {
@@ -576,16 +577,16 @@ namespace ChariotSanzzo.Components.MusicComponent {
 		}
 
 	// SocketUpdate
-		public class TrackInfo(string	title, string	link, string	artwork, int index, string	originalUser, string	originalUserAvatarUrl) {
+		public class TrackInfo(string	title, string	link, string	artwork, double durationInSeconds, int index, string	originalUser, string	originalUserAvatarUrl) {
 			public string	Title											{get;set;} = title;
 			public string	Link											{get;set;} = link;
 			public string	Artwork										{get;set;} = artwork;
+			public double	DurationInSeconds					{get;set;} = durationInSeconds;
 			public int		Index											{get;set;} = index;
 			public string	OriginalUser							{get;set;} = originalUser;
 			public string	OriginalUserAvatarUrl			{get;set;} = originalUserAvatarUrl;
 		}
-		public class CurrentTrackInfo(string	title, string	link, string	artwork, int index, string	originalUser, string	originalUserAvatarUrl, double totalLength, double currentPosition, long lastUpdate) : TrackInfo(title, link, artwork, index, originalUser, originalUserAvatarUrl){
-			public double	TotalLength								{get;set;} = totalLength;
+		public class CurrentTrackInfo(string	title, string	link, string	artwork, double durationInSeconds, int index, string	originalUser, string	originalUserAvatarUrl, double currentPosition, long lastUpdate) : TrackInfo(title, link, artwork, durationInSeconds, index, originalUser, originalUserAvatarUrl){
 			public double	CurrentPosition						{get;set;} = currentPosition;
 			public long		LastUpdate								{get;set;} = lastUpdate;
 		}
@@ -603,13 +604,42 @@ namespace ChariotSanzzo.Components.MusicComponent {
 			public TrackInfo?							PreviousTrack			{get; set;} = previousTrackInfo;
 			public TrackInfo?							NextTrack					{get; set;} = nextTrackInfo;
 		}
-		private static async Task	SendSocketUpdate(GjallarhornContext ctx, Tools tools) {
-			var (currentTrack, currentTrackIndex) = tools.Queue.GetCurrentTrackSafe(ctx);
-			var (previousTrack, previousTrackIndex) = tools.Queue.GetPreviousTrackSafe(ctx);
-			var (nextTrack, nextTrackIndex) = tools.Queue.GetNextTrackSafe(ctx);
-			var currentPosition = currentTrack.GetTrackCurrentPosition(tools, ctx.Result);
+		public static async Task<TrackInfo>	ToTrackInfo(this ChariotTrack track, int index) {
+			return new(
+				track.Title,
+				track.Uri.AbsoluteUri,
+				await track.GetArtworkAsync(),
+				Math.Floor(track.Length.TotalSeconds),
+				index,
+				track.User.Username,
+				track.User.AvatarUrl
+			);
+		}
+		public static async Task<TrackInfo?> ToNullableTrackInfo(this ChariotTrack? track, int index)
+			=> track is null ? null : await track.ToTrackInfo(index);
+		public static async Task<CurrentTrackInfo?>	ToNullableCurrentTrackInfo(this ChariotTrack? track, int index, double currentPosition, long lastUpdate) {
+			if (track == null)
+				return null;
+			return new(
+				track.Title,
+				track.Uri.AbsoluteUri,
+				await track.GetArtworkAsync(),
+				Math.Floor(track.Length.TotalSeconds),
+				index,
+				track.User.Username,
+				track.User.AvatarUrl,
+				currentPosition,
+				lastUpdate
+			);
+		}
+		
+		private static async Task	SendStationSocketUpdate(Tools tools) {
+			var (currentTrack, currentTrackIndex) = tools.Queue.GetCurrentTrackSafe(tools.Ctx);
+			var (previousTrack, previousTrackIndex) = tools.Queue.GetPreviousTrackSafe(tools.Ctx);
+			var (nextTrack, nextTrackIndex) = tools.Queue.GetNextTrackSafe(tools.Ctx);
+			var currentPosition = currentTrack.GetTrackCurrentPosition(tools, tools.Ctx.Result);
 
-			var response = await Program.HttpClient.PostAsJsonAsync<PlayerLiveUpdateDto>($"{ChariotApiFullAddress}/live/ChariotSanzzo/{tools.ServerId}/player-update-socket", new (
+			await Program.HttpClient.PostAsJsonAsync<PlayerLiveUpdateDto>($"{ChariotApiFullAddress}/live/ChariotSanzzo/{tools.ServerId}/player-update-socket", new (
 				tools.ServerId.ToString(),
 				tools.Conn.Channel?.Id.ToString(),
 				tools.Queue.Chat?.Id.ToString(),
@@ -617,36 +647,55 @@ namespace ChariotSanzzo.Components.MusicComponent {
 				tools.Queue.Loop,
 				tools.Queue.IsFinished,
 				tools.Queue.CurrentIndex,
-				ctx.Result,
-				(currentTrack == null) ? null : new (
-					currentTrack.Title,
-					currentTrack.Uri.AbsoluteUri,
-					await currentTrack.GetArtworkAsync(),
-					currentTrackIndex,
-					currentTrack.User.Username,
-					currentTrack.User.AvatarUrl,
-					Math.Floor(currentTrack.Length.TotalSeconds),
-					currentPosition,
-					tools.Conn.CurrentState != null
-						? tools.Conn.CurrentState.LastUpdate.ToUnixTimeSeconds()
-						: DateTimeOffset.UtcNow.ToUnixTimeSeconds()
-				),
-				(previousTrack == null) ? null : new (
-					previousTrack.Title,
-					previousTrack.Uri.AbsoluteUri,
-					await previousTrack.GetArtworkAsync(),
-					previousTrackIndex,
-					previousTrack.User.Username,
-					previousTrack.User.AvatarUrl
-				),
-				(nextTrack == null) ? null : new (
-					nextTrack.Title,
- 					nextTrack.Uri.AbsoluteUri,
- 					await nextTrack.GetArtworkAsync(),
-					nextTrackIndex,
- 					nextTrack.User.Username,
- 					nextTrack.User.AvatarUrl
+				tools.Ctx.Result,
+				await currentTrack.ToNullableCurrentTrackInfo(
+						currentTrackIndex,
+						currentPosition,
+						tools.Conn.CurrentState != null
+							? tools.Conn.CurrentState.LastUpdate.ToUnixTimeSeconds()
+							: DateTimeOffset.UtcNow.ToUnixTimeSeconds()),
+				await previousTrack.ToNullableTrackInfo(previousTrackIndex),
+				await nextTrack.ToNullableTrackInfo(nextTrackIndex)
+			));
+		}
+		
+		public class QueueUpdateDto(string guildId, string guildName, string? voiceChannelId, bool isPaused, int loopState, bool isFinished, int currentIndex, TrackInfo[] tracks) {
+			public long					UnixTimestamp		{get; set;} = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+			public string				GuildId					{get; set;} = guildId;
+			public string				GuildName				{get; set;} = guildName;
+			public string?			VoiceChannelId	{get; set;} = voiceChannelId;
+			public bool					IsPaused				{get; set;} = isPaused;
+			public int					LoopState				{get; set;} = loopState;
+			public bool					IsFinished			{get; set;} = isFinished;
+			public int					CurrentIndex		{get;set;} = currentIndex;
+			public TrackInfo[]	Tracks					{get;set;} = tracks;
+		}
+		private static async Task	SendQueueSocketUpdate(Tools tools) {
+			if (!(tools.Ctx.Command == "Play"
+				|| tools.Ctx.Command == "Previous"
+				|| tools.Ctx.Command == "Next"
+				|| tools.Ctx.Command == "Shuffle"
+				|| tools.Ctx.Command == "Pause"
+				|| tools.Ctx.Command == "Loop"
+				|| tools.Ctx.Command == "Reset"
+				|| tools.Ctx.Command == "Stop")
+			)
+				return;
+			var tracks = tools.Ctx.Command switch {
+				("Stop" or "Reset") when tools.Ctx.Result.WasSuccess  => [],
+				_ => await Task.WhenAll(
+					tools.Queue.Tracks.Select((track, index) => track.ToTrackInfo(index))
 				)
+			};
+			var response = await Program.HttpClient.PostAsJsonAsync<QueueUpdateDto>($"{ChariotApiFullAddress}/live/ChariotSanzzo/{tools.ServerId}/queue-update-socket", new (
+				tools.ServerId.ToString(),
+				tools.Conn.Guild.Name,
+				tools.Conn.Channel?.Id.ToString(),
+				tools.Queue.PauseState,
+				tools.Queue.Loop,
+				tools.Queue.IsFinished,
+				tools.Queue.CurrentIndex,
+				tracks ?? []
 			));
 		}
 	}
