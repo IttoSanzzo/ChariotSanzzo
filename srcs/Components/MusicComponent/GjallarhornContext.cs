@@ -88,6 +88,7 @@ namespace ChariotSanzzo.Components.MusicComponent {
 			this.UserId = ulong.Parse(genericCommand.UserId);
 			_ = this.GetDataFromMember().Result;
 			this.Data.Query = this.TrackLink;
+			this.Data.Priority = genericCommand.Priority;
 			this.Result = new(this.Command);
 		}
 		public GjallarhornContext(string gString) {

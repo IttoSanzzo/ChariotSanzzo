@@ -9,6 +9,7 @@ namespace ChariotSanzzo.Components.HttpServer {
 		public string?	TrackUrl	{get;set;} = null;
 		public string?	ChannelId	{get;set;} = null;
 		public long?		Position	{get;set;} = null;
+		public bool			Priority	{get;set;} = true;
 	}
 	public class GjallarhornPostBody {
 		public string?	TrackUrl				{get;set;} = null;
@@ -76,7 +77,6 @@ namespace ChariotSanzzo.Components.HttpServer {
 			var gCtx = new GjallarhornContext();
 			await gCtx.GjallarhornContextAsync(genericCommand);
 			gCtx.Data.WithResponse = false;
-			gCtx.Data.Priority = true;
 			await ChariotMusicCalls.TryCallAsync(gCtx);
 		}
 		static public IResult							UserVoicePresenceRouteHandler(HttpContext context, ulong userId) {
