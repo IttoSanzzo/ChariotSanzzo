@@ -6,8 +6,8 @@ namespace ChariotSanzzo.Components.PresenceSentinel {
 		private readonly DiscordClient			Client = client;
 		private static readonly string			NotFound = "0";
 
-		public UserPresenceState? ForceResolveUserVoiceStateAsync(ulong userId) {
-			var state = Registry.GetOrCreate(userId);
+		public async Task<UserPresenceState?> ForceResolveUserVoiceStateAsync(ulong userId) {
+			var state = await Registry.GetOrCreate(userId);
 			if (state.Get<string?>("voice.guildId") != null)
 				return state;
 			foreach (var (guildId, guild) in Client.Guilds) {
@@ -18,7 +18,7 @@ namespace ChariotSanzzo.Components.PresenceSentinel {
 					state.Set("voice.guildId", guildId.ToString());
 					state.Set("voice.guildName", "");
 					state.Set("voice.channelId", guild.Members[userId].VoiceState.Channel.Id.ToString());
-					state.Set("voice.guildName", "");
+					state.Set("voice.channelName", "");
 					return state;
 				}
 			}

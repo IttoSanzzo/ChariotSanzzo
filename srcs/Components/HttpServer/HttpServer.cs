@@ -79,19 +79,21 @@ namespace ChariotSanzzo.Components.HttpServer {
 			gCtx.Data.WithResponse = false;
 			await ChariotMusicCalls.TryCallAsync(gCtx);
 		}
-		static public IResult							UserVoicePresenceRouteHandler(HttpContext context, ulong userId) {
-			var state = Program.PresenceSentinel.Registry.GetOrCreate(userId);
+		static public async Task<IResult>	UserVoicePresenceRouteHandler(HttpContext context, ulong userId) {
+			var state = await Program.PresenceSentinel.Registry.GetOrCreate(userId);
 			if (state.Get<string?>("voice.channelId") == null)
-				Program.PresenceSentinel.ForceResolveVoiceAsync(userId);
+				await Program.PresenceSentinel.ForceResolveVoiceAsync(userId);
 			return Results.Ok(new {
 				UserId = state.UserId,
 				GuildId = state.Get<string>("voice.guildId"),
+				GuildName = state.Get<string>("voice.guildName"),
 				ChannelId = state.Get<string>("voice.channelId"),
+				ChannelName = state.Get<string>("voice.channelName"),
 				UpdatedAt = state.UpdatedAt
 			});
 		}
-		static public IResult							UserStalkPresenceRouteHandler(HttpContext context, ulong userId) {
-			return Results.Text(Program.PresenceSentinel.GetForceStalkeUserJsonStringAsync(userId), "text/plain");
+		static public async Task<IResult>	UserStalkPresenceRouteHandler(HttpContext context, ulong userId) {
+			return Results.Text(await Program.PresenceSentinel.GetForceStalkeUserJsonStringAsync(userId), "text/plain");
 		}
 	}
 }

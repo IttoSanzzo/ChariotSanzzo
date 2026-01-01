@@ -31,7 +31,7 @@ namespace ChariotSanzzo.Components.PresenceSentinel {
 				}
 			}
 
-			var state = Registry.GetOrCreate(args.User.Id);
+			var state = await Registry.GetOrCreate(args.User.Id);
 			state.Set("voice.lastUpdate", currentTimestamp.ToString());
 			if (args.After.Channel != null) {
 				state.Set("voice.guildId", args.After.Guild.Id.ToString());

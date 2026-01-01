@@ -12,12 +12,10 @@ namespace ChariotSanzzo.Components.PresenceSentinel {
 			return Task.CompletedTask;
 		}
 
-		#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 		private async Task OnPresenceUpdated(DiscordClient sender, PresenceUpdateEventArgs args) {
-			var state = Registry.GetOrCreate(args.User.Id);
+			var state = await Registry.GetOrCreate(args.User.Id);
 			state.Set("status", args.PresenceAfter.Status);
 			return;
 		}
-		#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 	}
 }
