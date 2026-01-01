@@ -433,7 +433,7 @@ namespace ChariotSanzzo.Components.MusicComponent {
 				var embed = new DiscordEmbedBuilder();
 				embed.WithColor(DiscordColor.DarkBlue);
 				embed.WithTitle("Music ControlPanel Link");
-				embed.WithDescription($"[Here is your link for this Channel's ControlPanel]({LinkData.GetGjallarhornControlFullAdress()}/ChariotSanzzo/control-panel?&userId={ctx.Member.Id}&channelId={ctx.ChatChannel.Id})");
+				embed.WithDescription($"[Here is your link for this Channel's ControlPanel]({LinkData.GetGjallarhornControlFullAdress()}/ChariotSanzzo/control-panel?&userId={ctx.Member.Id})");
 				embed.WithFooter($"For: {ctx.Username}", ctx.UserIcon);
 				await ctx.Ictx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
 				await Task.Delay(1000 * 15);

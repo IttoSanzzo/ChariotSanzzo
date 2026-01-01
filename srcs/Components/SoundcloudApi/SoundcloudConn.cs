@@ -24,7 +24,7 @@ namespace ChariotSanzzo.Components.SoundcloudApi {
 			.AddJsonFile("SoundcloudAPIconfig.json", optional: true, reloadOnChange: true)
 			.AddUserSecrets<Program>();
 			IConfiguration config = builder.Build();
-			string? oAuthToken = config.GetValue<string>("SoundcloudApiData:OAuthToken");
+			string? oAuthToken = Environment.GetEnvironmentVariable("SOUNDCLOUDAPIDATA_OAUTHTOKEN") ?? throw new InvalidOperationException("SOUNDCLOUDAPIDATA_OAUTHTOKEN not set");
 			if (oAuthToken == null) {
 				Program.WriteLine("Error: SoundcloudConn: OAuthToken null!");
 				return ;

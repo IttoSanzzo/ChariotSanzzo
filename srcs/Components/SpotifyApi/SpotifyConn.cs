@@ -35,8 +35,8 @@ namespace ChariotSanzzo.Components.SpotifyApi {
 			.AddJsonFile("spotifyAPIconfig.json", optional: true, reloadOnChange: true)
 			.AddUserSecrets<Program>();
 			IConfiguration config = builder.Build();
-			string? tempID = config.GetValue<string>("SpotifyApiData:ClientId");
-			string? tempSecret = config.GetValue<string>("SpotifyApiData:ClientSecret");
+			string? tempID = Environment.GetEnvironmentVariable("SPOTIFYAPIDATA_CLIENTID") ?? throw new InvalidOperationException("SPOTIFYAPIDATA_CLIENTID not set");
+			string? tempSecret = Environment.GetEnvironmentVariable("SPOTIFYAPIDATA_CLIENTSECRET") ?? throw new InvalidOperationException("SPOTIFYAPIDATA_CLIENTSECRET not set");
 			if (tempID == null || tempSecret == null) {
 				Program.WriteLine("Error: SpotifyConn: ClientID or ClientSecret null!");
 				return ;
