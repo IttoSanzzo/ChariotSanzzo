@@ -14,8 +14,11 @@ namespace ChariotSanzzo.Components.PresenceSentinel {
 				if (!guild.Members.TryGetValue(userId, out var member) || member.VoiceState?.Channel == null)
 					continue;
 				if (guild.Members.Keys.Contains(userId) && guild.Members[userId].VoiceState.Channel != null) {
+					state.Set("voice.lastUpdate", DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString());
 					state.Set("voice.guildId", guildId.ToString());
+					state.Set("voice.guildName", "");
 					state.Set("voice.channelId", guild.Members[userId].VoiceState.Channel.Id.ToString());
+					state.Set("voice.guildName", "");
 					return state;
 				}
 			}
