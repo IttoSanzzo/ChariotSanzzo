@@ -31,11 +31,21 @@ namespace ChariotSanzzo.Events {
 			gCtx.Data.IsFromEvent = true;
 			await gCtx.TryCallingAsync();
 		}
-		public static Task			Disconnected(DiscordClient sender, VoiceStateUpdateEventArgs ctx) {
-			if (ctx.User.Id == 1070103829934260344 && ctx.After.Member.VoiceState == null)
-				ChariotMusicCalls.QColle.DropQueue(ctx.Before.Channel.Guild.Id);
-			Program.ColorWriteLine(ConsoleColor.DarkGreen, $"[DISCONNECTED!] {ctx.Before.Channel.Guild.Id}");
-			return Task.CompletedTask;
+		public static async Task			Disconnected(DiscordClient sender, VoiceStateUpdateEventArgs ctx) {
+			if (ctx.User.Id == 1070103829934260344
+				&& ctx.After.Member.VoiceState == null
+				&& ChariotMusicCalls.QColle.QueueExist(ctx.Before.Channel.Guild.Id)) {
+					Program.ColorWriteLine(ConsoleColor.DarkGreen, $"[DISCONNECTED!] {ctx.Before.Channel.Guild.Id}");
+					GjallarhornContext gtx = new () {
+						Guild = ctx.Guild,
+						VoiceChannel = ctx.Before.Channel,
+						Command = "Disconnect",
+						Member = ctx.Before.Member,
+						UserIcon = ctx.Before.Member.AvatarUrl,
+						Username = ctx.Before.Member.Nickname
+					};
+					await gtx.TryCallingAsync();
+			}
 		}
 		public static Task			NewConn(LavalinkGuildConnection conn, GuildConnectionCreatedEventArgs ctx) {
 			Program.ColorWriteLine(ConsoleColor.Green, $"[CONNECTED!] {conn.Guild.Id}");

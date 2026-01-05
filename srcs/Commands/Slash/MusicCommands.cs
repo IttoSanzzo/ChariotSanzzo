@@ -23,8 +23,6 @@ namespace ChariotSanzzo.Commands.Slash {
 	// C. Constructor
 	static MusicCommands() {
 		MusicCommands.Node.GuildConnectionCreated += CharitoMusicEvents.NewConn;
-		if (Program.Client != null)
-			Program.Client.VoiceStateUpdated += CharitoMusicEvents.Disconnected;
 	}
 
 	// 0. Main

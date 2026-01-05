@@ -14,6 +14,8 @@ namespace ChariotSanzzo.Events {
 			client.Ready += ClientReady;
 			client.MessageCreated += Events.STPDiceRoller.DiceRoller;
 			client.ComponentInteractionCreated += Events.CharitoMusicEvents.MusicInterectionButton;
+			client.VoiceStateUpdated += CharitoMusicEvents.Disconnected;
+			// client.UnknownEvent += CharitoMusicEvents.UnknownEventHandler;
 			Program.PresenceSentinel.AddTracker(new VoicePresenceTracker(client));
 			Program.PresenceSentinel.AddTracker(new StatusPresenceTracker(client));
 			await Program.PresenceSentinel.InitializeAsync(client);

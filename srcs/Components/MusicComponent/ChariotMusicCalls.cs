@@ -32,7 +32,9 @@ namespace ChariotSanzzo.Components.MusicComponent {
 					return (successMessage);
 				}
 
-				var obj = await ChariotMusicCalls.GetLavalinkTools(ctx, 0);
+				var obj = ctx.Command != "Disconnect"
+					? await ChariotMusicCalls.GetLavalinkTools(ctx, 0)
+					: ChariotMusicCalls.GetLavalinkToolsForDisconnect(ctx);
 				if (obj.Item1 == false)
 					return (successMessage);
 				Tools tools = obj.Item2;
@@ -57,7 +59,7 @@ namespace ChariotSanzzo.Components.MusicComponent {
 				await SendStationSocketUpdate(tools);
 				await SendQueueSocketUpdate(tools);
 				tools.Queue.LastGjallarhornContext = ctx;
-				return (successMessage);
+				return successMessage;
 			} catch(Exception ex) {
 				Program.WriteException(ex);
 				if (ex.Message == "Invalid Command")
@@ -444,6 +446,27 @@ namespace ChariotSanzzo.Components.MusicComponent {
 		}
 
 	// E. Miscs
+		private static (bool, Tools)		GetLavalinkToolsForDisconnect(GjallarhornContext ctx) {
+			Tools	tools = new();
+			if (ctx.Guild == null
+				|| ctx.Member == null)
+				return (false, tools);
+			tools.Ctx = ctx;
+			tools.LlInstace = Program.Client.GetLavalink();
+			tools.ServerId = ctx.Guild.Id;
+			var embed = new DiscordEmbedBuilder() {Color = DiscordColor.Red};
+			if (!tools.LlInstace.ConnectedNodes.Any())
+				return (false, tools);
+			tools.Node = tools.LlInstace.ConnectedNodes.Values.First();
+			tools.Conn = tools.Node.GetGuildConnection(ctx.Guild);
+			if (tools.Conn == null)
+				return (false, tools);
+			if (ChariotMusicCalls.QColle.QueueExist(tools.ServerId))
+				tools.Queue = ChariotMusicCalls.QColle.GetQueue(tools.ServerId, ctx.Member, tools.Conn, ctx.ChatChannel);
+			ctx.Command = "Stop";
+			ctx.Result.Command = "Stop";
+			return (true, tools);
+		}
 		private static async Task<(bool, Tools)>	GetLavalinkTools(GjallarhornContext ctx, int type) {
 		// 0. Starting
 			Tools	tools = new Tools();
