@@ -27,7 +27,7 @@ namespace ChariotSanzzo.Commands.Prefix {
 		[Command("dice")]
 		public async Task Dice(CommandContext ctx, string line) {
 			DiceExpression expression = new(line);
-			var (wasSuccess, embed) = expression.RollForDiscord();
+			var (_, embed) = expression.RollForDiscord();
 			await ctx.Message.RespondAsync(embed);
 		}
 	}

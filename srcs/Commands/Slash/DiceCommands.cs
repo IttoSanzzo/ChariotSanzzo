@@ -23,7 +23,7 @@ namespace ChariotSanzzo.Commands.Slash {
 		public async Task Dice(InteractionContext ctx, [Option("Expression", "Just roll your dices.")] string line) {
 			await ctx.DeferAsync();
 			DiceExpression expression = new(line);
-			var (wasSuccess, embed) = expression.RollForDiscord();
+			var (_, embed) = expression.RollForDiscord();
 			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
 		}
 	}

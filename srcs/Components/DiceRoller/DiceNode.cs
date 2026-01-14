@@ -62,6 +62,11 @@ namespace ChariotSanzzo.Components.DiceRoller {
 				var (total, results, advantage) = this.Set.Roll();
 				return (total, this.Operator, $"{this.GetFormatedNodeStringWithResults(results, advantage, withExpressionString)}");
 			}
+			public int GetMaxValue() {
+				if (this.Type == DiceNodeType.Constant)
+					return this.Constant;
+				return this.Set.Count * this.Set.Sides;
+			}
 		}
 
 		private static char OperatorSymbol(DiceNodeOperator nodeOperator) =>

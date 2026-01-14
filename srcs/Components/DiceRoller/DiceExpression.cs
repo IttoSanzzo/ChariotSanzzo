@@ -4,10 +4,10 @@ using DSharpPlus.Entities;
 
 namespace ChariotSanzzo.Components.DiceRoller {
 	public partial class DiceExpression {
-		private static int MaxExpressionLength { get; set; } = 40;
+		private static int MaxExpressionLength { get; set; } = 50;
 		private string ExpressionString { get; set; } = null!;
 		public bool IsValid { get; private set; } = false;
-		public string ValidationErrorMessage { get; private set; } = "";
+		public int MaxResult { get; private set; } = 0;
 		private List<DiceNode> Nodes { get; set; } = [];
 		private int Iterations { get; set; } = 1;
 
@@ -29,7 +29,10 @@ namespace ChariotSanzzo.Components.DiceRoller {
 				this.Nodes = [.. ArithmeticSeparatorsRegex().Split(this.ExpressionString[(hashtagPosition + 1)..]).Select((rawNodeString) => new DiceNode(rawNodeString))];
 			} else
 				this.Nodes = [.. ArithmeticSeparatorsRegex().Split(this.ExpressionString).Select((rawNodeString) => new DiceNode(rawNodeString))];
-			if (this.Nodes.Any((node) => node.Validate() == false))
+			if (this.Nodes.Count > 20 || this.Nodes.Any((node) => node.Validate() == false))
+				this.IsValid = false;
+			this.MaxResult = this.GenMaxResult();
+			if (this.MaxResult > 1000000)
 				this.IsValid = false;
 		}
 		public static bool ValidateExpressionString(string expression) {
@@ -62,6 +65,7 @@ namespace ChariotSanzzo.Components.DiceRoller {
 				foreach (var node in this.Nodes)
 					embed.Title += $" {node.GetFormatedNodeString()}";
 			}
+			int maxResultWidth = this.MaxResult.ToString().Length;
 			StringBuilder finalMessageBuilder = new();
 			for (int index = 0; index < this.Iterations; ++index) {
 				StringBuilder nodeString = new();
@@ -81,11 +85,32 @@ namespace ChariotSanzzo.Components.DiceRoller {
 						nodeString.Append($" {message}");
 				}
 				if (index == 0)
-					finalMessageBuilder.Append($"` {total}{(this.Iterations != 1 && total < 10 ? " " : "")} ` ⟵ {nodeString.ToString()}");
-				else finalMessageBuilder.Append($"\n` {total}{(this.Iterations != 1 && total < 10 ? " " : "")} ` ⟵ {nodeString.ToString()}");
+					finalMessageBuilder.Append($"` {(this.Iterations == 1 ? total : total.ToString().PadRight(maxResultWidth, ' '))} ` ⟵ {nodeString.ToString()}");
+				else finalMessageBuilder.Append($"\n` {(this.Iterations == 1 ? total : total.ToString().PadRight(maxResultWidth, ' '))} ` ⟵ {nodeString.ToString()}");
+				if (finalMessageBuilder.Length > 4090) {
+					this.IsValid = false;
+					DiscordEmbedBuilder error = new() {
+						Color = DiscordColor.Red,
+						Description = "Dice Result was too large."
+					};
+					return (false, error.Build());
+				}
 			}
 			embed.Description = finalMessageBuilder.ToString();
 			return (true, embed.Build());
+		}
+		public int GenMaxResult() {
+			int max = 0;
+			foreach (var node in this.Nodes) {
+				max = node.Operator switch {
+					DiceNodeOperator.Sum => max + node.GetMaxValue(),
+					DiceNodeOperator.Sub => max - node.GetMaxValue(),
+					DiceNodeOperator.Mul => max * node.GetMaxValue(),
+					DiceNodeOperator.Div => max / node.GetMaxValue(),
+					_ => max + node.GetMaxValue()
+				};
+			}
+			return max;
 		}
 
 		[GeneratedRegex(@"\s")]
