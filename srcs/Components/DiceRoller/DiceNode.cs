@@ -1,6 +1,6 @@
 namespace ChariotSanzzo.Components.DiceRoller {
 	public partial class DiceExpression {
-		private enum DiceNodeType {
+		public enum DiceNodeType {
 			Undefined,
 			DiceSet,
 			Constant
@@ -41,6 +41,14 @@ namespace ChariotSanzzo.Components.DiceRoller {
 					return this.Set.Validate();
 				return true;
 			}
+			public int GetAdvantageValue() {
+				if (this.Type == DiceNodeType.DiceSet)
+					return this.Set.Advantage;
+				return 0;
+			}
+			public char GetOperatorSymbol() {
+				return OperatorSymbol(this.Operator);
+			}
 			public string GetFormatedNodeString() {
 				if (this.Operator == DiceNodeOperator.None)
 					return this.NodeString;
@@ -55,6 +63,12 @@ namespace ChariotSanzzo.Components.DiceRoller {
 				if (this.Operator == DiceNodeOperator.None)
 					return $"{resultsString}{(withExpressionString ? ($" {this.NodeString}") : "")}";
 				return $"{OperatorSymbol(this.Operator)} {resultsString}{(withExpressionString ? ($" {this.NodeString}") : "")}";
+			}
+			public (int result, int[] results) Execute() {
+				if (this.Type == DiceNodeType.Constant)
+					return (this.Constant, [this.Constant]);
+				var (total, results, _) = this.Set.Roll();
+				return (total, results);
 			}
 			public (int result, DiceNodeOperator nodeOperator, string message) ExecuteWithMessage(bool withExpressionString = true) {
 				if (this.Type == DiceNodeType.Constant)

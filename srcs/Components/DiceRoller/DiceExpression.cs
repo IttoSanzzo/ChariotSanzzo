@@ -6,6 +6,7 @@ namespace ChariotSanzzo.Components.DiceRoller {
 	public partial class DiceExpression {
 		private static int MaxExpressionLength { get; set; } = 50;
 		private string ExpressionString { get; set; } = null!;
+		private string ExpressionStringFormatted { get; set; } = "";
 		public bool IsValid { get; private set; } = false;
 		public int MaxResult { get; private set; } = 0;
 		private List<DiceNode> Nodes { get; set; } = [];
@@ -29,11 +30,21 @@ namespace ChariotSanzzo.Components.DiceRoller {
 				this.Nodes = [.. ArithmeticSeparatorsRegex().Split(this.ExpressionString[(hashtagPosition + 1)..]).Select((rawNodeString) => new DiceNode(rawNodeString))];
 			} else
 				this.Nodes = [.. ArithmeticSeparatorsRegex().Split(this.ExpressionString).Select((rawNodeString) => new DiceNode(rawNodeString))];
-			if (this.Nodes.Count > 20 || this.Nodes.Any((node) => node.Validate() == false))
+			if (this.Nodes.Count > 20 || this.Nodes.Any((node) => node.Validate() == false)) {
 				this.IsValid = false;
+				return;
+			}
 			this.MaxResult = this.GenMaxResult();
-			if (this.MaxResult > 1000000)
+			if (this.MaxResult > 1000000) {
 				this.IsValid = false;
+				return;
+			}
+			if (this.Iterations > 1) {
+				this.ExpressionStringFormatted = $"{this.Iterations}#";
+				foreach (var node in this.Nodes)
+					this.ExpressionStringFormatted += $" {node.GetFormatedNodeString()}";
+			} else
+				this.ExpressionStringFormatted = string.Join(" ", this.Nodes.Select((node) => node.GetFormatedNodeString()));
 		}
 		public static bool ValidateExpressionString(string expression) {
 			if (
@@ -99,6 +110,44 @@ namespace ChariotSanzzo.Components.DiceRoller {
 			embed.Description = finalMessageBuilder.ToString();
 			return (true, embed.Build());
 		}
+		public DiceResults Roll() {
+			var results = new DiceResults();
+			if (IsValid == false) {
+				results.WasSuccess = false;
+				results.ErrorMessage = "Dice Expression Was Not Valid.";
+				return results;
+			}
+			results.FormattedExpression = this.ExpressionStringFormatted;
+			int maxResultWidth = this.MaxResult.ToString().Length;
+			results.MaxResultWidth = maxResultWidth;
+
+			results.DiceNodes = [.. Nodes.Select((node) => new DiceResults.DiceNode() {
+				NodeExpression = node.GetFormatedNodeString(),
+				NodeOperator = node.GetOperatorSymbol(),
+				AdvantageValue = node.GetAdvantageValue(),
+				Type = ((node.Type == DiceNodeType.DiceSet) ? "DiceSet" : "Constant"),
+			})];
+			results.IterationResults = [.. new int[Iterations].Select((_) => {
+				var iterationResult = new DiceResults.IterationResult {
+					TotalResult = 0,
+					NodeResults = new int[Nodes.Count][]
+				};
+				for (int nodeIndex = 0; nodeIndex < Nodes.Count; ++nodeIndex) {
+					var (rollResult, rollResults) = Nodes[nodeIndex].Execute();
+					iterationResult.TotalResult = Nodes[nodeIndex].Operator switch {
+						DiceNodeOperator.Sum => iterationResult.TotalResult + rollResult,
+						DiceNodeOperator.Sub => iterationResult.TotalResult - rollResult,
+						DiceNodeOperator.Mul => iterationResult.TotalResult * rollResult,
+						DiceNodeOperator.Div => iterationResult.TotalResult / rollResult,
+						_ => iterationResult.TotalResult + rollResult
+					};
+					iterationResult.NodeResults[nodeIndex] = rollResults;
+				}
+				return iterationResult;
+			})];
+			return results;
+		}
+
 		public int GenMaxResult() {
 			int max = 0;
 			foreach (var node in this.Nodes) {
