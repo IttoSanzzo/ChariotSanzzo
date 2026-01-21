@@ -46,6 +46,16 @@ namespace ChariotSanzzo.Components.DiceRoller {
 					return this.Set.Advantage;
 				return 0;
 			}
+			public int GetCountValue() {
+				if (this.Type == DiceNodeType.DiceSet)
+					return this.Set.Count;
+				return 0;
+			}
+			public int GetSideValue() {
+				if (this.Type == DiceNodeType.DiceSet)
+					return this.Set.Sides;
+				return 0;
+			}
 			public char GetOperatorSymbol() {
 				return OperatorSymbol(this.Operator);
 			}

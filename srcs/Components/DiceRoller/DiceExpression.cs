@@ -125,6 +125,8 @@ namespace ChariotSanzzo.Components.DiceRoller {
 				NodeExpression = node.GetFormatedNodeString(),
 				NodeOperator = node.GetOperatorSymbol(),
 				AdvantageValue = node.GetAdvantageValue(),
+				CountValue = node.GetCountValue(),
+				SideValue = node.GetSideValue(),
 				Type = ((node.Type == DiceNodeType.DiceSet) ? "DiceSet" : "Constant"),
 			})];
 			results.IterationResults = [.. new int[Iterations].Select((_) => {

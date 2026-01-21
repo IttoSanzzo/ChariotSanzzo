@@ -5,10 +5,12 @@ namespace ChariotSanzzo.Components.DiceRoller {
 			public int TotalResult { get; set; } = 0;
 		}
 		public class DiceNode {
-			public char NodeOperator { get; set; } = '+';
 			public string NodeExpression { get; set; } = "";
-			public int AdvantageValue { get; set; } = 0;
+			public char NodeOperator { get; set; } = '+';
 			public string Type { get; set; } = "";
+			public int AdvantageValue { get; set; } = 0;
+			public int CountValue { get; set; } = 0;
+			public int SideValue { get; set; } = 0;
 		}
 
 		public bool WasSuccess { get; set; } = false;
