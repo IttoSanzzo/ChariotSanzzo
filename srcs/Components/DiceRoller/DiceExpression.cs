@@ -147,6 +147,7 @@ namespace ChariotSanzzo.Components.DiceRoller {
 				}
 				return iterationResult;
 			})];
+			results.WasSuccess = true;
 			return results;
 		}
 
