@@ -4,13 +4,13 @@ using DSharpPlus.EventArgs;
 namespace ChariotSanzzo.Components.PresenceSentinel {
 	public class VoicePresenceTracker(DiscordClient client) : IPresenceTracker {
 		private class UpdateDebounceState {
-			public long											TimestampMilliseconds	{get; set;} = 0;
-			public CancellationTokenSource	CancellationToken			{get; set;} = null!;
+			public long TimestampMilliseconds { get; set; } = 0;
+			public CancellationTokenSource CancellationToken { get; set; } = null!;
 		}
-		private 					PresenceRegistry						Registry	= null!;
-		private readonly	DiscordClient								Client		= client;
-		private	static		Dictionary<ulong, UpdateDebounceState>	VoiceUpdateDebounceState	{get;} = [];
-		
+		private PresenceRegistry Registry = null!;
+		private readonly DiscordClient Client = client;
+		private static Dictionary<ulong, UpdateDebounceState> VoiceUpdateDebounceState { get; } = [];
+
 		public Task InitializeAsync(PresenceRegistry registry) {
 			Registry = registry;
 			Client.VoiceStateUpdated += OnVoiceStateUpdated;
@@ -46,7 +46,7 @@ namespace ChariotSanzzo.Components.PresenceSentinel {
 			}
 
 
-			VoiceUpdateDebounceState.Add(args.User.Id, new () {
+			VoiceUpdateDebounceState.Add(args.User.Id, new() {
 				TimestampMilliseconds = currentTimestamp,
 				CancellationToken = SetTimeout(async () => {
 					await Program.PresenceSentinel.PostPresenceUpdate(args.User.Id);
@@ -61,8 +61,7 @@ namespace ChariotSanzzo.Components.PresenceSentinel {
 					await Task.Delay(delayMs, cts.Token);
 					if (!cts.Token.IsCancellationRequested)
 						await action();
-				}
-				catch (TaskCanceledException) {}
+				} catch (TaskCanceledException) { }
 			});
 			return cts;
 		}

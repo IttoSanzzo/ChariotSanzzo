@@ -62,6 +62,7 @@ namespace ChariotSanzzo.Components.HttpServer {
 			app.MapGet("/presence/{userId}/voice", (Delegate)UserVoicePresenceRouteHandler);
 			app.MapGet("/presence/{userId}/stalk", (Delegate)UserStalkPresenceRouteHandler);
 			app.MapPost("/peer-in/dice-roller", (Delegate)DiceRollerRouteHandler);
+			app.MapPost("/peer-in/mute-me", (Delegate)MuteMeRouteHandler);
 		}
 		static public async Task<IResult> PostGenericCommandAsync(string guildId, HttpContext context) {
 			var payload = await context.Request.ReadFromJsonAsync<PlayerGenericCommand>();
@@ -123,6 +124,32 @@ namespace ChariotSanzzo.Components.HttpServer {
 				}
 			}
 			return Results.Ok(new { diceResults = results });
+		}
+		static public async Task<IResult> MuteMeRouteHandler(HttpRequest request) {
+			try {
+				if (!request.Headers.TryGetValue("STP-DiscordUserId", out var discordUserIdRaw)
+					|| !ulong.TryParse(discordUserIdRaw, out var discordUserId)
+				) return Results.BadRequest(new { message = "Missing discordUserId" });
+				var userPresenceState = await Program.PresenceSentinel.ForceResolveVoiceAsync(discordUserId);
+				if (userPresenceState == null)
+					return Results.Ok(new { state = "disconnected" });
+				if (!ulong.TryParse(userPresenceState.Get<string>("voice.channelId"), out var channelId))
+					return Results.Ok(new { state = "disconnected" });
+				var voiceChannel = await Program.Client!.GetChannelAsync(channelId);
+				if (voiceChannel == null)
+					return Results.Ok(new { state = "disconnected" });
+				var user = voiceChannel.Users.FirstOrDefault((user) => user.Id == discordUserId);
+				if (user == null)
+					return Results.Ok(new { state = "disconnected" });
+				if (user.VoiceState.IsServerMuted) {
+					await user.SetMuteAsync(false);
+					return Results.Ok(new { state = "unmuted" });
+				}
+				await user.SetMuteAsync(true);
+				return Results.Ok(new { state = "muted" });
+			} catch {
+				return Results.BadRequest(new { message = "exception" });
+			}
 		}
 	}
 }
