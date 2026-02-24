@@ -58,11 +58,13 @@ namespace ChariotSanzzo.Components.HttpServer {
 			await app.RunAsync();
 		}
 		private static void MapRoutes(this WebApplication app) {
+			app.MapGet("/ping", (Delegate)PingRouteHandler);
 			app.MapPost("/{guildId}/player", (Delegate)PostGenericCommandAsync);
 			app.MapGet("/presence/{userId}/voice", (Delegate)UserVoicePresenceRouteHandler);
 			app.MapGet("/presence/{userId}/stalk", (Delegate)UserStalkPresenceRouteHandler);
 			app.MapPost("/peer-in/dice-roller", (Delegate)DiceRollerRouteHandler);
 			app.MapPost("/peer-in/mute-me", (Delegate)MuteMeRouteHandler);
+			app.MapPost("/minecraft/dice-roller", (Delegate)MinecraftDiceRollerRouteHandler);
 		}
 		static public async Task<IResult> PostGenericCommandAsync(string guildId, HttpContext context) {
 			var payload = await context.Request.ReadFromJsonAsync<PlayerGenericCommand>();
@@ -89,6 +91,9 @@ namespace ChariotSanzzo.Components.HttpServer {
 			await gCtx.GjallarhornContextAsync(genericCommand);
 			gCtx.Data.WithResponse = false;
 			await ChariotMusicCalls.TryCallAsync(gCtx);
+		}
+		static public IResult PingRouteHandler() {
+			return Results.Ok();
 		}
 		static public async Task<IResult> UserVoicePresenceRouteHandler(HttpContext context, ulong userId) {
 			var state = await Program.PresenceSentinel.Registry.GetOrCreate(userId);
@@ -150,6 +155,25 @@ namespace ChariotSanzzo.Components.HttpServer {
 			} catch {
 				return Results.BadRequest(new { message = "exception" });
 			}
+		}
+		static public async Task<IResult> MinecraftDiceRollerRouteHandler([FromBody] DiceExpressionDto dto, HttpRequest request) {
+			request.Headers.TryGetValue("STP-MinecraftUserId", out var discordUserId);
+			request.Headers.TryGetValue("STP-MinecraftClientToken", out var minecraftClientToken);
+
+			var diceExpression = dto.ToDiceExpression();
+			if (diceExpression.IsValid == false)
+				return Results.BadRequest("Invalid dice expression.");
+			var results = diceExpression.Roll();
+			if (!string.IsNullOrEmpty(discordUserId) && !string.IsNullOrEmpty(minecraftClientToken)) {
+				// var (success, embed) = await results.ToDiscordEmbedAsync(discordUserId);
+				// if (success) {
+				// await Program.Client!.SendMessageAsync(
+				// await Program.Client!.GetChannelAsync(756752942085963847),
+				// embed
+				// );
+				// }
+			}
+			return Results.Ok(new { diceResults = results });
 		}
 	}
 }
