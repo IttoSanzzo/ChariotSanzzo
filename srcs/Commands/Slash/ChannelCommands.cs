@@ -8,29 +8,28 @@ namespace ChariotSanzzo.Commands.Slash {
 	[SlashCommandGroup("Channel", "Channel Commands")]
 	public class ChannelCommands : ApplicationCommandModule {
 
-	// M. Member Variables
-		private const int	midMessageTime = 800;
+		// M. Member Variables
+		private const int midMessageTime = 800;
 
-	// 0. Core
+		// 0. Core
 		[SlashCommand("Clean", "Cleans the chat by the given ammount of messages.")]
 		public static async Task Clean(InteractionContext ctx, [Option("Count", "How many messages should be clean")] long count) {
 			await ctx.DeferAsync();
 
-		// 0. Check
+			// 0. Check
 			var retMss = new DiscordWebhookBuilder();
 			if (ctx.Member.Permissions.HasPermission(Permissions.ManageMessages) == false) {
 				retMss.Content = $"You do not have the permission to do this.";
 				await ctx.EditResponseAsync(retMss);
 				await Task.Delay(10000);
 				await ctx.DeleteResponseAsync();
-				return ;
-			}
-			else if (count < 1 || count > 100000) {
+				return;
+			} else if (count < 1 || count > 100000) {
 				retMss.Content = $"Invalid clean count value!";
 				await ctx.EditResponseAsync(retMss);
 				await Task.Delay(10000);
 				await ctx.DeleteResponseAsync();
-				return ;
+				return;
 			}
 			var chariotMember = await ctx.Guild.GetMemberAsync(1070103829934260344);
 			if (chariotMember.Permissions.HasPermission(Permissions.ManageMessages) == false) {
@@ -38,20 +37,20 @@ namespace ChariotSanzzo.Commands.Slash {
 				await ctx.EditResponseAsync(retMss);
 				await Task.Delay(10000);
 				await ctx.DeleteResponseAsync();
-				return ;
+				return;
 			}
 			retMss.Content = $"Excluding {count} messages!";
 			var anchor = await ctx.EditResponseAsync(retMss);
 
-		// 1. Search
+			// 1. Search
 			var mssList = await ctx.Channel.GetMessagesBeforeAsync(anchor.Id, (int)count);
-		// 2. Core
+			// 2. Core
 			try {
 				await ctx.Channel.DeleteMessagesAsync(mssList);
-			} catch(Exception ex) {
+			} catch (Exception ex) {
 				Program.WriteException(ex);
 			}
-		// 3. Closing
+			// 3. Closing
 			await Task.Delay(1500);
 			await ctx.DeleteResponseAsync();
 		}
@@ -62,21 +61,20 @@ namespace ChariotSanzzo.Commands.Slash {
 			DiscordChannel targetChannel;
 			ulong channelId = 0;
 
-		// 0. Checks
-			
+			// 0. Checks
+
 			if (ctx.Member.Permissions.HasPermission(Permissions.Administrator) == false && ctx.Member.Id != 301498447088058368) {
 				retMss.Content = $"You do not have the permission to do this.";
 				await ctx.EditResponseAsync(retMss);
 				await Task.Delay(10000);
 				await ctx.DeleteResponseAsync();
-				return ;
-			}
-			else if (count < 1 || count > 100000) {
+				return;
+			} else if (count < 1 || count > 100000) {
 				retMss.Content = $"Invalid clean count value!";
 				await ctx.EditResponseAsync(retMss);
 				await Task.Delay(10000);
 				await ctx.DeleteResponseAsync();
-				return ;
+				return;
 			}
 			try {
 				channelId = ulong.Parse(targetId);
@@ -87,10 +85,10 @@ namespace ChariotSanzzo.Commands.Slash {
 				await ctx.EditResponseAsync(retMss);
 				await Task.Delay(3000);
 				await ctx.DeleteResponseAsync();
-				return ;
+				return;
 			}
 
-		// 1. Question
+			// 1. Question
 			retMss.Content = $"Are you sure you want to copy up to `{count}` messages from `{ctx.Channel.Name}` to `{targetChannel.Name}`? (Yes/No)";
 			var ctxResponse = await ctx.EditResponseAsync(retMss);
 			var response = await ctx.Channel.GetNextMessageAsync(ctx.User);
@@ -100,39 +98,39 @@ namespace ChariotSanzzo.Commands.Slash {
 				await ctx.EditResponseAsync(retMss);
 				await Task.Delay(3000);
 				await ctx.DeleteResponseAsync();
-				return ;
+				return;
 			}
 			await response.Result.DeleteAsync();
 			retMss.Content = $"Then be it. Copying... `(x/x)`";
 			ctxResponse = await ctx.EditResponseAsync(retMss);
 
-		// 2. Search
+			// 2. Search
 			var mssList = await ctx.Channel.GetMessagesBeforeAsync(ctxResponse.Id, (int)count);
 
-		// 3. Core
+			// 3. Core
 			Thread thread = new Thread(() => CopyMessagesThread(ctx, targetChannel, mssList));
 			thread.Start();
 		}
 
-	// 1. Threads
-		private static async void	CopyMessagesThread(InteractionContext ctx, DiscordChannel targetChannel, IReadOnlyList<DiscordMessage> mssList){
-		// 0. Variables
+		// 1. Threads
+		private static async void CopyMessagesThread(InteractionContext ctx, DiscordChannel targetChannel, IReadOnlyList<DiscordMessage> mssList) {
+			// 0. Variables
 			await ctx.DeleteResponseAsync();
 			DiscordMessage updateLine = await ctx.Channel.SendMessageAsync($"Then be it. Copying... `(0/{mssList.Count}`)");
-			DiscordWebhookBuilder	retMss = new();
-			DiscordMember			lastMember = (DiscordMember)mssList[mssList.Count - 1].Author;
-			DiscordEmbed			headerEmbed = ChannelCommands.GetNewHeader(mssList[mssList.Count - 1]);
-			string					sendingMessage = "";
-			int						timeCount = 0;
+			DiscordWebhookBuilder retMss = new();
+			DiscordMember lastMember = (DiscordMember)mssList[mssList.Count - 1].Author;
+			DiscordEmbed headerEmbed = ChannelCommands.GetNewHeader(mssList[mssList.Count - 1]);
+			string sendingMessage = "";
+			int timeCount = 0;
 
-		// 1. Core
+			// 1. Core
 			await targetChannel.SendMessageAsync(headerEmbed);
 			try {
 				for (int i = mssList.Count - 1; i >= 0; i--) {
 					timeCount++;
 					try {
 						if (mssList[i].Content == "" && mssList[i].Embeds.Count == 0 && mssList[i].Attachments.Count == 0)
-							continue ;
+							continue;
 						else if (lastMember != mssList[i].Author) {
 							ChannelCommands.SendText(sendingMessage, targetChannel);
 							await Task.Delay(ChannelCommands.midMessageTime);
@@ -148,23 +146,21 @@ namespace ChariotSanzzo.Commands.Slash {
 								sendingMessage = "";
 								await targetChannel.SendMessageAsync(mssList[i].Content);
 								await Task.Delay(ChannelCommands.midMessageTime);
-							}
-							else if (sendingMessage.Length + mssList[i].Content.Length > 1950) {
+							} else if (sendingMessage.Length + mssList[i].Content.Length > 1950) {
 								ChannelCommands.SendText(sendingMessage, targetChannel);
 								await Task.Delay(ChannelCommands.midMessageTime);
 								sendingMessage = "";
-							}
-							else
+							} else
 								sendingMessage += "\n";
 							sendingMessage += mssList[i].Content;
 						}
 						if (mssList[i].Embeds.Count != 0 || mssList[i].Attachments.Count != 0) {
 							if (mssList[i].Attachments.Count != 0 && mssList[i].Attachments[0].Url.Substring(18) == "https://tenor.com/")
-								continue ;
+								continue;
 							ChannelCommands.SendText(sendingMessage, targetChannel);
 							await Task.Delay(ChannelCommands.midMessageTime);
 							sendingMessage = "";
-							foreach(DiscordAttachment element in mssList[i].Attachments) {
+							foreach (DiscordAttachment element in mssList[i].Attachments) {
 								ChannelCommands.SendText(element.Url, targetChannel);
 								await Task.Delay(ChannelCommands.midMessageTime);
 							}
@@ -174,9 +170,9 @@ namespace ChariotSanzzo.Commands.Slash {
 								await targetChannel.SendMessageAsync(tempBuilder);
 								await Task.Delay(ChannelCommands.midMessageTime);
 							}
-							continue ;
+							continue;
 						}
-					} catch(Exception ex) {
+					} catch (Exception ex) {
 						Program.WriteException(ex);
 					}
 					if (i % 250 == 0) {
@@ -192,7 +188,7 @@ namespace ChariotSanzzo.Commands.Slash {
 					}
 					if (mssList[0].Embeds.Count != 0 || mssList[0].Attachments.Count != 0) {
 						if (!(mssList[0].Attachments.Count != 0 && mssList[0].Attachments[0].Url.Substring(18) == "https://tenor.com/")) {
-							foreach(DiscordAttachment element in mssList[0].Attachments) {
+							foreach (DiscordAttachment element in mssList[0].Attachments) {
 								ChannelCommands.SendText(element.Url, targetChannel);
 								await Task.Delay(ChannelCommands.midMessageTime);
 							}
@@ -204,17 +200,17 @@ namespace ChariotSanzzo.Commands.Slash {
 							}
 						}
 					}
-				} catch(Exception ex) {
+				} catch (Exception ex) {
 					Program.WriteException(ex);
 				}
-			// 3. Closing
+				// 3. Closing
 				await updateLine.ModifyAsync("Copied Succesfully!");
-			} catch(Exception ex) {
+			} catch (Exception ex) {
 				Program.WriteException(ex);
 			}
 		}
-	// E. Miscs
-		private static async Task	UpdateCopyCounterAsync(DiscordMessage message, DiscordWebhookBuilder retMss, int index, int count) {
+		// E. Miscs
+		private static async Task UpdateCopyCounterAsync(DiscordMessage message, DiscordWebhookBuilder retMss, int index, int count) {
 			try {
 				if (index % 10 == 0) {
 					double remainingSeconds = (count - index) * 1.15;
@@ -227,17 +223,17 @@ namespace ChariotSanzzo.Commands.Slash {
 					content += $"{timesp.Seconds} Seconds)";
 					await message.ModifyAsync(content);
 				}
-			} catch(Exception ex) {
+			} catch (Exception ex) {
 				Program.WriteException(ex);
 			}
 		}
-		private static DiscordEmbed	GetNewHeader(DiscordMessage message) {
+		private static DiscordEmbed GetNewHeader(DiscordMessage message) {
 			DiscordEmbedBuilder embed = new();
 			embed.WithColor(((DiscordMember)message.Author).Color);
 			embed.WithFooter($"{message.Author.Username} - {message.Timestamp}", message.Author.AvatarUrl);
 			return (embed);
 		}
-		private static async void	SendText(string message, DiscordChannel targetChannel) {
+		private static async void SendText(string message, DiscordChannel targetChannel) {
 			if (message != "")
 				await targetChannel.SendMessageAsync(message);
 		}

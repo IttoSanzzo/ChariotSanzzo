@@ -157,21 +157,20 @@ namespace ChariotSanzzo.Components.HttpServer {
 			}
 		}
 		static public async Task<IResult> MinecraftDiceRollerRouteHandler([FromBody] DiceExpressionDto dto, HttpRequest request) {
-			request.Headers.TryGetValue("STP-MinecraftUserId", out var discordUserId);
-			request.Headers.TryGetValue("STP-MinecraftClientToken", out var minecraftClientToken);
+			request.Headers.TryGetValue("STP-DiscordUserId", out var discordUserIdRaw);
 
 			var diceExpression = dto.ToDiceExpression();
 			if (diceExpression.IsValid == false)
 				return Results.BadRequest("Invalid dice expression.");
 			var results = diceExpression.Roll();
-			if (!string.IsNullOrEmpty(discordUserId) && !string.IsNullOrEmpty(minecraftClientToken)) {
-				// var (success, embed) = await results.ToDiscordEmbedAsync(discordUserId);
-				// if (success) {
-				// await Program.Client!.SendMessageAsync(
-				// await Program.Client!.GetChannelAsync(756752942085963847),
-				// embed
-				// );
-				// }
+			if (!string.IsNullOrEmpty(discordUserIdRaw) && ulong.TryParse(discordUserIdRaw, out var discordUserId)) {
+				var (success, embed) = await results.ToDiscordEmbedAsync(discordUserId);
+				if (success) {
+					await Program.Client!.SendMessageAsync(
+						await Program.Client!.GetChannelAsync(756752942085963847),
+						embed
+					);
+				}
 			}
 			return Results.Ok(new { diceResults = results });
 		}
