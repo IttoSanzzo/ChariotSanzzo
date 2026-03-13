@@ -1,0 +1,46 @@
+{
+	"discord": {
+		"name": "Chariot Sanzzo",
+		"version": 2.0,
+		"prefix": "cs ",
+		"botToken": null,
+		"botUserId": null,
+		"debugGuildId": null
+	},
+	"lavalink": {
+		"secured": null,
+		"port": null,
+		"hostname": null,
+		"password": null
+	},
+	"database": {
+		"hostname": null,
+		"username": null,
+		"password": null,
+		"database": null,
+		"port": null
+	},
+	"webServ": {
+		"port": null
+	},
+	"integrations": {
+		"soundcloud": {
+			"oAuthToken": null
+		},
+		"spotify": {
+			"clientId": null,
+			"clientSecret": null
+		},
+		"chariotApi": {
+			"token": null
+		}
+	},
+	"addresses": {
+		"chariotApiAddress": "https://chariotapi.setsu.party",
+		"chariotApiLocalAddress": null,
+		"gjallarhornLocalAddress": null,
+		"gjallarhornControlAdress": "https://gjallarhorncontrol.setsu.party",
+		"albinaApiAddress": "https://albinaapi.setsu.party",
+		"albinaSiteAddress": "https://albina.setsu.party"
+	}
+}

@@ -75,3 +75,4 @@ dotnet_separate_import_directive_groups = false
 # -------------------------
 
 dotnet_diagnostic.IDE0055.severity = warning
+dotnet_diagnostic.IDE0130.severity = none

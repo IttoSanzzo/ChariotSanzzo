@@ -1,8 +1,0 @@
-{
-	"ChariotLavalink": {
-		"hostname": "",
-		"password": "",
-		"secured": true,
-		"port": 443
-	}
-}
