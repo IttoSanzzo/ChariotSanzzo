@@ -79,25 +79,27 @@ namespace ChariotSanzzo.Components.Gjallar {
 				return false;
 			}
 
-			if (tools.Player.TotalTracks != 0 && retrievedTracks.Length == 1 && ctx.Data.Priority == false) {
+			if (retrievedTracks.Length == 1 && tools.Player.TotalTracks > 0 && ctx.Data.Priority == false) {
 				var trackPosition = tools.Player.GetTrackPosition(retrievedTracks[0]);
-				if (trackPosition == tools.Player.CurrentPosition) {
-					embed.WithDescription($"_**Already playing...:**_ [{retrievedTracks[0].Title}]({retrievedTracks[0].Uri})\n");
-					embed.WithThumbnail(await GjallarTrack.GetArtworkAsync(retrievedTracks[0].Uri!));
-					await ctx.GTXEmbedTimerAsync(20, embed);
-					return true;
-				} else if (trackPosition != 0 && trackPosition != tools.Player.CurrentPosition) {
-					tools.Player.MoveTrackToEndOfQueue(retrievedTracks[0]);
-					embed.WithDescription(
-						$"_**Moved to the end of Queue:**_ [{retrievedTracks[0].Title}]({retrievedTracks[0].Uri})\n" +
-						$"**Author:** {retrievedTracks[0].Author}\n" +
-						$"**Length:** {retrievedTracks[0].Duration}" +
-						$"\t\t**Index:** ` {tools.Player.TotalTracks} `");
-					embed.WithThumbnail(await GjallarTrack.GetArtworkAsync(retrievedTracks[0].Uri!));
-					if (tools.Player.CurrentTrack != null)
-						await tools.Player.NowPlayingAsync();
-					await ctx.GTXEmbedTimerAsync(20, embed);
-					return true;
+				if (trackPosition != 0) {
+					if (trackPosition == tools.Player.CurrentPosition) {
+						embed.WithDescription($"_**Already playing...:**_ [{retrievedTracks[0].Title}]({retrievedTracks[0].Uri})\n");
+						embed.WithThumbnail(await GjallarTrack.GetArtworkAsync(retrievedTracks[0].Uri!));
+						await ctx.GTXEmbedTimerAsync(20, embed);
+						return true;
+					} else {
+						tools.Player.MoveTrackToEndOfQueue(retrievedTracks[0]);
+						embed.WithDescription(
+							$"_**Moved to the end of Queue:**_ [{retrievedTracks[0].Title}]({retrievedTracks[0].Uri})\n" +
+							$"**Author:** {retrievedTracks[0].Author}\n" +
+							$"**Length:** {retrievedTracks[0].Duration}" +
+							$"\t\t**Index:** ` {tools.Player.TotalTracks} `");
+						embed.WithThumbnail(await GjallarTrack.GetArtworkAsync(retrievedTracks[0].Uri!));
+						if (tools.Player.CurrentTrack != null)
+							await tools.Player.NowPlayingAsync();
+						await ctx.GTXEmbedTimerAsync(20, embed);
+						return true;
+					}
 				}
 			}
 
@@ -111,10 +113,14 @@ namespace ChariotSanzzo.Components.Gjallar {
 					await tools.Player.NowPlayingAsync();
 			}
 			if (ctx.Data.Priority == true) {
-				await tools.Player.PlayAsync((await tools.Player.UseTrackAsync(retrievedTracks[0]))!.Track);
-				if (retrievedTracks.Length <= 1 && ctx.Ictx != null)
-					await ctx.Ictx.DeleteResponseAsync();
-				return true;
+				if (tools.Player.MoveTrackToEndOfQueue(retrievedTracks[0])) {
+					await tools.Player.PlayAsync((await tools.Player.UseTrackAsync(retrievedTracks[0]))!.Track);
+					if (retrievedTracks.Length <= 1 && ctx.Ictx != null)
+						await ctx.Ictx.DeleteResponseAsync();
+					return true;
+				} else {
+					return false;
+				}
 			} else if (tools.Player.CurrentTrack == null) {
 				await tools.Player.PlayAsync((await tools.Player.UseNextTrackAsync())!.Track);
 				if (retrievedTracks.Length == 1 && ctx.Ictx != null) {
@@ -141,11 +147,13 @@ namespace ChariotSanzzo.Components.Gjallar {
 			embed.WithTitle("_**Music Stopped!**_");
 			if (tools.Player.ActivePlayerMss is not null)
 				await tools.Player.DeleteActivePlayerMessageAsync();
-			if (tools.Player.CurrentTrack != null) {
-				embed.WithDescription($"_**Stopped Track:**_ [{tools.Player.CurrentTrack.Title}]({tools.Player.CurrentTrack.Uri})");
-				await tools.Player.StopAsync();
-			}
-			await tools.Player.DisconnectAsync();
+			try {
+				if (tools.Player.CurrentTrack != null) {
+					embed.WithDescription($"_**Stopped Track:**_ [{tools.Player.CurrentTrack.Title}]({tools.Player.CurrentTrack.Uri})");
+					await tools.Player.StopAsync();
+				}
+				await tools.Player.DisconnectAsync();
+			} catch { }
 			await ctx.GTXEmbedTimerAsync(20, embed);
 			return true;
 		}
@@ -175,7 +183,7 @@ namespace ChariotSanzzo.Components.Gjallar {
 			}
 			if (ctx.Data.PauseType == GjallarPauseState.Switch)
 				ctx.Data.PauseType = tools.Player.SwitchPause();
-			var resumeButton = new DiscordButtonComponent(DiscordButtonStyle.Success, "MusicPlayPauseButton", "Resume Track", false, new DiscordComponentEmoji(1269696547046555688));
+			var resumeButton = new DiscordButtonComponent(DiscordButtonStyle.Success, "MusicPlayPauseButton", "Resume Track", false, new DiscordComponentEmoji(DiscordUtils.GetUlongIdFromDiscordEmoteUnsafe(EmojisConfig.CircularPlayIcon)));
 			switch (ctx.Data.PauseType) {
 				case GjallarPauseState.Pause:
 					await tools.Player.PauseAsync();
@@ -240,7 +248,7 @@ namespace ChariotSanzzo.Components.Gjallar {
 				return false;
 			}
 			if (tools.Player.LoopState != GjallarLoopState.LoopTrack)
-				for (int i = -1; i < ctx.Data.SkipCount; i++)
+				for (int i = 1; i < ctx.Data.SkipCount; i++)
 					tools.Player.GoNextPosition();
 
 			var toPlayNow = await tools.Player.UseNextTrackAsync(ctx.Data.IsFromEvent);

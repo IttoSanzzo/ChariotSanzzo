@@ -2,6 +2,7 @@ using DSharpPlus.Entities;
 using ChariotSanzzo.Components.DiceRoller;
 using DSharpPlus.Commands;
 using System.ComponentModel;
+using ChariotSanzzo.Infrastructure.Config;
 
 namespace ChariotSanzzo.Services.Commands {
 	[Command("Rolling"), Description("Commands for RNG.")]
@@ -13,7 +14,7 @@ namespace ChariotSanzzo.Services.Commands {
 			var res = coin.Next(1, 3);
 			var embed = new DiscordEmbedBuilder()
 				.WithColor(DiscordColor.VeryDarkGray)
-				.WithTitle($"Result..: {(((res == 1) ? "<:CSHeads:1264065806246088806>" : "<:CSTails:1264065821454372884>"))}")
+				.WithTitle($"Result..: {(((res == 1) ? EmojisConfig.CSHeads : EmojisConfig.CSTails))}")
 				.WithFooter($"The winner was... {(((res == 1) ? "Heads" : "Tails"))}!")
 				.WithImageUrl($"{((res == 1)
 					? "https://i.postimg.cc/5ywj9bWv/CSHeads.png"

@@ -111,7 +111,7 @@ namespace ChariotSanzzo.Components.Gjallar {
 			var position = player.CurrentPosition - 1;
 			if (position < 1) {
 				if (player.LoopState == GjallarLoopState.LoopQueue)
-					position = player.TotalTracks - 1;
+					return (player.Tracks[player.TotalTracks - 1], player.TotalTracks);
 				else
 					return (null, 0);
 			}
@@ -122,7 +122,7 @@ namespace ChariotSanzzo.Components.Gjallar {
 			var position = player.CurrentPosition + 1;
 			if (position > player.TotalTracks) {
 				if (player.LoopState == GjallarLoopState.LoopQueue)
-					position = 1;
+					return (player.Tracks[0], 1);
 				else
 					return (null, 0);
 			}
@@ -132,17 +132,10 @@ namespace ChariotSanzzo.Components.Gjallar {
 			if (track == null)
 				return 0;
 			return tools.Ctx.Command switch {
-				("Seek") => tools.Ctx.Data.Position,
-				("Next") when result.WasSuccess == false => Math.Ceiling(tools.Player.PlaybackPosition?.TotalSeconds ?? track.Duration.TotalSeconds),
-				("Pause") when result.WasSuccess && tools.Player.PauseState == false && tools.Player.LastGjallarContext != null && tools.Player.LastGjallarContext.Command == "Seek" && tools.Player.LastGjallarContext.Result.WasSuccess => tools.Player.LastGjallarContext.Data.Position,
-				("Play"
-					or "Previous"
-					or "Next"
-					or "Shuffle"
-					or "Replay"
-					or "Reset"
-					or "Stop"
-				) => 0,
+				"Seek" => tools.Ctx.Data.Position,
+				"Next" when result.WasSuccess == false => Math.Ceiling(tools.Player.PlaybackPosition?.TotalSeconds ?? track.Duration.TotalSeconds),
+				"Pause" when result.WasSuccess && tools.Player.PauseState == false && tools.Player.LastGjallarContext != null && tools.Player.LastGjallarContext.Command == "Seek" && tools.Player.LastGjallarContext.Result.WasSuccess => tools.Player.LastGjallarContext.Data.Position,
+				"Play" or "Previous" or "Next" or "Shuffle" or "Replay" or "Reset" or "Stop" => 0,
 				_ => Math.Ceiling(tools.Player.PlaybackPosition?.TotalSeconds ?? track.Duration.TotalSeconds),
 			};
 		}

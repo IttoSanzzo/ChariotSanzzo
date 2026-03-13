@@ -1,3 +1,4 @@
+using ChariotSanzzo.Infrastructure.Config;
 using DSharpPlus.Entities;
 using Lavalink4NET.Tracks;
 
@@ -21,9 +22,9 @@ namespace ChariotSanzzo.Components.Gjallar {
 			this.Host = this.Uri!.Host;
 			this.LengthInSeconds = TimeSpan.FromSeconds(this.Duration.TotalSeconds);
 			(Color, Favicon) = Host switch {
-				"youtube.com" or "www.youtube.com" => (DiscordColor.Red, "<:YoutubeIcon:1269684532777320448> "),
-				"soundcloud.com" => (DiscordColor.Orange, "<:SoundCloudIcon:1269685534737825822> "),
-				"open.spotify.com" => (DiscordColor.DarkGreen, "<:SpotifyIcon:1269685522528211004> "),
+				"youtube.com" or "www.youtube.com" => (DiscordColor.Red, $"{EmojisConfig.YoutubeIcon} "),
+				"soundcloud.com" => (DiscordColor.Orange, $"{EmojisConfig.SoundCloudIcon} "),
+				"open.spotify.com" => (DiscordColor.DarkGreen, $"{EmojisConfig.SpotifyIcon} "),
 				_ => (DiscordColor.Purple, "")
 			};
 		}

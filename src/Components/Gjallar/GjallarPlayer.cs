@@ -1,4 +1,6 @@
 using ChariotSanzzo.Components.Gjallar.Types;
+using ChariotSanzzo.Infrastructure.Config;
+using ChariotSanzzo.Utils;
 using DSharpPlus.Entities;
 using Lavalink4NET.Players;
 using Lavalink4NET.Protocol.Payloads.Events;
@@ -140,8 +142,9 @@ namespace ChariotSanzzo.Components.Gjallar {
 		}
 		public async Task<GjallarTrack?> UseTrackAsync(GjallarTrack track) {
 			int index = GetTrackPosition(track);
-			if (index == -1)
+			if (index == 0)
 				return null;
+			this.PauseState = false;
 			return await UseTrackByPositionAsync(index);
 		}
 		public async Task<GjallarTrack?> UseNextTrackAsync(bool fromEvent = false) {
@@ -235,24 +238,24 @@ namespace ChariotSanzzo.Components.Gjallar {
 			if (this.AdvanConfig == true) {
 				message.AddActionRowComponent([
 					LoopState == GjallarLoopState.None
-						? new DiscordButtonComponent(DiscordButtonStyle.Secondary, "MusicLoopButton", "", false, new DiscordComponentEmoji(1271598875374784644))
+						? new DiscordButtonComponent(DiscordButtonStyle.Secondary, "MusicLoopButton", "", false, new DiscordComponentEmoji(DiscordUtils.GetUlongIdFromDiscordEmoteUnsafe(EmojisConfig.CircularNotLoopIcon)))
 						: LoopState == GjallarLoopState.LoopTrack
-							? new DiscordButtonComponent(DiscordButtonStyle.Success, "MusicLoopButton", "", false, new DiscordComponentEmoji(1269881536552108135))
-							: new DiscordButtonComponent(DiscordButtonStyle.Danger, "MusicLoopButton", "", false, new DiscordComponentEmoji(1271598889501196290)),
+							? new DiscordButtonComponent(DiscordButtonStyle.Success, "MusicLoopButton", "", false, new DiscordComponentEmoji(DiscordUtils.GetUlongIdFromDiscordEmoteUnsafe(EmojisConfig.CircularOneLoopIcon)))
+							: new DiscordButtonComponent(DiscordButtonStyle.Danger, "MusicLoopButton", "", false, new DiscordComponentEmoji(DiscordUtils.GetUlongIdFromDiscordEmoteUnsafe(EmojisConfig.CircularLoopIcon))),
 					CheckSOQ()
-						? new DiscordButtonComponent(DiscordButtonStyle.Primary, "MusicPreviousTrackButton", "", true, new DiscordComponentEmoji(1269698996830605342))
-						: new DiscordButtonComponent(DiscordButtonStyle.Primary, "MusicPreviousTrackButton", "", false, new DiscordComponentEmoji(1269698996830605342)),
+						? new DiscordButtonComponent(DiscordButtonStyle.Primary, "MusicPreviousTrackButton", "", true, new DiscordComponentEmoji(DiscordUtils.GetUlongIdFromDiscordEmoteUnsafe(EmojisConfig.CircularPreviousTrackIcon)))
+						: new DiscordButtonComponent(DiscordButtonStyle.Primary, "MusicPreviousTrackButton", "", false, new DiscordComponentEmoji(DiscordUtils.GetUlongIdFromDiscordEmoteUnsafe(EmojisConfig.CircularPreviousTrackIcon))),
 					PauseState == false
-						? new DiscordButtonComponent(DiscordButtonStyle.Success, "MusicPlayPauseButton", "", false, new DiscordComponentEmoji(1269697085834395738))
-						: new DiscordButtonComponent(DiscordButtonStyle.Secondary, "MusicPlayPauseButton", "", false, new DiscordComponentEmoji(1269697085834395738)),
+						? new DiscordButtonComponent(DiscordButtonStyle.Success, "MusicPlayPauseButton", "", false, new DiscordComponentEmoji(DiscordUtils.GetUlongIdFromDiscordEmoteUnsafe(EmojisConfig.CircularPlayPauseIcon)))
+						: new DiscordButtonComponent(DiscordButtonStyle.Secondary, "MusicPlayPauseButton", "", false, new DiscordComponentEmoji(DiscordUtils.GetUlongIdFromDiscordEmoteUnsafe(EmojisConfig.CircularPlayPauseIcon))),
 					CheckEOQ()
-						? new DiscordButtonComponent(DiscordButtonStyle.Primary, "MusicNextTrackButton", "", true, new DiscordComponentEmoji(1269698987259330702))
-						: new DiscordButtonComponent(DiscordButtonStyle.Primary, "MusicNextTrackButton", "", false, new DiscordComponentEmoji(1269698987259330702)),
+						? new DiscordButtonComponent(DiscordButtonStyle.Primary, "MusicNextTrackButton", "", true, new DiscordComponentEmoji(DiscordUtils.GetUlongIdFromDiscordEmoteUnsafe(EmojisConfig.CircularNextTrackIcon)))
+						: new DiscordButtonComponent(DiscordButtonStyle.Primary, "MusicNextTrackButton", "", false, new DiscordComponentEmoji(DiscordUtils.GetUlongIdFromDiscordEmoteUnsafe(EmojisConfig.CircularNextTrackIcon))),
 					LoopState == GjallarLoopState.None
-						? new DiscordButtonComponent(DiscordButtonStyle.Secondary, "MusicShuffleButton", "", false, new DiscordComponentEmoji(1271602111783895150))
+						? new DiscordButtonComponent(DiscordButtonStyle.Secondary, "MusicShuffleButton", "", false, new DiscordComponentEmoji(DiscordUtils.GetUlongIdFromDiscordEmoteUnsafe(EmojisConfig.CircularShuffleIcon)))
 						: LoopState == GjallarLoopState.LoopTrack
-							? new DiscordButtonComponent(DiscordButtonStyle.Success, "MusicReplayTrackButton", "", false, new DiscordComponentEmoji(1281561425864691735))
-							: new DiscordButtonComponent(DiscordButtonStyle.Danger, "MusicShuffleButton", "", false, new DiscordComponentEmoji(1271602111783895150))
+							? new DiscordButtonComponent(DiscordButtonStyle.Success, "MusicReplayTrackButton", "", false, new DiscordComponentEmoji(DiscordUtils.GetUlongIdFromDiscordEmoteUnsafe(EmojisConfig.CircularReplayIcon)))
+							: new DiscordButtonComponent(DiscordButtonStyle.Danger, "MusicShuffleButton", "", false, new DiscordComponentEmoji(DiscordUtils.GetUlongIdFromDiscordEmoteUnsafe(EmojisConfig.CircularShuffleIcon)))
 				]);
 			}
 			return message;

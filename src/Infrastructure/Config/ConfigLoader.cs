@@ -21,6 +21,7 @@ namespace ChariotSanzzo.Infrastructure.Config {
 			PopulateConfig(typeof(SoundcloudConfig), "integrations:soundcloud");
 			PopulateConfig(typeof(ChariotApiConfig), "integrations:chariotApi");
 			PopulateConfig(typeof(AddressesConfig), "addresses");
+			PopulateConfig(typeof(EmojisConfig), "emojis");
 		}
 		private static void PopulateConfig(Type type, string node) {
 			var props = type.GetProperties(BindingFlags.Static | BindingFlags.Public);

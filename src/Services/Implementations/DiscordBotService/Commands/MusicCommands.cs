@@ -61,17 +61,19 @@ namespace ChariotSanzzo.Services.Commands {
 		public async Task GetQueue(CommandContext ctx) {
 			await ctx.DeferResponseAsync();
 			await ctx.DeleteResponseAsync();
-			var gCtx = new GjallarContext(ctx, "Queue");
-			GjallarCallTools tools = new();
-			await tools.InitializeAsync(gCtx);
+			try {
+				var gCtx = new GjallarContext(ctx, "Queue");
+				GjallarCallTools tools = new();
+				await tools.InitializeAsync(gCtx);
 
-			DiscordEmbed[] embeds = tools.Player.GetQueueEmbed();
-			DiscordMessage[] excMss = new DiscordMessage[embeds.Length];
-			for (int i = 0; i < embeds.Length; i++)
-				excMss[i] = await ctx.Channel.SendMessageAsync(embeds[i]);
-			await Task.Delay(1000 * 60 * 2);
-			for (int i = 0; i < excMss.Length; i++)
-				await excMss[i].DeleteAsync();
+				DiscordEmbed[] embeds = tools.Player.GetQueueEmbed();
+				DiscordMessage[] excMss = new DiscordMessage[embeds.Length];
+				for (int i = 0; i < embeds.Length; i++)
+					excMss[i] = await ctx.Channel.SendMessageAsync(embeds[i]);
+				await Task.Delay(1000 * 60 * 2);
+				for (int i = 0; i < excMss.Length; i++)
+					await excMss[i].DeleteAsync();
+			} catch { }
 		}
 		[Command("loop"), Description("Changes the loop setting! (Defaults to Loop Track)")]
 		[RequireGuild]
