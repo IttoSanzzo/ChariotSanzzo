@@ -3,7 +3,6 @@ using System.Text.Json.Serialization;
 using ChariotSanzzo.Routes;
 using ChariotSanzzo.Services;
 using FluentValidation;
-using Lavalink4NET.Extensions;
 
 namespace ChariotSanzzo.Infrastructure {
 	public static class AppFactory {
