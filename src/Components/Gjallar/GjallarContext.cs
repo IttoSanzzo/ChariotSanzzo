@@ -55,8 +55,10 @@ namespace ChariotSanzzo.Components.Gjallar {
 			}
 			if (!string.IsNullOrEmpty(genericCommand.TrackUrl))
 				this.TrackLink = genericCommand.TrackUrl;
-			if (genericCommand.Position != null)
-				this.Data.Position = (long)genericCommand.Position;
+			if (genericCommand.TrackPosition != null)
+				this.Data.MiscValue = (int)genericCommand.TrackPosition;
+			if (genericCommand.SeekSeconds != null)
+				this.Data.Position = (long)genericCommand.SeekSeconds;
 			this.Data.Query = this.TrackLink;
 			this.Data.Priority = genericCommand.Priority;
 			this.Result = new(this.Command);

@@ -73,6 +73,7 @@ namespace ChariotSanzzo.Components.Gjallar {
 		}
 		public static async Task SendQueueSocketUpdate(GjallarCallTools tools) {
 			if (!(tools.Ctx.Command == "Play"
+				|| tools.Ctx.Command == "Index"
 				|| tools.Ctx.Command == "Previous"
 				|| tools.Ctx.Command == "Next"
 				|| tools.Ctx.Command == "Shuffle"

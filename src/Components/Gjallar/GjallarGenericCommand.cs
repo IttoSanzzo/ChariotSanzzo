@@ -6,7 +6,8 @@ namespace ChariotSanzzo.Components.Gjallar {
 		public string GuildId { get; set; } = "";
 		public string? TrackUrl { get; set; } = null;
 		public string? ChannelId { get; set; } = null;
-		public long? Position { get; set; } = null;
+		public int? TrackPosition { get; set; } = null;
+		public long? SeekSeconds { get; set; } = null;
 		public bool Priority { get; set; } = true;
 	}
 	public class GjallarPostBody {
