@@ -55,7 +55,7 @@ namespace ChariotSanzzo.Routes {
 			var routeGroupEndpoint = RouteGroups.Keys.FirstOrDefault(path.StartsWith);
 			route.Configure((routeGroupEndpoint != null)
 				? RouteGroups[routeGroupEndpoint].MapMethods(
-				 path.Length != routeGroupEndpoint.Length
+				 path.Length == routeGroupEndpoint.Length
 					 ? "/"
 					 : path[routeGroupEndpoint.Length..],
 				 [method],
