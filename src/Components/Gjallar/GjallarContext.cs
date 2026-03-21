@@ -10,7 +10,7 @@ namespace ChariotSanzzo.Components.Gjallar {
 		public class GTXInfo {
 			public bool Priority { get; set; } = false;
 			public string Query { get; set; } = "NULL";
-			public TrackSearchMode Plataform { get; set; } = TrackSearchMode.None;
+			public TrackSearchMode Plataform { get; set; } = TrackSearchMode.YouTube;
 			public GjallarPauseState PauseType { get; set; } = GjallarPauseState.Switch;
 			public GjallarLoopState LoopType { get; set; } = GjallarLoopState.LoopQueue;
 			public int SkipCount { get; set; } = 1;
