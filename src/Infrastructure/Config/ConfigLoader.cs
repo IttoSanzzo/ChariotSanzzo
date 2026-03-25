@@ -20,6 +20,7 @@ namespace ChariotSanzzo.Infrastructure.Config {
 			PopulateConfig(typeof(SpotifyConfig), "integrations:spotify");
 			PopulateConfig(typeof(SoundcloudConfig), "integrations:soundcloud");
 			PopulateConfig(typeof(ChariotApiConfig), "integrations:chariotApi");
+			PopulateConfig(typeof(DiscordWidgetBotConfig), "integrations:discordWidgetBot");
 			PopulateConfig(typeof(AddressesConfig), "addresses");
 			PopulateConfig(typeof(EmojisConfig), "emojis");
 		}
