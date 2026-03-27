@@ -6,8 +6,8 @@ using DSharpPlus.EventArgs;
 namespace ChariotSanzzo.Services {
 	public class DiceRollEventHandler : IEventHandler<MessageCreatedEventArgs> {
 		public async Task HandleEventAsync(DiscordClient client, MessageCreatedEventArgs ctx) {
-			if (ctx.Author.IsBot && ctx.Author.Id != DiscordWidgetBotConfig.BotId)
-				return;
+			// if (ctx.Author.IsBot && ctx.Author.Id != DiscordWidgetBotConfig.BotId)
+			// return;
 
 			DiceExpression diceExpression = new(ctx.Message.Content);
 			if (diceExpression.IsValid == false)
