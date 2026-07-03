@@ -3,5 +3,5 @@
 **/bin
 **/obj
 **/secrets.json
-DockerDevRunner.sh
 DockerProdRunner.sh
+DockerDevRunner.sh
