@@ -366,43 +366,29 @@ namespace ChariotSanzzo.Components.Gjallar {
 			var embed = new DiscordEmbedBuilder() { Color = DiscordColor.Aquamarine };
 			embed.WithFooter($"By: {ctx.Username}", ctx.UserIcon);
 			var timespan = TimeSpan.FromSeconds(ctx.Data.Position);
-			if (tools.Player.IsFinished) {
+			if (tools.Player.IsFinished || tools.Player.PlaybackPosition?.TotalSeconds > tools.Player.CurrentTrack?.Duration.TotalSeconds - 10) {
 				var toPlayNow = await tools.Player.UseCurrentTrackAsync();
-				if (toPlayNow != null) {
-					await tools.Player.PlayAsync(toPlayNow.Track);
-					const int sleepMs = 50;
-					var timeoutTotalMs = 0;
-					while (tools.Player.CurrentTrack == null || tools.Player.PlaybackPosition?.TotalSeconds > 2 || tools.Player.PlaybackPosition?.TotalSeconds < 1) {
-						if (timeoutTotalMs >= 5000) { // 5 seconds
-							ctx.Result.ErrorMessage = "Coundn't replay for seek (Track got stuck).";
-							ctx.Result.WasSuccess = false;
-							embed.WithDescription(ctx.Result.ErrorMessage);
-							return false;
-						}
-						timeoutTotalMs += sleepMs;
-						await Task.Delay(sleepMs);
-					}
-					await tools.Player.SeekAsync(timespan);
-				} else {
+				if (toPlayNow == null) {
 					ctx.Result.ErrorMessage = "Coundn't replay for seek (Probably no tracks left).";
 					ctx.Result.WasSuccess = false;
 					embed.WithDescription(ctx.Result.ErrorMessage);
 					return false;
 				}
-			} else {
-				if (tools.Player.PauseState || tools.Player.PlaybackPosition?.TotalSeconds < tools.Player.CurrentTrack?.Duration.TotalSeconds - 10) {
-					await tools.Player.SeekAsync(timespan);
-				} else {
-					var toPlayNow = await tools.Player.UseCurrentTrackAsync();
-					if (toPlayNow != null) {
-						await tools.Player.PlayAsync(toPlayNow.Track);
-						while (tools.Player.PlaybackPosition?.TotalSeconds > 1 || tools.Player.PlaybackPosition?.Milliseconds < 1) {
-							await Task.Delay(50);
-						}
-						await tools.Player.SeekAsync(timespan);
+				await tools.Player.PlayAsync(toPlayNow.Track);
+				const int sleepMs = 50;
+				var timeoutTotalMs = 0;
+				while (tools.Player.CurrentTrack == null || tools.Player.PlaybackPosition?.TotalSeconds > 2 || tools.Player.PlaybackPosition?.TotalSeconds < 1) {
+					if (timeoutTotalMs >= 5000) { // 5 seconds
+						ctx.Result.ErrorMessage = "Coundn't replay for seek (Track got stuck).";
+						ctx.Result.WasSuccess = false;
+						embed.WithDescription(ctx.Result.ErrorMessage);
+						return false;
 					}
+					timeoutTotalMs += sleepMs;
+					await Task.Delay(sleepMs);
 				}
 			}
+			await tools.Player.SeekAsync(timespan);
 			embed.WithDescription($"Track seeked to {timespan.ToString(@"hh\:mm\:ss")}.");
 			await ctx.GTXEmbedTimerAsync(10, embed);
 			return true;
