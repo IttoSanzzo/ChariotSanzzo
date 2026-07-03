@@ -62,14 +62,14 @@ namespace ChariotSanzzo.Components.Gjallar {
 				retrieveOptions
 			);
 			if (playerResult.IsSuccess == false) {
-				embed.WithDescription("Chariot is not in a channel to perform such action!");
+				embed.WithDescription($"{DiscordBotConfig.Name} is not in a channel to perform such action!");
 				await Ctx.GTXEmbedTimerAsync(20, embed);
 				return null;
 			}
 			return (Ctx.Command == "Disconnect" || await ExtraChecks(Ctx, playerResult.Player, embed)) ? playerResult.Player : null;
 		}
 		private static async Task<bool> ExtraChecks(GjallarContext ctx, GjallarPlayer player, DiscordEmbedBuilder embed) {
-			if (player.CurrentTrack == null && ctx.Data.VipCall == false && ctx.Command != "Play") {
+			if (player.Tracks.Count == 0 && ctx.Data.VipCall == false && ctx.Command != "Play") {
 				switch (ctx.Command) {
 					case "Stop":
 						embed.WithDescription("There's no music playing to be stopped!");

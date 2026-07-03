@@ -21,11 +21,11 @@ namespace ChariotSanzzo.Components.Gjallar {
 			await gCtx.TryCallingAsync();
 		}
 		public static async ValueTask HandleTrackStuckEvent(GjallarPlayer player, TimeSpan threshold, CancellationToken cancellationToken = default) {
-			Program.WriteLine($"!!!!!!!!!!!!!!!!!!! GjallarError! Stuck ${threshold}");
+			Program.WriteLine($"!!!!!!!!!!!!!!!!!!! GjallarError! Stuck {player.CurrentTrack?.Title ?? "\"NoTrack\""} {threshold}");
 			await ValueTask.CompletedTask;
 		}
 		public static async ValueTask HandleTrackExceptionEvent(GjallarPlayer player, TrackException exception, CancellationToken cancellationToken = default) {
-			Program.WriteLine($"!!!!!!!!!!!!!!!!!!! GjallarError! Exception ${exception.Message}");
+			Program.WriteLine($"!!!!!!!!!!!!!!!!!!! GjallarError! Exception {exception.Message}");
 			await ValueTask.CompletedTask;
 		}
 	}

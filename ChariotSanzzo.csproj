@@ -9,10 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DSharpPlus" Version="5.0.0-nightly-02574" />
-    <PackageReference Include="DSharpPlus.Commands" Version="5.0.0-nightly-02574" />
-    <PackageReference Include="DSharpPlus.Interactivity" Version="5.0.0-nightly-02574" />
-    <PackageReference Include="Lavalink4NET.DSharpPlus.Nightly" Version="4.2.1" />
+    <PackageReference Include="DSharpPlus" Version="5.0.0-nightly-02594" />
+    <PackageReference Include="DSharpPlus.Commands" Version="5.0.0-nightly-02594" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="5.0.0-nightly-02594" />
+    <PackageReference Include="Lavalink4NET.DSharpPlus.Nightly" Version="4.2.2" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.3" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.3" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.3" />

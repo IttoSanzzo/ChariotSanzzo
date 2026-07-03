@@ -152,6 +152,8 @@ namespace ChariotSanzzo.Components.Gjallar {
 					embed.WithDescription($"_**Stopped Track:**_ [{tools.Player.CurrentTrack.Title}]({tools.Player.CurrentTrack.Uri})");
 					await tools.Player.StopAsync();
 				}
+			} catch { }
+			try {
 				await tools.Player.DisconnectAsync();
 			} catch { }
 			await ctx.GTXEmbedTimerAsync(20, embed);
@@ -368,13 +370,23 @@ namespace ChariotSanzzo.Components.Gjallar {
 				var toPlayNow = await tools.Player.UseCurrentTrackAsync();
 				if (toPlayNow != null) {
 					await tools.Player.PlayAsync(toPlayNow.Track);
-					while (tools.Player.PlaybackPosition?.TotalSeconds > 1 || tools.Player.PlaybackPosition?.Milliseconds < 1)
-						await Task.Delay(50);
+					const int sleepMs = 50;
+					var timeoutTotalMs = 0;
+					while (tools.Player.CurrentTrack == null || tools.Player.PlaybackPosition?.TotalSeconds > 2 || tools.Player.PlaybackPosition?.TotalSeconds < 1) {
+						if (timeoutTotalMs >= 5000) { // 5 seconds
+							ctx.Result.ErrorMessage = "Coundn't replay for seek (Track got stuck).";
+							ctx.Result.WasSuccess = false;
+							embed.WithDescription(ctx.Result.ErrorMessage);
+							return false;
+						}
+						timeoutTotalMs += sleepMs;
+						await Task.Delay(sleepMs);
+					}
 					await tools.Player.SeekAsync(timespan);
 				} else {
-					embed.WithDescription("Coundn't replay for seek (Probably no tracks left).");
+					ctx.Result.ErrorMessage = "Coundn't replay for seek (Probably no tracks left).";
 					ctx.Result.WasSuccess = false;
-					ctx.Result.ErrorMessage = "Coundn't replay (Probably no tracks left).";
+					embed.WithDescription(ctx.Result.ErrorMessage);
 					return false;
 				}
 			} else {
