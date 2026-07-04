@@ -11,6 +11,12 @@ namespace ChariotSanzzo.Services.Components {
 			if (state.Get<string?>("voice.guildId") != null)
 				return state;
 			state.Set("voice.lastUpdate", DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString());
+			var elapsedMs = 0;
+			const int sleepMs = 1000;
+			while (DiscordBotService.IsReady == false) {
+				await Task.Delay(sleepMs);
+				elapsedMs += sleepMs;
+			}
 			foreach (var (guildId, guild) in Client.Guilds) {
 				if (!guild.Members.TryGetValue(userId, out var member) || member.VoiceState?.ChannelId == null)
 					continue;

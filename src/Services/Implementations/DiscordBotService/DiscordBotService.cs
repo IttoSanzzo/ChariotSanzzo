@@ -9,6 +9,7 @@ using DSharpPlus.Extensions;
 namespace ChariotSanzzo.Services {
 	public class DiscordBotService(DiscordClient client) : BackgroundService {
 		private readonly DiscordClient Client = client;
+		public static bool IsReady { get; set; } = false;
 
 		public static void AddDiscordBotServiceToBuilder(WebApplicationBuilder builder) {
 			builder.Services.AddDiscordClient(DiscordBotConfig.BotToken, DiscordIntents.All);
@@ -22,6 +23,8 @@ namespace ChariotSanzzo.Services {
 			await Client.ConnectAsync();
 			// await RemoveStaleCommands();
 			Program.WriteLine($"{DiscordBotConfig.Name} connected to Discord.");
+			IsReady = await WaitForReady();
+			Program.WriteLine($"{DiscordBotConfig.Name} is Ready.");
 			await Task.Delay(Timeout.Infinite, cancellationToken);
 		}
 		private static void AddEventHandlers(WebApplicationBuilder builder) {
@@ -83,6 +86,19 @@ namespace ChariotSanzzo.Services {
 				}
 				await Client.DeleteGlobalApplicationCommandAsync(command.Id);
 			}
+		}
+		private async Task<bool> WaitForReady() {
+			const int sleepMs = 50;
+			while (true) {
+				try {
+					if (Client.Guilds.Count == 0) continue;
+					if (!Client.Guilds.Any((guild) => guild.Value.Name.Length == 0)) break;
+					await Task.Delay(sleepMs);
+				} catch {
+					await Task.Delay(sleepMs);
+				}
+			}
+			return true;
 		}
 	}
 }
