@@ -27,6 +27,8 @@ namespace ChariotSanzzo.Components.Gjallar {
 		public bool IsCurrentPositionInBounds => CurrentPosition >= 1 && CurrentPosition <= TotalTracks;
 		public GjallarTrack? CurrentGjallarTrack => IsCurrentPositionInBounds ? Tracks[CurrentPosition - 1] : null;
 		public TimeSpan? PlaybackPosition => Position?.Position;
+		public string StationSocketUpdateString { get; set; } = "";
+		public string QueueSocketUpdateString { get; set; } = "";
 		private SemaphoreSlim ActivePlayerSemaphore { get; } = new(1, 1);
 		private static Random Random { get; set; } = new Random();
 

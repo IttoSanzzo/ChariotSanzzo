@@ -8,26 +8,30 @@ using Lavalink4NET.Tracks;
 
 namespace ChariotSanzzo.Components.Gjallar {
 	public static class GjallarCaller {
-		public static async Task<string> TryCallingAsync(GjallarContext ctx) {
+		public static async Task<GjallarCallResult> TryCallingAsync(GjallarContext ctx) {
 			try {
-				string successMessage = $"GjallarCall Received: {ctx.Command}.";
+				string receivedMessage = $"GjallarCall Received: {ctx.Command}.";
 				switch (ctx.Command) {
 					case "Message":
 						await SendEmbedMessageAsync(ctx);
-						return successMessage;
+						return ctx.SetResult(new(ctx.Command, true, message: receivedMessage));
 					case "ControlPanel":
 						await ControlPanelAsync(ctx);
-						return successMessage;
+						return ctx.SetResult(new(ctx.Command, true, message: receivedMessage));
 				}
 
 				GjallarCallTools tools = new();
 				await tools.InitializeAsync(ctx);
 				if (tools.IsValid == false)
-					return successMessage;
+					return ctx.SetResult(new(ctx.Command, false, message: receivedMessage));
 
 				if (tools.Player.Chat is null && ctx.ChatChannel is not null)
 					await tools.Player.SetChatChannel(ctx.ChatChannel);
 
+				if (ctx.Command == "StationSocketUpdateString")
+					return ctx.SetResult(new(ctx.Command, true, message: receivedMessage, data: tools.Player.StationSocketUpdateString));
+				if (ctx.Command == "QueueSocketUpdateString")
+					return ctx.SetResult(new(ctx.Command, true, message: receivedMessage, data: tools.Player.QueueSocketUpdateString));
 				ctx.Result.WasSuccess = ctx.Command switch {
 					"Play" => await PlayAsync(ctx, tools),
 					"Stop" => await StopAsync(ctx, tools),
@@ -47,12 +51,12 @@ namespace ChariotSanzzo.Components.Gjallar {
 				await GjallarSocketUpdater.SendStationSocketUpdate(tools);
 				await GjallarSocketUpdater.SendQueueSocketUpdate(tools);
 				tools.Player.LastGjallarContext = ctx;
-				return successMessage;
+				return ctx.Result;
 			} catch (Exception ex) {
 				Program.WriteException(ex);
 				if (ex.Message == "Invalid Command")
-					return $"FunctionsSwitch: GjallarCall Received was not valid. ({ctx.Command})";
-				return "Caugh Exception...";
+					return ctx.SetResult(new(ctx.Command, false, message: $"GjallarCall Received: {ctx.Command}.", errorMessage: $"FunctionsSwitch: GjallarCall Received was not valid. ({ctx.Command})"));
+				return ctx.SetResult(new(ctx.Command, false, message: $"GjallarCall Received: {ctx.Command}.", errorMessage: "Caugh Exception..."));
 			}
 		}
 

@@ -1,4 +1,6 @@
+using System.Text.Json;
 using ChariotSanzzo.Components.Gjallar.Types;
+using ChariotSanzzo.Infrastructure;
 using ChariotSanzzo.Infrastructure.Config;
 using ChariotSanzzo.Utils;
 
@@ -45,60 +47,77 @@ namespace ChariotSanzzo.Components.Gjallar {
 		}
 
 		public static async Task SendStationSocketUpdate(GjallarCallTools tools) {
-			var (currentTrack, currentTrackIndex) = tools.Player.GetCurrentTrackSafe(tools.Ctx);
-			var (previousTrack, previousTrackIndex) = tools.Player.GetPreviousTrackSafe(tools.Ctx);
-			var (nextTrack, nextTrackIndex) = tools.Player.GetNextTrackSafe(tools.Ctx);
-			var currentPosition = currentTrack.GetTrackCurrentPosition(tools, tools.Ctx.Result);
+			try {
+				var (currentTrack, currentTrackIndex) = tools.Player.GetCurrentTrackSafe(tools.Ctx);
+				var (previousTrack, previousTrackIndex) = tools.Player.GetPreviousTrackSafe(tools.Ctx);
+				var (nextTrack, nextTrackIndex) = tools.Player.GetNextTrackSafe(tools.Ctx);
+				var currentPosition = currentTrack.GetTrackCurrentPosition(tools, tools.Ctx.Result);
 
-			await Program.HttpClient.PostAsJsonAsync<PlayerLiveUpdateDto>(LinkData.GetChariotApiFullAddress($"/live/{DiscordBotConfig.Name}/{tools.GuildId}/player-update-socket"), new(
-				tools.GuildId.ToString(),
-				tools.Player.VoiceChannelId.ToString(),
-				tools.Player.Chat?.Id.ToString(),
-				tools.Player.PauseState,
-				(int)tools.Player.LoopState,
-				float.ConvertToInteger<int>(tools.Player.Volume * 100),
-				tools.Player.IsFinished,
-				tools.Player.CurrentPosition,
-				tools.Ctx.Result,
-				await currentTrack.ToNullableCurrentTrackInfo(
-						currentTrackIndex,
-						currentPosition,
-						tools.Player.Position is not null
-							? tools.Player.Position?.SyncedAt.ToUnixTimeSeconds()
-								?? DateTimeOffset.UtcNow.ToUnixTimeSeconds()
-							: DateTimeOffset.UtcNow.ToUnixTimeSeconds()),
-				await previousTrack.ToNullableTrackInfo(previousTrackIndex),
-				await nextTrack.ToNullableTrackInfo(nextTrackIndex)
-			));
+				tools.Player.StationSocketUpdateString = JsonSerializer.Serialize(
+					new PlayerLiveUpdateDto(
+						tools.GuildId.ToString(),
+						tools.Player.VoiceChannelId.ToString(),
+						tools.Player.Chat?.Id.ToString(),
+						tools.Player.PauseState,
+						(int)tools.Player.LoopState,
+						float.ConvertToInteger<int>(tools.Player.Volume * 100),
+						tools.Player.IsFinished,
+						tools.Player.CurrentPosition,
+						tools.Ctx.Result,
+						await currentTrack.ToNullableCurrentTrackInfo(
+								currentTrackIndex,
+								currentPosition,
+								tools.Player.Position is not null
+									? tools.Player.Position?.SyncedAt.ToUnixTimeSeconds()
+										?? DateTimeOffset.UtcNow.ToUnixTimeSeconds()
+									: DateTimeOffset.UtcNow.ToUnixTimeSeconds()),
+						await previousTrack.ToNullableTrackInfo(previousTrackIndex),
+						await nextTrack.ToNullableTrackInfo(nextTrackIndex)
+					),
+					AppFactory.JsonSerializerOptions
+				);
+			} catch {
+				tools.Player.StationSocketUpdateString = "";
+			}
+			await Program.HttpClient.PostAsync(LinkData.GetChariotApiFullAddress($"/live/{DiscordBotConfig.Name}/{tools.GuildId}/player-update-socket"), new StringContent(tools.Player.StationSocketUpdateString));
 		}
 		public static async Task SendQueueSocketUpdate(GjallarCallTools tools) {
-			if (!(tools.Ctx.Command == "Play"
-				|| tools.Ctx.Command == "Index"
-				|| tools.Ctx.Command == "Previous"
-				|| tools.Ctx.Command == "Next"
-				|| tools.Ctx.Command == "Shuffle"
-				|| tools.Ctx.Command == "Pause"
-				|| tools.Ctx.Command == "Loop"
-				|| tools.Ctx.Command == "Reset"
-				|| tools.Ctx.Command == "Stop")
-			)
-				return;
-			var tracks = tools.Ctx.Command switch {
-				("Stop" or "Reset") when tools.Ctx.Result.WasSuccess => [],
-				_ => await Task.WhenAll(
-					tools.Player.Tracks.Select((track, index) => track.ToTrackInfo(index))
+			try {
+				if (!(tools.Ctx.Command == "Play"
+					|| tools.Ctx.Command == "Index"
+					|| tools.Ctx.Command == "Previous"
+					|| tools.Ctx.Command == "Next"
+					|| tools.Ctx.Command == "Shuffle"
+					|| tools.Ctx.Command == "Pause"
+					|| tools.Ctx.Command == "Loop"
+					|| tools.Ctx.Command == "Reset"
+					|| tools.Ctx.Command == "Stop")
 				)
-			};
-			var response = await Program.HttpClient.PostAsJsonAsync<QueueUpdateDto>(LinkData.GetChariotApiFullAddress($"/live/{DiscordBotConfig.Name}/{tools.GuildId}/queue-update-socket"), new(
-				tools.GuildId.ToString(),
-				tools.Ctx.Guild.Name,
-				tools.Player.VoiceChannelId.ToString(),
-				tools.Player.PauseState,
-				(int)tools.Player.LoopState,
-				tools.Player.IsFinished,
-				tools.Player.CurrentPosition,
-				tracks ?? []
-			));
+					return;
+				var tracks = tools.Ctx.Command switch {
+					("Stop" or "Reset") when tools.Ctx.Result.WasSuccess => [],
+					_ => await Task.WhenAll(
+						tools.Player.Tracks.Select((track, index) => track.ToTrackInfo(index))
+					)
+				};
+				tools.Player.QueueSocketUpdateString = JsonSerializer.Serialize(
+					new QueueUpdateDto(
+						tools.GuildId.ToString(),
+						tools.Ctx.Guild.Name,
+						tools.Player.VoiceChannelId.ToString(),
+						tools.Player.PauseState,
+						(int)tools.Player.LoopState,
+						tools.Player.IsFinished,
+						tools.Player.CurrentPosition,
+						tracks ?? []
+					),
+					AppFactory.JsonSerializerOptions
+				);
+			} catch {
+				tools.Player.QueueSocketUpdateString = "";
+			}
+			// Console.WriteLine(tools.Player.QueueSocketUpdateString);
+			await Program.HttpClient.PostAsync(LinkData.GetChariotApiFullAddress($"/live/{DiscordBotConfig.Name}/{tools.GuildId}/queue-update-socket"), new StringContent(tools.Player.QueueSocketUpdateString));
 		}
 
 		private static (GjallarTrack? track, int position) GetCurrentTrackSafe(this GjallarPlayer player, GjallarContext ctx) {

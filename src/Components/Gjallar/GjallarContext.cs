@@ -131,7 +131,7 @@ namespace ChariotSanzzo.Components.Gjallar {
 			this.Result = new(this.Command);
 		}
 
-		public async Task<string> TryCallingAsync() {
+		public async Task<GjallarCallResult> TryCallingAsync() {
 			return await GjallarCaller.TryCallingAsync(this);
 		}
 
@@ -150,6 +150,11 @@ namespace ChariotSanzzo.Components.Gjallar {
 			} catch {
 				return null;
 			}
+		}
+
+		public GjallarCallResult SetResult(GjallarCallResult result) {
+			this.Result = result;
+			return this.Result;
 		}
 
 		public async Task GTXEmbedTimerAsync(int seconds, DiscordEmbed embed) {

@@ -18,9 +18,11 @@ namespace ChariotSanzzo.Components.Gjallar {
 		public string? Message { get; set; } = "";
 		public string? ChannelId { get; set; } = null;
 	}
-	public class GjallarCallResult(string command, bool wasSuccess = false, string? errorMessage = null) {
+	public class GjallarCallResult(string command, bool wasSuccess = false, string message = "", string? errorMessage = null, object? data = null) {
 		public string Command { get; set; } = command;
 		public bool WasSuccess { get; set; } = wasSuccess;
+		public string Message { get; private set; } = message;
 		public string? ErrorMessage { get; set; } = errorMessage;
+		public object? Data { get; private set; } = data;
 	}
 }
