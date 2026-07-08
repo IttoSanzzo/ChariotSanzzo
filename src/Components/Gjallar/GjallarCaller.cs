@@ -117,14 +117,11 @@ namespace ChariotSanzzo.Components.Gjallar {
 					await tools.Player.NowPlayingAsync();
 			}
 			if (ctx.Data.Priority == true) {
-				if (tools.Player.MoveTrackToEndOfQueue(retrievedTracks[0])) {
-					await tools.Player.PlayAsync((await tools.Player.UseTrackAsync(retrievedTracks[0]))!.Track);
-					if (retrievedTracks.Length <= 1 && ctx.Ictx != null)
-						await ctx.Ictx.DeleteResponseAsync();
-					return true;
-				} else {
-					return false;
-				}
+				if (retrievedTracks.Length == 1 && !tools.Player.MoveTrackToEndOfQueue(retrievedTracks[0])) return false;
+				await tools.Player.PlayAsync((await tools.Player.UseTrackAsync(retrievedTracks[0]))!.Track);
+				if (retrievedTracks.Length <= 1 && ctx.Ictx != null)
+					await ctx.Ictx.DeleteResponseAsync();
+				return true;
 			} else if (tools.Player.CurrentTrack == null) {
 				await tools.Player.PlayAsync((await tools.Player.UseNextTrackAsync())!.Track);
 				if (retrievedTracks.Length == 1 && ctx.Ictx != null) {
