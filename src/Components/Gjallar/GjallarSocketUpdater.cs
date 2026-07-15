@@ -91,6 +91,7 @@ namespace ChariotSanzzo.Components.Gjallar {
 					|| tools.Ctx.Command == "Pause"
 					|| tools.Ctx.Command == "Loop"
 					|| tools.Ctx.Command == "Reset"
+					|| tools.Ctx.Command == "Remove"
 					|| tools.Ctx.Command == "Stop")
 				)
 					return;
@@ -116,7 +117,6 @@ namespace ChariotSanzzo.Components.Gjallar {
 			} catch {
 				tools.Player.QueueSocketUpdateString = "";
 			}
-			// Console.WriteLine(tools.Player.QueueSocketUpdateString);
 			await Program.HttpClient.PostAsync(LinkData.GetChariotApiFullAddress($"/live/{DiscordBotConfig.Name}/{tools.GuildId}/queue-update-socket"), new StringContent(tools.Player.QueueSocketUpdateString));
 		}
 

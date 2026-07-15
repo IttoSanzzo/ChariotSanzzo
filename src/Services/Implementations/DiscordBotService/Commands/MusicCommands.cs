@@ -136,43 +136,21 @@ namespace ChariotSanzzo.Services.Commands {
 			};
 			await GjallarCaller.TryCallingAsync(gCtx);
 		}
+		[Command("remove"), Description("Removes the track at the given index position from the queue!")]
+		[RequireGuild]
+		public async Task Remove(CommandContext ctx, [Description("The track's position in the queue.")] int position) {
+			await ctx.DeferResponseAsync();
+			var gCtx = new GjallarContext(ctx, "Remove") {
+				Data = { MiscValue = position }
+			};
+			await GjallarCaller.TryCallingAsync(gCtx);
+		}
 		[Command("shuffle"), Description("Shuffles the queue.")]
 		[RequireGuild]
 		public async Task Shuffle(CommandContext ctx) {
 			await ctx.DeferResponseAsync();
 			var gCtx = new GjallarContext(ctx, "Shuffle");
 			await GjallarCaller.TryCallingAsync(gCtx);
-		}
-		[Command("remove"), Description("Removes a track from the queue.")]
-		[RequireGuild]
-		public async Task Remove(CommandContext ctx, [Description("Index from the music to be removed.")] int position) {
-			await ctx.DeferResponseAsync();
-			var gCtx = new GjallarContext(ctx, "Volume");
-			GjallarCallTools tools = new();
-			await tools.InitializeAsync(gCtx);
-
-			var embed = new DiscordEmbedBuilder();
-			if (position < 1 || position > tools.Player.TotalTracks) {
-				embed.WithColor(DiscordColor.Red);
-				embed.WithDescription("There is no track with such index.");
-				await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
-				await Task.Delay(1000 * 10);
-				await ctx.DeleteResponseAsync();
-				return;
-			}
-			embed.WithColor(DiscordColor.Black);
-			embed.WithDescription($"[{tools.Player.Tracks[position - 1].Title}]({tools.Player.Tracks[position - 1].Uri}) was removed from queue.");
-			tools.Player.RemoveTrackFromQueue(position);
-			if (tools.Player.CurrentPosition == position) {
-				var toPlayNow = await tools.Player.UseTrackByPositionAsync(tools.Player.CurrentPosition);
-				if (toPlayNow != null)
-					await tools.Player.PlayAsync(toPlayNow.Track);
-				else
-					await tools.Player.StopAsync();
-			}
-			await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
-			await Task.Delay(1000 * 10);
-			await ctx.DeleteResponseAsync();
 		}
 		[Command("reset"), Description("Resets the guild queue.")]
 		[RequireGuild]

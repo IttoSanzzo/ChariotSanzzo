@@ -21,8 +21,12 @@ namespace ChariotSanzzo.Infrastructure.Extensions {
 			thread.Start();
 		}
 		private static async void WaitForCleaning(int seconds, DiscordMessage message) {
-			await Task.Delay(1000 * seconds);
-			await message.DeleteAsync();
+			try {
+				await Task.Delay(1000 * seconds);
+				await message.DeleteAsync();
+			} catch (Exception ex) {
+				Console.WriteLine(ex.Message);
+			}
 		}
 	}
 }

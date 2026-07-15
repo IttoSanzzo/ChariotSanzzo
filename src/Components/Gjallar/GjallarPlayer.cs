@@ -50,10 +50,11 @@ namespace ChariotSanzzo.Components.Gjallar {
 			if (TrackExist(track) != true)
 				Tracks.Add(track);
 		}
-		public void RemoveTrackFromQueue(int position) {
-			if (this.Tracks.Count == 0 || position < 1 || position > this.TotalTracks) return;
+		public bool RemoveTrackFromQueue(int position) {
+			if (this.Tracks.Count == 0 || position < 1 || position > this.TotalTracks) return false;
 			Program.WriteLine($"RemoveTrackEntered");
 			Tracks.RemoveAt(position - 1);
+			return true;
 		}
 		public bool MoveTrackToEndOfQueue(GjallarTrack track) {
 			var position = GetTrackPosition(track);
@@ -67,6 +68,18 @@ namespace ChariotSanzzo.Components.Gjallar {
 		}
 		public void SetLoop(GjallarLoopState newState) {
 			this.LoopState = newState;
+		}
+		public bool SetPosition(int position) {
+			if (this.TotalTracks == 0) {
+				this.CurrentPosition = 0;
+				return false;
+			} else if (position < 1) {
+				this.CurrentPosition = 1;
+			} else if (position > this.TotalTracks) {
+				this.CurrentPosition = this.TotalTracks;
+			} else
+				this.CurrentPosition = position;
+			return true;
 		}
 		public bool GoNextPosition(bool fromEvent = false) {
 			if (this.TotalTracks == 0) {

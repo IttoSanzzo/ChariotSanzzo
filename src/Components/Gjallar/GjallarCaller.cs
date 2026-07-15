@@ -40,6 +40,7 @@ namespace ChariotSanzzo.Components.Gjallar {
 					"Next" => await NextAsync(ctx, tools),
 					"Previous" => await PreviousAsync(ctx, tools),
 					"Index" => await IndexAsync(ctx, tools),
+					"Remove" => await RemoveAsync(ctx, tools),
 					"Volume" => await VolumeAsync(ctx, tools),
 					"Shuffle" => await ShuffleAsync(ctx, tools),
 					"Replay" => await ReplayAsync(ctx, tools),
@@ -319,10 +320,54 @@ namespace ChariotSanzzo.Components.Gjallar {
 				await tools.Player.PlayAsync(toPlayNow.Track);
 				ctx.Result.WasSuccess = true;
 			} else {
-				embed.WithDescription("Coundn't replay (Probably no tracks left).");
+				embed.WithDescription("Coundn't play (Probably no tracks left).");
 				await ctx.GTXEmbedTimerAsync(20, embed);
 				ctx.Result.WasSuccess = false;
 			}
+			return ctx.Result.WasSuccess;
+		}
+		private static async Task<bool> RemoveAsync(GjallarContext ctx, GjallarCallTools tools) {
+			var embed = new DiscordEmbedBuilder() { Color = DiscordColor.Aquamarine };
+			embed.WithFooter($"By: {ctx.Username}", ctx.UserIcon);
+
+			ctx.Result.WasSuccess = tools.Player.RemoveTrackFromQueue(ctx.Data.MiscValue);
+			if (!ctx.Result.WasSuccess) {
+				embed.WithColor(DiscordColor.Red);
+				embed.WithDescription("Selected track to removal does no exist!");
+				await ctx.GTXEmbedTimerAsync(20, embed);
+				return ctx.Result.WasSuccess;
+			}
+			if (ctx.Data.MiscValue < tools.Player.CurrentPosition) {
+				tools.Player.SetPosition(tools.Player.CurrentPosition - 1);
+			} else if (ctx.Data.MiscValue == tools.Player.CurrentPosition) {
+				if (tools.Player.CurrentPosition <= tools.Player.TotalTracks) {
+					var toPlayNow = await tools.Player.UseCurrentTrackAsync();
+					await tools.Player.PlayAsync(toPlayNow!.Track);
+				} else {
+					switch (tools.Player.LoopState) {
+						case GjallarLoopState.None
+							or GjallarLoopState.LoopTrack: {
+								tools.Player.SetPosition(tools.Player.TotalTracks);
+								await tools.Player.StopAsync();
+								break;
+							}
+						case GjallarLoopState.LoopQueue when tools.Player.TotalTracks == 0: {
+								tools.Player.SetPosition(tools.Player.TotalTracks);
+								await tools.Player.StopAsync();
+								break;
+							}
+						case GjallarLoopState.LoopQueue: {
+								tools.Player.SetPosition(1);
+								var toPlayNow = await tools.Player.UseCurrentTrackAsync();
+								await tools.Player.PlayAsync(toPlayNow!.Track);
+								break;
+							}
+					}
+				}
+			}
+
+			embed.WithDescription($"Track {ctx.Data.MiscValue} removed.");
+			await ctx.GTXEmbedTimerAsync(20, embed);
 			return ctx.Result.WasSuccess;
 		}
 		private static async Task<bool> ShuffleAsync(GjallarContext ctx, GjallarCallTools tools) {
