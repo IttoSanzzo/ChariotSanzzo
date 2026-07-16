@@ -8,7 +8,8 @@ namespace ChariotSanzzo.Routes {
 		private static async Task<IResult> Handler(HttpContext context, ulong userId) {
 			var state = await PresenceSentinel.Registry.GetOrCreate(userId);
 			if (state.Get<string?>("voice.channelId") == null)
-				await PresenceSentinel.ForceResolveVoiceAsync(userId);
+				state = await PresenceSentinel.ForceResolveVoiceAsync(userId)
+					?? await PresenceSentinel.Registry.GetOrCreate(userId);
 			return Results.Ok(new {
 				UserId = state.UserId,
 				GuildId = state.Get<string>("voice.guildId"),
