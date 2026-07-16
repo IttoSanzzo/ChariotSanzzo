@@ -59,6 +59,8 @@ namespace ChariotSanzzo.Components.Gjallar {
 				this.Data.MiscValue = (int)genericCommand.TrackPosition;
 			if (genericCommand.SeekSeconds != null)
 				this.Data.Position = (long)genericCommand.SeekSeconds;
+			if (genericCommand.Volume != null)
+				this.Data.MiscDoubleValue = (double)genericCommand.Volume;
 			this.Data.Query = this.TrackLink;
 			this.Data.Priority = genericCommand.Priority;
 			this.Result = new(this.Command);

@@ -8,6 +8,7 @@ namespace ChariotSanzzo.Components.Gjallar {
 		public string? ChannelId { get; set; } = null;
 		public int? TrackPosition { get; set; } = null;
 		public long? SeekSeconds { get; set; } = null;
+		public double? Volume { get; set; } = null;
 		public bool Priority { get; set; } = true;
 	}
 	public class GjallarPostBody {
