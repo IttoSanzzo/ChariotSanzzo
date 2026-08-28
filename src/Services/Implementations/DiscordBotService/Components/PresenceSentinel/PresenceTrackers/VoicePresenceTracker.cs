@@ -38,11 +38,10 @@ namespace ChariotSanzzo.Services.Components {
 				state.Set("voice.channelName", "");
 			}
 
-
 			VoiceUpdateDebounceState.Add(ctx.UserId, new() {
 				TimestampMilliseconds = currentTimestamp,
 				CancellationToken = SetTimeout(async () => {
-					await PresenceSentinel.PostPresenceUpdate(ctx.UserId);
+					await PresenceSentinel.PostPresenceUpdates(ctx.UserId);
 					VoiceUpdateDebounceState.Remove(ctx.UserId);
 				}, 100)
 			});

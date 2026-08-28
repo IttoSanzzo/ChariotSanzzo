@@ -78,11 +78,26 @@ namespace ChariotSanzzo.Services {
 			await ForceStalkEverythingForUserAsync(userId);
 			return await GetUserPresenceJsonStringAsync(userId);
 		}
-		public static async Task PostPresenceUpdate(ulong userId) {
+		public static async Task PostPresenceUpdates(ulong userId) {
+			var json = await GetUserPresenceJsonStringAsync(userId);
+			await PostPresenceUpdateToSocket(userId, json);
+			await PostPresenceUpdateToAlbinaSessions(userId, json);
+		}
+		private static async Task PostPresenceUpdateToSocket(ulong userId, string json) {
 			await Program.HttpClient.PostAsync(
 				LinkData.GetChariotApiFullAddress($"/live/users/{userId}/presence-sentinel-socket"),
 				new StringContent(
-					await GetUserPresenceJsonStringAsync(userId),
+					json,
+					Encoding.UTF8,
+					"application/json"
+				)
+			);
+		}
+		private static async Task PostPresenceUpdateToAlbinaSessions(ulong userId, string json) {
+			await Program.HttpClient.PostAsync(
+				LinkData.GetAlbinaApiFullAddress($"/peer-in/discord-user/{userId}/campaigns/session-state"),
+				new StringContent(
+					json,
 					Encoding.UTF8,
 					"application/json"
 				)
