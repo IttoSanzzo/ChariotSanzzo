@@ -36,6 +36,9 @@
 		},
 		"discordWidgetBot": {
 			"botId": null
+		},
+		"peerApi": {
+			"token": null
 		}
 	},
 	"addresses": {

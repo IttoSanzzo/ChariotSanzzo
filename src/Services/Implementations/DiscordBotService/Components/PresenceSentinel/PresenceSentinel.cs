@@ -3,6 +3,7 @@ using System.Text.Json;
 using ChariotSanzzo.Services.Components;
 using ChariotSanzzo.Utils;
 using DSharpPlus;
+using PeerApiAuth;
 
 namespace ChariotSanzzo.Services {
 	public class UserPresenceState(ulong userId) {
@@ -94,13 +95,9 @@ namespace ChariotSanzzo.Services {
 			);
 		}
 		private static async Task PostPresenceUpdateToAlbinaSessions(ulong userId, string json) {
-			await Program.HttpClient.PostAsync(
+			await PeerApiHttpClient.PostAsync(
 				LinkData.GetAlbinaApiFullAddress($"/peer-in/discord-user/{userId}/campaigns/session-state"),
-				new StringContent(
-					json,
-					Encoding.UTF8,
-					"application/json"
-				)
+				json
 			);
 		}
 		public static async Task<UserPresenceState?> ForceResolveVoiceAsync(ulong userId) {
